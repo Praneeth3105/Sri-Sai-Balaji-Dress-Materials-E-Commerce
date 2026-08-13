@@ -10,11 +10,13 @@
     "start": "nodemon server.js"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.2",
     "nodemailer": "^9.0.5",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "sonner": "^2.0.8"
   }
 }

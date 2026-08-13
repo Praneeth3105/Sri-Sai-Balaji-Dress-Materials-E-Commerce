@@ -40,9 +40,9 @@ const Signup = () => {
     try {
       const res = await axios.post(
         `http://localhost:8000/api/v1/user/register`, formData, {
-        headers:{
+        headers :{
             "Content-Type":"application/json"
-          }
+          } 
         }
       );
       if (res.data.success) {
@@ -51,7 +51,8 @@ const Signup = () => {
       }
       
     } catch (error) {
-     console.log(error);
+      console.log(error);
+      toast.error(error.response.data.message)
      
     }
   }
@@ -67,77 +68,81 @@ const Signup = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          
-            <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    placeholder="John"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    placeholder="Doe"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="example@gamil.com"
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  placeholder="John"
                   required
-                  value={formData.email}
+                  value={formData.firstName}
                   onChange={handleChange}
                 />
               </div>
-
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    name="password"
-                    placeholder="Create a Password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    type={showPassword ? "text" : "password"}
-                    required
-                  />
-                  {showPassword ? (
-                    <EyeOff
-                      onClick={() => setShowPassword(false)}
-                      className="w-5 h-5 text-black-700 absolute right-4 bottom-2 "
-                    />
-                  ) : (
-                    <Eye
-                      onClick={() => setShowPassword(true)}
-                      className="w-5 h-5 text-black-700 absolute right-4 bottom-2 "
-                    />
-                  )}
-                </div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  placeholder="Doe"
+                  required
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
               </div>
             </div>
-          
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="example@gamil.com"
+                required
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  placeholder="Create a Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  type={showPassword ? "text" : "password"}
+                  required
+                />
+                {showPassword ? (
+                  <EyeOff
+                    onClick={() => setShowPassword(false)}
+                    className="w-5 h-5 text-black-700 absolute right-4 bottom-2 "
+                  />
+                ) : (
+                  <Eye
+                    onClick={() => setShowPassword(true)}
+                    className="w-5 h-5 text-black-700 absolute right-4 bottom-2 "
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button onClick={submitHandler} type="submit" className="w-full cursor-pointer bg-black hover:bg-gray-500">
+          <Button
+            onClick={submitHandler}
+            type="submit"
+            className="w-full cursor-pointer bg-black hover:bg-gray-500"
+          >
             Signup
           </Button>
           <p className="text-gray-700 text-sm">

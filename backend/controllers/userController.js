@@ -8,14 +8,14 @@ export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
     if (!firstName || !lastName || !email || !password) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "All Fields are Required",
       });
     }
     const user = await User.findOne({ email });
     if (user) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "User Already Exists",
       });
@@ -39,7 +39,7 @@ export const register = async (req, res) => {
       user: newUser,
     });
   } catch (error) {
-    res.status(500).json({
+   return res.status(500).json({
       success: false,
       message: error.message,
     });
