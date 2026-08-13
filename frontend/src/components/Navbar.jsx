@@ -1,13 +1,17 @@
+import { setUser } from "@/redux/UserSlice";
 import { Button } from "@base-ui/react";
 import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-
+import { toast } from "sonner";
 const Navbar = () => {
   
-const {user}= useSelector(store=>store.user)
+  const { user } = useSelector(store => store.user)
+  // const accessToken = localStorage.getItem('accessTkoen')
+  const accessToken = localStorage.getItem("accessToken");
+  const dispatch=useDispatch()
   const logoutHandler = async () => {
     try {
       const res = await axios.post(
@@ -20,6 +24,7 @@ const {user}= useSelector(store=>store.user)
         },
       );
       if (res.data.success) {
+dispatch(setUser(null))
         toast.success(res.data.message)
       }
     } catch (error) {
@@ -55,7 +60,7 @@ const {user}= useSelector(store=>store.user)
             </span>
           </Link>
           {user ? (
-            <Button className="bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 cursor-pointer font-serif shadow-sm">
+            <Button onClick={logoutHandler} className="bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 cursor-pointer font-serif shadow-sm">
               Logout
             </Button>
           ) : (
