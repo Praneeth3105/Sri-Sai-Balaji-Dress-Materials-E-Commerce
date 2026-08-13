@@ -2,11 +2,12 @@ import { Button } from "@base-ui/react";
 import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
-  const user = true;
-
+  
+const {user}= useSelector(store=>store.user)
   const logoutHandler = async () => {
     try {
       const res = await axios.post(
@@ -43,7 +44,7 @@ const Navbar = () => {
             </Link>
             {user && (
               <Link to={"/profile"}>
-                <li>Hello User</li>
+                <li>Hello, { user.firstName}</li>
               </Link>
             )}
           </ul>

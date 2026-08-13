@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -15,6 +14,8 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/UserSlice";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,6 +25,7 @@ const Login = () => {
     password: "",
   });
   const navigate = useNavigate();
+  const dispatch=useDispatch()
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -48,6 +50,7 @@ const Login = () => {
       );
       if (res.data.success) {
         navigate("/");
+        dispatch(setUser(res.data.user))
         toast.success(res.data.message);
       }
     } catch (error) {
