@@ -1,10 +1,30 @@
 import { Button } from "@base-ui/react";
+import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const user = true;
+
+  const logoutHandler = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/user/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      if (res.data.success) {
+        toast.success(res.data.message)
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <header className="bg-orange-300 fixed top-0 w-full z-20 border-b border-gray-200">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2">
