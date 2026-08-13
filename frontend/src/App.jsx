@@ -7,12 +7,13 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Verify from "./pages/Verify";
 import VerifyEmail from "./pages/VerifyEmail";
+import Footer from "./components/Footer";
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <>
-        <Navbar /> <Home />
+        <Navbar /> <Home /><Footer/>
       </>
     ),
   },
