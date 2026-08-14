@@ -1,6 +1,6 @@
-import { Product } from "../models/productModel";
-import cloudinary from "../utils/cloudinary";
-import getDataUri from "../utils/dataUri";
+import { Product } from "../models/productModel.js";
+import cloudinary from "../utils/cloudinary.js";
+import getDataUri from "../utils/dataUri.js";
 
 export const addProduct = async (req, res) => {
   try {
@@ -33,7 +33,7 @@ export const addProduct = async (req, res) => {
       productPrice,
       category,
       brand,
-      productImage,
+      productImage: productImg,
     });
     return res.status(200).json({
       success: true,
