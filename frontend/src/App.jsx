@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "./components/ui/button";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -8,12 +7,14 @@ import Login from "./pages/Login";
 import Verify from "./pages/Verify";
 import VerifyEmail from "./pages/VerifyEmail";
 import Footer from "./components/Footer";
+import Profile from "./pages/Profile";
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <>
-        <Navbar /> <Home /><Footer/>
+        <Navbar /> <Home />
+        <Footer />
       </>
     ),
   },
@@ -45,7 +46,15 @@ const router = createBrowserRouter([
     path: "/verify/:token",
     element: (
       <>
-        <VerifyEmail/>
+        <VerifyEmail />
+      </>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <>
+        <Navbar/><Profile/>
       </>
     ),
   },
