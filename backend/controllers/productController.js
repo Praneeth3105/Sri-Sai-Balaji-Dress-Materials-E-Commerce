@@ -69,3 +69,72 @@ export const getAllProduct = async (_, res) => {
     });
   }
 };
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product Not Found",
+      });
+    }
+    if (product.productImg && product.productImg.length > 0) {
+      for (let img of product.productImg) {
+        const result = await cloudinary.uploader.destroy(img.public_id);
+      }
+    }
+    await Product.findByIdAndDelete(productId);
+    return res.status(200).json({
+      success: true,
+      message: "Product Deleted Successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const updateProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const {
+      productName,
+      productDesc,
+      productPrice,
+      category,
+      brand,
+      existingImages,
+    } = req.body;
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product Not Found",
+      });
+    }
+    let updatedImages = [];
+    if (existingImages) {
+      const keepIds = JSON.parse(existingImages);
+      updatedImages = product.productImg.filter((img) =>
+        keepIds.include(img.public_id),
+      );
+      const removedImages = product.productImg.filter(
+        (img = !keepIds.includes(img.public_id)),
+      );
+      for (let img of removedImages) {
+        await cloudinary.uploader.destroy(img.public_id);
+      }
+    } else {
+      updatedImages = product.productImg;
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
