@@ -101,37 +101,77 @@ export const deleteProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-    const {
-      productName,
-      productDesc,
-      productPrice,
-      category,
-      brand,
-      existingImages,
-    } = req.body;
+
+    const { productName, productDesc, productPrice, category, brand } =
+      req.body;
+
+    // Find product
     const product = await Product.findById(productId);
+
     if (!product) {
       return res.status(404).json({
         success: false,
         message: "Product Not Found",
       });
     }
+
     let updatedImages = [];
-    if (existingImages) {
-      const keepIds = JSON.parse(existingImages);
-      updatedImages = product.productImg.filter((img) =>
-        keepIds.include(img.public_id),
-      );
-      const removedImages = product.productImg.filter(
-        (img = !keepIds.includes(img.public_id)),
-      );
-      for (let img of removedImages) {
-        await cloudinary.uploader.destroy(img.public_id);
+
+    // If new images are uploaded
+    if (req.files && req.files.length > 0) {
+      // Delete old images from Cloudinary
+      if (product.productImage && product.productImage.length > 0) {
+        for (const img of product.productImage) {
+          if (img.public_id) {
+            await cloudinary.uploader.destroy(img.public_id);
+          }
+        }
+      }
+
+      // Upload all new images
+      for (const file of req.files) {
+        const fileUri = getDataUri(file);
+
+        const result = await cloudinary.uploader.upload(fileUri, {
+          folder: "mern_products",
+        });
+
+        updatedImages.push({
+          url: result.secure_url,
+          public_id: result.public_id,
+        });
       }
     } else {
-      updatedImages = product.productImg;
+      // No new images uploaded
+      // Keep existing images
+      updatedImages = product.productImage;
     }
+
+    // Update product details
+    product.productName = productName || product.productName;
+
+    product.productDesc = productDesc || product.productDesc;
+
+    product.productPrice = productPrice || product.productPrice;
+
+    product.category = category || product.category;
+
+    product.brand = brand || product.brand;
+
+    // Update images
+    product.productImage = updatedImages;
+
+    // Save product
+    const updatedProduct = await product.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Product Updated Successfully",
+      product: updatedProduct,
+    });
   } catch (error) {
+    console.log("UPDATE PRODUCT ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message,
