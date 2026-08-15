@@ -15,15 +15,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { setProducts } from "@/redux/productSlice";
 
 const items = [
-  { label: "Price: Low to High", value: "lowtoHigh" },
+  { label: "Price: Low to High", value: "lowToHigh" },
   { label: "Price: High to Low", value: "highToLow" },
 ];
 
 const Products = () => {
-  const { product } = useSelector((store) => store.product);
+  const { products } = useSelector((store) => store.product);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 99999]);
+  const [sortOrder, setSortOrder] = useState("");
   const dispatch = useDispatch();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -47,6 +48,33 @@ const Products = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (allProducts.length === 0) return;
+    let filtered = [...allProducts];
+    if (search.trim() !== "") {
+      filtered = filtered.filter((p) =>
+        p.productName?.toLowerCase().includes(search.toLowerCase()),
+      );
+    }
+    if (category !== "All") {
+      filtered = filtered.filter((p) => p.category === category);
+    }
+    if (brand !== "All") {
+      filtered = filtered.filter((p) => p.brand === brand);
+    }
+
+    filtered = filtered.filter(
+      (p) => p.productPrice >= priceRange[0] && p.productPrice <= priceRange[1],
+    );
+
+    if (sortOrder === "lowToHigh") {
+      filtered.sort((a, b) => a.productPrice - b.productPrice);
+    } else if (sortOrder === "highToLow") {
+      filtered.sort((a, b) => b.productPrice - a.productPrice);
+    }
+    dispatch(setProducts(filtered));
+  }, [search, category, brand, sortOrder, priceRange, allProducts, dispatch]);
 
   useEffect(() => {
     getAllProducts();
@@ -74,13 +102,13 @@ const Products = () => {
         <div className="flex flex-col flex-1">
           {/* Sort */}
           <div className="flex justify-end mb-4">
-            <Select items={items}>
+            <Select onValueChange={(value)=>setSortOrder(value)} items={items}>
               <SelectTrigger className="w-full max-w-48">
                 <SelectValue placeholder="Sort By Price" />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectGroup>
+                <SelectGroup className="font-serif">
                   {items.map((item) => (
                     <SelectItem key={item.value} value={item.value}>
                       {item.label}
@@ -97,7 +125,7 @@ const Products = () => {
               ? Array.from({ length: 5 }).map((_, index) => (
                   <ProductCard key={index} loading={true} />
                 ))
-              : allProducts.map((product) => (
+              : products.map((product) => (
                   <ProductCard
                     key={product._id}
                     product={product}
