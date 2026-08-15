@@ -2,22 +2,58 @@ import React from "react";
 import { Button } from "./ui/button";
 import { ShoppingCart } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
+import { useDispatch } from "react-redux";
+import { setCart } from "@/redux/productSlice";
+import axios from "axios";
+import { toast } from "sonner";
 
 const ProductCard = ({ product, loading }) => {
+  const dispatch = useDispatch();
+
+  const accessToken = localStorage.getItem("accessToken");
+
+  const addToCart = async (productId) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:8000/api/v1/cart/add",
+        {
+          productId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      console.log("Cart response:", res.data);
+
+      if (res.data.success) {
+        toast.success("Product Added to Cart");
+
+        dispatch(setCart(res.data.cart));
+      }
+    } catch (error) {
+      console.log("Add to cart error:", error);
+
+      toast.error(
+        error.response?.data?.message || "Failed to add product to cart",
+      );
+    }
+  };
+
+  // Loading skeleton
   if (loading) {
     return (
       <div className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-100">
-        {/* Image Skeleton */}
         <div className="w-full aspect-square bg-gray-50">
           <Skeleton className="w-full h-full rounded-none" />
         </div>
 
-        {/* Content Skeleton */}
         <div className="px-4 pt-4 pb-4 space-y-3">
           <Skeleton className="w-full h-5" />
           <Skeleton className="w-2/3 h-5" />
           <Skeleton className="w-1/3 h-5" />
-
           <Skeleton className="w-full h-10 rounded-lg" />
         </div>
       </div>
@@ -47,7 +83,11 @@ const ProductCard = ({ product, loading }) => {
           ₹{productPrice}
         </p>
 
-        <Button className="mt-3 bg-orange-600 hover:bg-orange-700 text-white w-full h-10 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-colors duration-200">
+        <Button
+          type="button"
+          onClick={() => addToCart(product._id)}
+          className="mt-3 bg-orange-600 hover:bg-orange-700 text-white w-full h-10 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition-colors duration-200"
+        >
           <ShoppingCart className="w-4 h-4" />
           Add To Cart
         </Button>

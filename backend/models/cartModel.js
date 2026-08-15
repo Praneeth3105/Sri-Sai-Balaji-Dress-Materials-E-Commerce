@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import mangoose, { mongo } from "mongoose";
+
 
 const cartSchema = new mongoose.Schema(
   {
@@ -34,4 +34,4 @@ const cartSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-export const Cart = mongoose.nodel("Cart",cartSchema)
+export const Cart = mongoose.model("Cart",cartSchema)

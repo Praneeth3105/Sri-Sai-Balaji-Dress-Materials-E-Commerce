@@ -17,7 +17,7 @@ app.use(
 );
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
-app.use("/api/v1/cart", cartRout);
+app.use("/api/v1/cart", cartRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
