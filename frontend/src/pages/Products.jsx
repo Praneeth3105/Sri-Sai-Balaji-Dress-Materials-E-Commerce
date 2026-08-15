@@ -1,15 +1,16 @@
 import FilterSidebar from "@/components/FilterSidebar";
-import React from "react";
-
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ProductCard from "@/components/ProductCard";
+import { toast } from "sonner";
 
 const items = [
   { label: "Price: Low to High", value: "lowtoHigh" },
@@ -17,18 +18,50 @@ const items = [
 ];
 
 const Products = () => {
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getAllProducts = async () => {
+    try {
+      setLoading(true);
+
+      const res = await axios.get(
+        "http://localhost:8000/api/v1/product/getallproducts",
+      );
+
+      if (res.data.success) {
+        setAllProducts(res.data.products);
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast.error(error.response?.data?.message || "Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAllProducts();
+  }, []);
+
+  console.log(allProducts);
+
   return (
-    <div className="pt-20 pb-10">
-      <div className="max-w-7xl mx-auto flex gap-7">
-        {/* sidebar */}
+    <div className="pt-20 pb-10 min-h-screen">
+      <div className="max-w-7xl mx-auto flex gap-7 font-serif">
+        {/* Sidebar */}
         <FilterSidebar />
+
         {/* Main Product Section */}
         <div className="flex flex-col flex-1">
+          {/* Sort */}
           <div className="flex justify-end mb-4">
             <Select items={items}>
               <SelectTrigger className="w-full max-w-48">
                 <SelectValue placeholder="Sort By Price" />
               </SelectTrigger>
+
               <SelectContent>
                 <SelectGroup>
                   {items.map((item) => (
@@ -39,6 +72,21 @@ const Products = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Product Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-7">
+            {loading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <ProductCard key={index} loading={true} />
+                ))
+              : allProducts.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    loading={false}
+                  />
+                ))}
           </div>
         </div>
       </div>
