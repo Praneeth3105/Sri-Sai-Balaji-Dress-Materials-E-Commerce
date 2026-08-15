@@ -20,6 +20,7 @@ const items = [
 const Products = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [priceRange,setPriceRange]=useState([0,99999])
 
   const getAllProducts = async () => {
     try {
@@ -51,7 +52,7 @@ const Products = () => {
     <div className="pt-20 pb-10 min-h-screen">
       <div className="max-w-7xl mx-auto flex gap-7 font-serif">
         {/* Sidebar */}
-        <FilterSidebar />
+        <FilterSidebar allProducts={allProducts} priceRange={ priceRange} />
 
         {/* Main Product Section */}
         <div className="flex flex-col flex-1">
