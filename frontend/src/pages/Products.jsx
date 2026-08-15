@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/select";
 import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { setProducts } from "@/redux/productSlice";
 
 const items = [
   { label: "Price: Low to High", value: "lowtoHigh" },
@@ -18,10 +20,14 @@ const items = [
 ];
 
 const Products = () => {
+  const { product } = useSelector((store) => store.product);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [priceRange,setPriceRange]=useState([0,99999])
-
+  const [priceRange, setPriceRange] = useState([0, 99999]);
+  const dispatch = useDispatch();
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [brand, setBrand] = useState("All");
   const getAllProducts = async () => {
     try {
       setLoading(true);
@@ -32,10 +38,10 @@ const Products = () => {
 
       if (res.data.success) {
         setAllProducts(res.data.products);
+        dispatch(setProducts(res.data.products));
       }
     } catch (error) {
       console.log(error);
-
       toast.error(error.response?.data?.message || "Failed to load products");
     } finally {
       setLoading(false);
@@ -52,7 +58,17 @@ const Products = () => {
     <div className="pt-20 pb-10 min-h-screen">
       <div className="max-w-7xl mx-auto flex gap-7 font-serif">
         {/* Sidebar */}
-        <FilterSidebar allProducts={allProducts} priceRange={ priceRange} />
+        <FilterSidebar
+          search={search}
+          setSearch={setSearch}
+          brand={brand}
+          setBrand={setBrand}
+          category={category}
+          setCategory={setCategory}
+          allProducts={allProducts}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+        />
 
         {/* Main Product Section */}
         <div className="flex flex-col flex-1">
