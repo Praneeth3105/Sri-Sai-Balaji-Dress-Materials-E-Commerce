@@ -18,6 +18,8 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import ShowUsersOrders from "./pages/admin/ShowUsersOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
 import UserInfo from "./pages/admin/UserInfo";
+import ProtectedRoute from "./components/ProtectedRoute";
+import SingleProduct from "./pages/SingleProduct";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -64,11 +66,14 @@ const router = createBrowserRouter([
     path: "/profile/:userId",
     element: (
       <>
-        <Navbar />
-        <Profile />
+        <ProtectedRoute>
+          <Navbar />
+          <Profile />
+        </ProtectedRoute>
       </>
     ),
   },
+
   {
     path: "/products",
     element: (
@@ -79,18 +84,35 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/cart",
+    path: "/products/:id",
     element: (
       <>
         <Navbar />
-        <Cart />
+        <SingleProduct />
+      </>
+    ),
+  },
+  {
+    path: "/cart",
+    element: (
+      <>
+        <ProtectedRoute>
+          <Navbar />
+          <Cart />
+        </ProtectedRoute>
       </>
     ),
   },
   {
     path: "/dashboard",
-    element: <Dashboard />,
-    childre: [
+    element: (
+      <>
+        <ProtectedRoute adminOnly={true}>
+          <Dashboard />
+        </ProtectedRoute>
+      </>
+    ),
+    children: [
       {
         path: "sales",
         element: <AdminSales />,

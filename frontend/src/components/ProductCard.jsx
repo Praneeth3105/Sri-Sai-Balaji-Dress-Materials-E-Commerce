@@ -6,10 +6,11 @@ import { useDispatch } from "react-redux";
 import { setCart } from "@/redux/productSlice";
 import axios from "axios";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product, loading }) => {
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const accessToken = localStorage.getItem("accessToken");
 
   const addToCart = async (productId) => {
@@ -67,9 +68,10 @@ const ProductCard = ({ product, loading }) => {
       {/* Product Image */}
       <div className="w-full aspect-square overflow-hidden bg-gray-50">
         <img
+          onClick={() => navigate(`/products/${product._id}`)}
           src={productImage?.[0]?.url}
           alt={productName}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
         />
       </div>
 
