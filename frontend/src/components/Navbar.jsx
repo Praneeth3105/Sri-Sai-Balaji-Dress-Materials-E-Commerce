@@ -12,7 +12,8 @@ const Navbar = () => {
   const { user } = useSelector(store => store.user)
   const accessToken = localStorage.getItem("accessToken");
   const dispatch = useDispatch()
-  const navigate=useNavigate()
+  const navigate = useNavigate()
+  const {cart}=useSelector(store=>store.product)
   const logoutHandler = async () => {
     try {
       const res = await axios.post(
@@ -32,6 +33,8 @@ dispatch(setUser(null))
       console.log(error);
     }
   };
+  console.log(cart);
+  
   return (
     <header className="bg-orange-300 fixed top-0 w-full z-20 border-b border-gray-200">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2">
@@ -57,7 +60,7 @@ dispatch(setUser(null))
           <Link to={"/cart"} className="relative">
             <ShoppingCart />
             <span className="bg-red-500 rounded-full absolute text-white -top-3 -right-4 px-2">
-              0
+              { cart.items.length }
             </span>
           </Link>
           {user ? (
