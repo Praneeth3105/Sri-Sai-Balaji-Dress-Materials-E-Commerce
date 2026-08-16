@@ -11,6 +11,13 @@ import Profile from "./pages/Profile";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Dashboard from "./pages/Dashboard";
+import AdminSales from "./pages/admin/AdminSales";
+import AdminProduct from "./pages/admin/AdminProduct";
+import AddProduct from "./pages/admin/AddProduct";
+import AdminOrders from "./pages/admin/AdminOrders";
+import ShowUsersOrders from "./pages/admin/ShowUsersOrders";
+import AdminUsers from "./pages/admin/AdminUsers";
+import UserInfo from "./pages/admin/UserInfo";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -81,16 +88,39 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/dashboard',
+    path: "/dashboard",
     element: <Dashboard />,
-      childre:[
+    childre: [
       {
-          path: "sales",
-        element:
-      }
-      ]
-    
-  }
+        path: "sales",
+        element: <AdminSales />,
+      },
+      {
+        path: "add-product",
+        element: <AddProduct />,
+      },
+      {
+        path: "products",
+        element: <AdminProduct />,
+      },
+      {
+        path: "orders",
+        element: <AdminOrders />,
+      },
+      {
+        path: "users/orders/:userId",
+        element: <ShowUsersOrders />,
+      },
+      {
+        path: "users",
+        element: <AdminUsers />,
+      },
+      {
+        path: "users/:id",
+        element: <UserInfo />,
+      },
+    ],
+  },
 ]);
 const App = () => {
   return (
