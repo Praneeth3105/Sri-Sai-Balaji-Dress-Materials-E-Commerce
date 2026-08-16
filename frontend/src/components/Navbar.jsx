@@ -8,12 +8,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 const Navbar = () => {
-  
-  const { user } = useSelector(store => store.user)
+  const { user } = useSelector((store) => store.user);
   const accessToken = localStorage.getItem("accessToken");
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const {cart}=useSelector(store=>store.product)
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const admin = user?.role === "admin" ? true : false;
+  const { cart } = useSelector((store) => store.product);
   const logoutHandler = async () => {
     try {
       const res = await axios.post(
@@ -26,15 +27,15 @@ const Navbar = () => {
         },
       );
       if (res.data.success) {
-dispatch(setUser(null))
-        toast.success(res.data.message)
+        dispatch(setUser(null));
+        toast.success(res.data.message);
       }
     } catch (error) {
       console.log(error);
     }
   };
   console.log(cart);
-  
+
   return (
     <header className="bg-orange-300 fixed top-0 w-full z-20 border-b border-gray-200">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2">
@@ -54,6 +55,11 @@ dispatch(setUser(null))
             {user && (
               <Link to={`/profile/${user._id}`}>
                 <li>Hello, {user.firstName}</li>
+              </Link>
+            )}
+            {admin && (
+              <Link to={`/dashboard/sales`}>
+                <li>Dashboard</li>
               </Link>
             )}
           </ul>

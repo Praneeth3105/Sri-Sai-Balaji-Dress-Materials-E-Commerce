@@ -10,6 +10,7 @@ import Footer from "./components/Footer";
 import Profile from "./pages/Profile";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
+import Dashboard from "./pages/Dashboard";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -79,6 +80,17 @@ const router = createBrowserRouter([
       </>
     ),
   },
+  {
+    path: '/dashboard',
+    element: <Dashboard />,
+      childre:[
+      {
+          path: "sales",
+        element:
+      }
+      ]
+    
+  }
 ]);
 const App = () => {
   return (
