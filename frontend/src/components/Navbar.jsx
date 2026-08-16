@@ -53,22 +53,28 @@ dispatch(setUser(null))
             </Link>
             {user && (
               <Link to={`/profile/${user._id}`}>
-                <li>Hello, { user.firstName}</li>
+                <li>Hello, {user.firstName}</li>
               </Link>
             )}
           </ul>
           <Link to={"/cart"} className="relative">
             <ShoppingCart />
             <span className="bg-red-500 rounded-full absolute text-white -top-3 -right-4 px-2">
-              { cart.items.length }
+              {cart?.items?.length || 0}
             </span>
           </Link>
           {user ? (
-            <Button onClick={logoutHandler} className="bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 cursor-pointer font-serif shadow-sm">
+            <Button
+              onClick={logoutHandler}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 cursor-pointer font-serif shadow-sm"
+            >
               Logout
             </Button>
           ) : (
-            <Button onClick={()=>navigate('/login')} className=" bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-md px-4 py-2 cursor-pointer font-serif shadow-sm">
+            <Button
+              onClick={() => navigate("/login")}
+              className=" bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-md px-4 py-2 cursor-pointer font-serif shadow-sm"
+            >
               Login
             </Button>
           )}
