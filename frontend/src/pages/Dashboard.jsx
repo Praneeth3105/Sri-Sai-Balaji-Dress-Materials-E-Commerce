@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 
 const Dashboard = () => {
   return (
-    <div className="flex">
+    <div className="flex font-serif">
       <Sidebar />
 
       <div className="flex-1">

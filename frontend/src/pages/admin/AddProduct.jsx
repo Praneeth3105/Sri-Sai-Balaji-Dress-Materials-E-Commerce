@@ -12,16 +12,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { setProducts } from "@/redux/productSlice";
 import { Input } from "@base-ui/react";
+import axios from "axios";
 import { Loader2 } from "lucide-react";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
 const AddProduct = () => {
   const [loading, setLoading] = useState(false);
 
+  const { products } = useSelector((store) => store.product);
+
   const dispatch = useDispatch();
+
   const accessToken = localStorage.getItem("accessToken");
+
   const [productData, setProductData] = useState({
     productName: "",
     productPrice: 0,
@@ -30,8 +35,10 @@ const AddProduct = () => {
     brand: "",
     category: "",
   });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setProductData((prev) => ({
       ...prev,
       [name]: value,
@@ -40,24 +47,44 @@ const AddProduct = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    // Basic validation
+    if (
+      !productData.productName ||
+      !productData.productPrice ||
+      !productData.productDesc ||
+      !productData.brand ||
+      !productData.category
+    ) {
+      toast.error("Please fill all product details");
+      return;
+    }
+
+    if (productData.productImg.length === 0) {
+      toast.error("Please select at least one image");
+      return;
+    }
+
     const formData = new FormData();
+
     formData.append("productName", productData.productName);
-    formData.append("productPrice ", productData.productPrice);
+
+    // IMPORTANT: no space after productPrice
+    formData.append("productPrice", productData.productPrice);
+
     formData.append("productDesc", productData.productDesc);
     formData.append("category", productData.category);
     formData.append("brand", productData.brand);
 
-    if (productData.productImg.length === 0) {
-      toast.error("Please Select Alteast One Image");
-      return;
-    }
     productData.productImg.forEach((img) => {
       formData.append("files", img);
     });
+
     try {
       setLoading(true);
+
       const res = await axios.post(
-        `http://localhost:8000/api/v1/product/add`,
+        "http://localhost:8000/api/v1/product/add",
         formData,
         {
           headers: {
@@ -65,12 +92,28 @@ const AddProduct = () => {
           },
         },
       );
+
       if (res.data.success) {
-        dispatch(setProducts([...Products, res.data.product]));
-        toast.success(res.data.message);
+        // Add newly created product to Redux
+        dispatch(setProducts([...products, res.data.product]));
+
+        // Success toast
+        toast.success("Product Added Successfully");
+
+        // Clear form
+        setProductData({
+          productName: "",
+          productPrice: 0,
+          productDesc: "",
+          productImg: [],
+          brand: "",
+          category: "",
+        });
       }
     } catch (error) {
-      console.log(error);
+      console.log("Add Product Error:", error);
+
+      toast.error(error.response?.data?.message || "Failed to add product");
     } finally {
       setLoading(false);
     }
@@ -90,7 +133,8 @@ const AddProduct = () => {
         </CardHeader>
 
         <CardContent className="px-8 py-8 bg-white rounded-b-xl">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-5">
+            {/* Product Name */}
             <div className="grid gap-2">
               <Label className="text-sm font-semibold font-serif text-gray-700">
                 Product Name
@@ -106,6 +150,8 @@ const AddProduct = () => {
                 className="h-11 rounded-lg border border-gray-300 px-4 font-serif text-gray-800 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               />
             </div>
+
+            {/* Price */}
             <div className="grid gap-2">
               <Label className="text-sm font-semibold font-serif text-gray-700">
                 Price
@@ -116,13 +162,15 @@ const AddProduct = () => {
                 onChange={handleChange}
                 type="number"
                 name="productPrice"
-                placeholder=""
+                placeholder="Enter price"
                 required
                 className="h-11 rounded-lg border border-gray-300 px-4 font-serif text-gray-800 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               />
             </div>
 
+            {/* Brand + Category */}
             <div className="grid grid-cols-2 gap-4">
+              {/* Brand */}
               <div className="grid gap-2">
                 <Label className="text-sm font-semibold font-serif text-gray-700">
                   Brand
@@ -139,6 +187,7 @@ const AddProduct = () => {
                 />
               </div>
 
+              {/* Category */}
               <div className="grid gap-2">
                 <Label className="text-sm font-semibold font-serif text-gray-700">
                   Category
@@ -155,12 +204,12 @@ const AddProduct = () => {
                 />
               </div>
             </div>
+
+            {/* Description */}
             <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label className="text-sm font-semibold font-serif text-gray-700">
-                  Description
-                </Label>
-              </div>
+              <Label className="text-sm font-semibold font-serif text-gray-700">
+                Description
+              </Label>
 
               <Textarea
                 name="productDesc"
@@ -170,21 +219,30 @@ const AddProduct = () => {
                 className="min-h-[120px] resize-none rounded-lg border border-gray-300 px-4 py-3 font-serif text-gray-800 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               />
             </div>
+
+            {/* Image Upload */}
             <ImageUpload
               productData={productData}
               setProductData={setProductData}
             />
           </div>
-          <CardFooter className="flex-col gap-2 pt-6">
+
+          {/* Add Product Button */}
+          <CardFooter className="flex-col gap-2 pt-8 px-0">
             <Button
               disabled={loading}
               onClick={submitHandler}
-              className="w-full h-11 bg-orange-600 hover:bg-orange-700 text-white font-serif font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+              className="w-full h-11 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-serif font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
               type="submit"
             >
-              {
-                loading?<span className="flex gap-1 items-center"><Loader2 className="animate-spin"/>Please Wait</span>:"Add Product"
-             }
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Adding Product...
+                </span>
+              ) : (
+                "Add Product"
+              )}
             </Button>
           </CardFooter>
         </CardContent>
