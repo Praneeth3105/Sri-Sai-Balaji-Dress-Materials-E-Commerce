@@ -121,16 +121,17 @@ const FilterSidebar = ({
           min="0"
           max="5000"
           step="100"
-          className="w-full"
+          className="w-full h-2 mt-2 cursor-pointer appearance-none rounded-full bg-gray-300 accent-orange-600"
           value={priceRange[0]}
           onChange={handleMinChange}
         />
+
         <input
           type="range"
           min="0"
           max="99999"
           step="100"
-          className="w-full"
+          className="w-full h-2 mt-1 cursor-pointer appearance-none rounded-full bg-gray-300 accent-orange-600"
           value={priceRange[1]}
           onChange={handleMaxChange}
         />

@@ -26,6 +26,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import axios from "axios";
 import { setProducts } from "@/redux/productSlice";
 import { toast } from "sonner";
@@ -186,8 +198,32 @@ const AdminProduct = () => {
       setLoading(false);
     }
   };
+const deleteProductHandler = async (productId) => {
+  try {
+    const res = await axios.delete(
+      `http://localhost:8000/api/v1/product/delete/${productId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
 
-  return (
+    if (res.data.success) {
+      toast.success(res.data.message || "Product Deleted Successfully");
+
+      const remainingProducts = products.filter(
+        (product) => product._id !== productId,
+      );
+
+      dispatch(setProducts(remainingProducts));
+    }
+  } catch (error) {
+    console.log("Delete Product Error:", error);
+
+    toast.error(error.response?.data?.message || "Failed to delete product");
+  }
+};  return (
     <div className="pl-[350px] py-20 pr-20 flex flex-col gap-5 min-h-screen bg-gray-100">
       <div className="flex justify-between items-center">
         <div className="relative bg-white rounded-lg">
@@ -451,7 +487,42 @@ const AdminProduct = () => {
                       type="button"
                       className="p-2 cursor-pointer hover:bg-red-50"
                     >
-                      <Trash2 className="text-red-500 w-5 h-5" />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            type="button"
+                            className="p-2 cursor-pointer hover:bg-red-50"
+                          >
+                            <Trash2 className="text-red-500 w-5 h-5" />
+                          </Button>
+                        </AlertDialogTrigger>
+
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Product?</AlertDialogTitle>
+
+                            <AlertDialogDescription>
+                              Are you sure you want to delete{" "}
+                              <span className="font-semibold">
+                                {product.productName}
+                              </span>
+                              ? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                            <AlertDialogAction
+                              onClick={() => deleteProductHandler(product._id)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </Button>
                   </div>
                 </div>
