@@ -49,7 +49,7 @@ const AdminUsers = () => {
 
   return (
     <div className="pl-[350px] py-20 pr-20 min-h-screen bg-gray-100 font-serif">
-      {/* Header */}
+
       <div className="mb-8">
         <h1 className="font-bold text-3xl text-gray-800">User Management</h1>
 
@@ -58,7 +58,7 @@ const AdminUsers = () => {
         </p>
       </div>
 
-      {/* Search */}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
         <div className="flex items-center justify-between">
           <div className="relative w-full max-w-md">
@@ -73,7 +73,6 @@ const AdminUsers = () => {
                 h-5
               "
             />
-
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
