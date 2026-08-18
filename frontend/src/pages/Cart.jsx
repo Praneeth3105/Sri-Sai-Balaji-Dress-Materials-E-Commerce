@@ -69,7 +69,7 @@ const Cart = () => {
       });
       if (res.data.success) {
         console.log(res.data.cart);
-        
+
         dispatch(setCart(res.data.cart));
         toast.success("Product Removed From Cart");
       }
@@ -140,7 +140,11 @@ const Cart = () => {
                         </Button>
                       </div>
                       <p>
-                        ₹{product?.productId.productPrice * product?.quantity}
+                        {/* ₹{product?.productId.productPrice * product?.quantity}
+                         */}
+                        ₹
+                        {(product?.productId?.productPrice || 0) *
+                          (product?.quantity || 0)}
                       </p>
                       <p
                         onClick={() => handleRemove(product?.productId?._id)}
@@ -183,7 +187,7 @@ const Cart = () => {
                     </div>
                     <Button
                       style={{ cursor: "pointer" }}
-                       onClick={() => navigate("/address")}
+                      onClick={() => navigate("/address")}
                       className="w-full bg-orange-600"
                     >
                       PLACE ORDER
