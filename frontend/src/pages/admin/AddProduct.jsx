@@ -94,13 +94,11 @@ const AddProduct = () => {
       );
 
       if (res.data.success) {
-        // Add newly created product to Redux
+
         dispatch(setProducts([...products, res.data.product]));
 
-        // Success toast
         toast.success("Product Added Successfully");
 
-        // Clear form
         setProductData({
           productName: "",
           productPrice: 0,
