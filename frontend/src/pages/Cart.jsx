@@ -125,7 +125,7 @@ const Cart = () => {
                         >
                           -
                         </Button>
-                        <span>{product.quantity}</span>
+                        <span className="font-serif">{product.quantity}</span>
                         <Button
                           onClick={() =>
                             handleUpdateQuantity(
@@ -139,7 +139,7 @@ const Cart = () => {
                           +
                         </Button>
                       </div>
-                      <p>
+                      <p className="font-serif">
                         {/* ₹{product?.productId.productPrice * product?.quantity}
                          */}
                         ₹
@@ -148,9 +148,9 @@ const Cart = () => {
                       </p>
                       <p
                         onClick={() => handleRemove(product?.productId?._id)}
-                        className="flex text-red-500 items-center gap-1 cursor-pointer"
+                        className="flex text-red-500 items-center gap-1 cursor-pointer font-serif"
                       >
-                        <Trash2 className="w-4 h-4" /> Remove
+                        <Trash2 className="w-4 h-4 " /> Remove
                       </p>
                     </div>
                   </Card>
