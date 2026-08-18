@@ -181,7 +181,11 @@ const Cart = () => {
                       <Input placeholder="Promo Code" />
                       <Button variant="outline">Apply</Button>
                     </div>
-                    <Button className="w-full bg-orange-600">
+                    <Button
+                      style={{ cursor: "pointer" }}
+                       onClick={() => navigate("/address")}
+                      className="w-full bg-orange-600"
+                    >
                       PLACE ORDER
                     </Button>
                     <Button variant="outline" className="w-full bg-transparent">
