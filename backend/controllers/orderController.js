@@ -105,20 +105,12 @@ export const verifyPayment = async (req, res) => {
       });
     }
 
-    // ==========================================
-    // CHECK PAYMENT DATA
-    // ==========================================
-
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({
         success: false,
         message: "Payment verification data is missing",
       });
     }
-
-    // ==========================================
-    // CREATE SIGNATURE
-    // ==========================================
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
@@ -129,10 +121,6 @@ export const verifyPayment = async (req, res) => {
 
     console.log("Expected Signature:", expectedSignature);
     console.log("Received Signature:", razorpay_signature);
-
-    // ==========================================
-    // VERIFY SIGNATURE
-    // ==========================================
 
     if (expectedSignature !== razorpay_signature) {
       console.log("❌ INVALID RAZORPAY SIGNATURE");
@@ -158,10 +146,6 @@ export const verifyPayment = async (req, res) => {
 
     console.log("✅ RAZORPAY SIGNATURE VERIFIED");
 
-    // ==========================================
-    // UPDATE ORDER AS PAID
-    // ==========================================
-
     const order = await Order.findOneAndUpdate(
       {
         razorpayOrderId: razorpay_order_id,
@@ -183,10 +167,6 @@ export const verifyPayment = async (req, res) => {
         message: "Order not found",
       });
     }
-
-    // ==========================================
-    // CLEAR USER CART
-    // ==========================================
 
     await Cart.findOneAndUpdate(
       {
@@ -210,6 +190,35 @@ export const verifyPayment = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ ERROR IN VERIFY PAYMENT:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getMyOrder = async (req, res) => {
+  try {
+    const userId = req.id;
+
+    const orders = await Order.find({
+      user: userId,
+    })
+      .populate({
+        path: "products.productId",
+        select: "productName productPrice productImage",
+      })
+      .populate("user", "firstName lastName email")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+  } catch (error) {
+    console.error("❌ Error Fetching User Orders:", error);
 
     return res.status(500).json({
       success: false,

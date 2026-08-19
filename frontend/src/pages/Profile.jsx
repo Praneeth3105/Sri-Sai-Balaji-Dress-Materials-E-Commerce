@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import axios from "axios";
 
 import { setUser } from "@/redux/UserSlice";
+import MyOrder from "./MyOrder";
 
 const Profile = () => {
   const { user } = useSelector((store) => store.user);
@@ -188,7 +189,7 @@ const Profile = () => {
           </h1>
         </div>
 
-        {/* Profile / Orders */}
+
 
         <div className="flex justify-center mb-10">
           <div className="bg-white border border-orange-100 rounded-full p-1 shadow-sm flex">
@@ -220,7 +221,7 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* ================= PROFILE ================= */}
+
 
         {activeTab === "profile" && (
           <form
@@ -435,18 +436,7 @@ const Profile = () => {
                 </p>
               </div>
             </div>
-
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <ShoppingBag className="w-12 h-12 text-orange-300" />
-
-              <h3 className="text-xl font-semibold font-serif mt-5">
-                No Orders Yet
-              </h3>
-
-              <p className="text-gray-500 mt-2">
-                Your orders will appear here after you make a purchase.
-              </p>
-            </div>
+<MyOrder/>
           </div>
         )}
       </div>
