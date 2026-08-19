@@ -1,15 +1,26 @@
 import React from "react";
 import { CheckCircle, ShoppingBag, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const OrderSuccess = () => {
   const navigate = useNavigate();
+
+  const { user } = useSelector((store) => store.user);
+
+  const handleViewOrders = () => {
+    if (user?._id) {
+      navigate(`/profile/${user._id}`);
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-20">
       <div className="w-full max-w-lg">
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 text-center">
-          {/* Success Icon */}
+          {/* SUCCESS ICON */}
           <div className="flex justify-center">
             <div className="bg-green-100 rounded-full p-5">
               <CheckCircle
@@ -19,19 +30,19 @@ const OrderSuccess = () => {
             </div>
           </div>
 
-          {/* Title */}
+          {/* TITLE */}
           <h1 className="text-3xl sm:text-4xl font-bold font-serif text-gray-800 mt-7">
             Thank You For Your Order!
           </h1>
 
-          {/* Success Message */}
+          {/* MESSAGE */}
           <p className="text-gray-600 font-serif mt-4 leading-7">
             Your order has been placed successfully.
             <br />
             Thank you for shopping with us!
           </p>
 
-          {/* Order Success Status */}
+          {/* PAYMENT STATUS */}
           <div className="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
             <p className="text-green-700 font-semibold font-serif">
               ✓ Payment Successful
@@ -42,9 +53,9 @@ const OrderSuccess = () => {
             </p>
           </div>
 
-          {/* Buttons */}
+          {/* BUTTONS */}
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
-            {/* Continue Shopping */}
+            {/* CONTINUE SHOPPING */}
             <button
               type="button"
               onClick={() => navigate("/products")}
@@ -72,10 +83,10 @@ const OrderSuccess = () => {
               Continue Shopping
             </button>
 
-            {/* View Orders */}
+            {/* VIEW MY ORDERS */}
             <button
               type="button"
-              onClick={() => navigate("/orders")}
+              onClick={handleViewOrders}
               className="
                 flex-1
                 h-12
@@ -101,7 +112,7 @@ const OrderSuccess = () => {
             </button>
           </div>
 
-          {/* Small Footer Message */}
+          {/* FOOTER */}
           <p className="text-sm text-gray-400 font-serif mt-7">
             We appreciate your business and hope to see you again soon.
           </p>

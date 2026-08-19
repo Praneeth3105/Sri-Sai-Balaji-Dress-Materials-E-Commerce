@@ -494,7 +494,7 @@ const AddressForm = () => {
                 <div className="p-8 space-y-5">
                   {/* FULL NAME */}
 
-                  <div className="space-y-2">
+                  <div className=" font-serif space-y-2">
                     <Label
                       htmlFor="fullName"
                       className="font-serif font-semibold text-gray-700"
@@ -514,7 +514,7 @@ const AddressForm = () => {
 
                   {/* PHONE + EMAIL */}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="font-serif grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label
                         htmlFor="phone"
@@ -533,7 +533,7 @@ const AddressForm = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="font-serif space-y-2">
                       <Label
                         htmlFor="email"
                         className="font-serif font-semibold text-gray-700"
@@ -554,7 +554,7 @@ const AddressForm = () => {
 
                   {/* ADDRESS */}
 
-                  <div className="space-y-2">
+                  <div className="font-serif space-y-2">
                     <Label
                       htmlFor="address"
                       className="font-serif font-semibold text-gray-700"
@@ -574,7 +574,7 @@ const AddressForm = () => {
 
                   {/* CITY + STATE */}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="font-serif grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label
                         htmlFor="city"
@@ -593,7 +593,7 @@ const AddressForm = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="font-serif space-y-2">
                       <Label
                         htmlFor="state"
                         className="font-serif font-semibold text-gray-700"
@@ -614,7 +614,7 @@ const AddressForm = () => {
 
                   {/* ZIP + COUNTRY */}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="font-serif grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label
                         htmlFor="zip"

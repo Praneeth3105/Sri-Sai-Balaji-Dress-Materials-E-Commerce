@@ -209,19 +209,19 @@ const Cart = () => {
       ) : (
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
           {/* Icon  */}
-          <div className="bg-orange-100 p-6 rounded-full">
+          <div className="font-serif bg-orange-100 p-6 rounded-full">
             <ShoppingCart className="w-16 h-16 text-black" />
           </div>
           {/* title  */}
-          <h2 className="mt-6 text-2xl font-bold text-gray-600">
+          <h2 className="font-serif mt-6 text-2xl font-bold text-gray-600">
             Your Cart is Empty
           </h2>
-          <p className="mt-2 text-gray-600">
+          <p className="font-serif mt-2 text-gray-600">
             Looks Like You Have Not Added Anything to Your Cart Yet
           </p>
           <Button
             onClick={() => navigate("/products")}
-            className=" cursor-pointer mt-6 bg-orange-600 text-white py-3 px-6 hover:bg-orange-700"
+            className="font-serif cursor-pointer mt-6 bg-orange-600 text-white py-3 px-6 hover:bg-orange-700"
           >
             Start Shopping
           </Button>
