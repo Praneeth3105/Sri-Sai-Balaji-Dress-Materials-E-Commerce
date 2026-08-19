@@ -226,3 +226,170 @@ export const getMyOrder = async (req, res) => {
     });
   }
 };
+
+export const getUserOrders = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const orders = await Order.find({
+      user: userId,
+    })
+      .populate({
+        path: "products.productId",
+        select: "productName productPrice productImage",
+      })
+      .populate("user", "firstName lastName email")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+  } catch (error) {
+    console.error("Error Fetching User Orders:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getAllOrdersAdmin = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate("user", "firstName lastName email")
+      .populate({
+        path: "products.productId",
+        select: "productName productPrice productImage",
+      });
+
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+  } catch (error) {
+    console.error("Error Fetching All Orders:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to Fetch All Orders",
+      error: error.message,
+    });
+  }
+};
+
+
+export const getSalesData = async (req, res) => {
+  try {
+    const salesData = await Order.aggregate([
+      {
+        $match: {
+          status: "Paid",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+            },
+          },
+
+          totalSales: {
+            $sum: "$amount",
+          },
+
+          totalOrders: {
+            $sum: 1,
+          },
+
+          totalProducts: {
+            $sum: {
+              $reduce: {
+                input: "$products",
+                initialValue: 0,
+                in: {
+                  $add: ["$$value", "$$this.quantity"],
+                },
+              },
+            },
+          },
+        },
+      },
+
+      {
+        $sort: {
+          _id: 1,
+        },
+      },
+    ]);
+
+    // ==========================================
+    // OVERALL SALES SUMMARY
+    // ==========================================
+
+    const summary = await Order.aggregate([
+      {
+        $match: {
+          status: "Paid",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+
+          totalSales: {
+            $sum: "$amount",
+          },
+
+          totalOrders: {
+            $sum: 1,
+          },
+
+          totalProducts: {
+            $sum: {
+              $reduce: {
+                input: "$products",
+                initialValue: 0,
+                in: {
+                  $add: ["$$value", "$$this.quantity"],
+                },
+              },
+            },
+          },
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+
+      salesData,
+
+      summary: summary[0] || {
+        totalSales: 0,
+        totalOrders: 0,
+        totalProducts: 0,
+      },
+    });
+  } catch (error) {
+    console.error("GET SALES DATA ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

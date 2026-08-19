@@ -200,9 +200,14 @@ const AdminUsers = () => {
                       Edit
                     </Button>
 
-                    <Button className="flex-1 bg-orange-600 hover:bg-orange-700 text-white cursor-pointer">
-                      <Eye className="w-4 h-4 mr-1" />
-                      Show Orders
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        navigate(`/dashboard/users/orders/${user._id}`)
+                      }
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Show Order
                     </Button>
                   </div>
                 </div>

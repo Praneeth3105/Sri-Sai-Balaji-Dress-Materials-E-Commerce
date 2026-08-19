@@ -1,14 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+  products: [],
+
+  cart: {
+    items: [],
+    totalPrice: 0,
+  },
+
+  addresses: [],
+
+  selectedAddress: null,
+};
+
 const productSlice = createSlice({
   name: "product",
 
-  initialState: {
-    products: [],
-    cart: [],
-    addresses: [],
-    selectedAddress: null,
-  },
+  initialState,
 
   reducers: {
     setProducts: (state, action) => {
@@ -40,6 +48,25 @@ const productSlice = createSlice({
         state.selectedAddress = null;
       }
     },
+
+    clearAddresses: (state) => {
+      state.addresses = [];
+      state.selectedAddress = null;
+    },
+
+    // IMPORTANT FOR LOGOUT
+    clearProductState: (state) => {
+      state.products = [];
+
+      state.cart = {
+        items: [],
+        totalPrice: 0,
+      };
+
+      state.addresses = [];
+
+      state.selectedAddress = null;
+    },
   },
 });
 
@@ -49,6 +76,8 @@ export const {
   addAddress,
   setselectedAddress,
   deleteAddress,
+  clearAddresses,
+  clearProductState,
 } = productSlice.actions;
 
 export default productSlice.reducer;
