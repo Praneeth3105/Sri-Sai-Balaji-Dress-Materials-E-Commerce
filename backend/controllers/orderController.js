@@ -80,10 +80,6 @@ export const verifyPayment = async (req, res) => {
     console.log("Payment ID:", razorpay_payment_id);
     console.log("Signature received:", razorpay_signature);
 
-    // ==========================================
-    // PAYMENT FAILED / CANCELLED
-    // ==========================================
-
     if (paymentFailed) {
       const order = await Order.findOneAndUpdate(
         {
@@ -335,10 +331,6 @@ export const getSalesData = async (req, res) => {
         },
       },
     ]);
-
-    // ==========================================
-    // OVERALL SALES SUMMARY
-    // ==========================================
 
     const summary = await Order.aggregate([
       {

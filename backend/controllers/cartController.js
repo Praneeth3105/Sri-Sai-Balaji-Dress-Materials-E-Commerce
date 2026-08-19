@@ -1,10 +1,6 @@
 import { Cart } from "../models/cartModel.js";
 import { Product } from "../models/productModel.js";
 
-// =====================================================
-// GET CART
-// =====================================================
-
 export const getCart = async (req, res) => {
   try {
     const userId = req.id;
@@ -36,19 +32,12 @@ export const getCart = async (req, res) => {
   }
 };
 
-// =====================================================
-// ADD TO CART
-// =====================================================
-
 export const addToCart = async (req, res) => {
   try {
     const userId = req.id;
 
     const { productId, quantity } = req.body;
 
-    // ---------------------------------------------
-    // Validate product ID
-    // ---------------------------------------------
 
     if (!productId) {
       return res.status(400).json({
@@ -56,11 +45,6 @@ export const addToCart = async (req, res) => {
         message: "Product ID is required",
       });
     }
-
-    // ---------------------------------------------
-    // Validate quantity
-    // ---------------------------------------------
-
     const selectedQuantity = Number(quantity) || 1;
 
     if (selectedQuantity < 1) {
@@ -69,10 +53,6 @@ export const addToCart = async (req, res) => {
         message: "Quantity must be at least 1",
       });
     }
-
-    // ---------------------------------------------
-    // Find product
-    // ---------------------------------------------
 
     const product = await Product.findById(productId);
 
@@ -83,15 +63,7 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // ---------------------------------------------
-    // Find user's cart
-    // ---------------------------------------------
-
     let cart = await Cart.findOne({ userId });
-
-    // =================================================
-    // USER DOES NOT HAVE CART
-    // =================================================
 
     if (!cart) {
       cart = new Cart({
@@ -109,25 +81,15 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // =================================================
-    // USER ALREADY HAS CART
-    // =================================================
     else {
       const itemIndex = cart.items.findIndex(
         (item) => item.productId.toString() === productId.toString(),
       );
 
-      // ---------------------------------------------
-      // Product already exists
-      // ---------------------------------------------
-
       if (itemIndex !== -1) {
         cart.items[itemIndex].quantity += selectedQuantity;
       }
 
-      // ---------------------------------------------
-      // Product does not exist
-      // ---------------------------------------------
       else {
         cart.items.push({
           productId: productId,
@@ -136,25 +98,13 @@ export const addToCart = async (req, res) => {
         });
       }
 
-      // ---------------------------------------------
-      // Recalculate total
-      // ---------------------------------------------
-
       cart.totalPrice = cart.items.reduce(
         (total, item) => total + item.price * item.quantity,
         0,
       );
     }
 
-    // ---------------------------------------------
-    // Save cart
-    // ---------------------------------------------
-
     await cart.save();
-
-    // ---------------------------------------------
-    // Populate product information
-    // ---------------------------------------------
 
     const populatedCart = await Cart.findById(cart._id).populate(
       "items.productId",
@@ -175,9 +125,6 @@ export const addToCart = async (req, res) => {
   }
 };
 
-// =====================================================
-// UPDATE QUANTITY
-// =====================================================
 
 export const updateQuantity = async (req, res) => {
   try {
@@ -205,27 +152,15 @@ export const updateQuantity = async (req, res) => {
       });
     }
 
-    // ---------------------------------------------
-    // Increase
-    // ---------------------------------------------
-
     if (type === "increase") {
       item.quantity += 1;
     }
-
-    // ---------------------------------------------
-    // Decrease
-    // ---------------------------------------------
 
     if (type === "decrease") {
       if (item.quantity > 1) {
         item.quantity -= 1;
       }
     }
-
-    // ---------------------------------------------
-    // Recalculate total
-    // ---------------------------------------------
 
     cart.totalPrice = cart.items.reduce(
       (total, item) => total + item.price * item.quantity,
@@ -253,10 +188,6 @@ export const updateQuantity = async (req, res) => {
   }
 };
 
-// =====================================================
-// REMOVE FROM CART
-// =====================================================
-
 export const removeFromCart = async (req, res) => {
   try {
     const userId = req.id;
@@ -275,10 +206,6 @@ export const removeFromCart = async (req, res) => {
     cart.items = cart.items.filter(
       (item) => item.productId.toString() !== productId.toString(),
     );
-
-    // ---------------------------------------------
-    // Recalculate total
-    // ---------------------------------------------
 
     cart.totalPrice = cart.items.reduce(
       (total, item) => total + item.price * item.quantity,

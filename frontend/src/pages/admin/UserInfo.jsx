@@ -10,14 +10,10 @@ import { toast } from "sonner";
 const UserInfo = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-
   const [file, setFile] = useState(null);
-
   const [profileImage, setProfileImage] = useState("/Profile.png");
-
   const [updateUser, setUpdateUser] = useState({
     firstName: "",
     lastName: "",
@@ -28,10 +24,6 @@ const UserInfo = () => {
     zipCode: "",
     role: "user",
   });
-
-  // ==============================
-  // GET USER
-  // ==============================
 
   const getUser = async () => {
     try {
@@ -91,10 +83,6 @@ const UserInfo = () => {
     getUser();
   }, [id]);
 
-  // ==============================
-  // INPUT CHANGE
-  // ==============================
-
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -104,20 +92,12 @@ const UserInfo = () => {
     }));
   };
 
-  // ==============================
-  // ROLE CHANGE
-  // ==============================
-
   const handleRoleChange = (e) => {
     setUpdateUser((prev) => ({
       ...prev,
       role: e.target.value,
     }));
   };
-
-  // ==============================
-  // IMAGE CHANGE
-  // ==============================
 
   const handleImageChange = (e) => {
     const selectedFile = e.target.files?.[0];
@@ -131,10 +111,6 @@ const UserInfo = () => {
     setProfileImage(preview);
   };
 
-  // ==============================
-  // UPDATE
-  // ==============================
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -146,22 +122,13 @@ const UserInfo = () => {
       const formData = new FormData();
 
       formData.append("firstName", updateUser.firstName);
-
       formData.append("lastName", updateUser.lastName);
-
       formData.append("email", updateUser.email);
-
       formData.append("phoneNo", updateUser.phoneNo);
-
       formData.append("address", updateUser.address);
-
       formData.append("city", updateUser.city);
-
       formData.append("zipCode", updateUser.zipCode);
-
-      // IMPORTANT
       formData.append("role", updateUser.role);
-
       if (file) {
         formData.append("file", file);
       }
@@ -182,8 +149,6 @@ const UserInfo = () => {
 
       if (res.data.success) {
         toast.success(res.data.message || "Profile Updated Successfully");
-
-        // Update screen with latest backend data
         const user = res.data.user;
 
         if (user) {
@@ -214,10 +179,6 @@ const UserInfo = () => {
     }
   };
 
-  // ==============================
-  // LOADING
-  // ==============================
-
   if (pageLoading) {
     return (
       <div className="pl-[350px] min-h-screen bg-orange-50 flex items-center justify-center">
@@ -229,16 +190,9 @@ const UserInfo = () => {
       </div>
     );
   }
-
-  // ==============================
-  // UI
-  // ==============================
-
   return (
     <div className="pl-[350px] py-20 pr-20 min-h-screen bg-orange-50">
       <div className="max-w-5xl mx-auto">
-        {/* HEADER */}
-
         <div className="flex items-center gap-4 mb-8">
           <Button
             type="button"
@@ -260,15 +214,11 @@ const UserInfo = () => {
           </div>
         </div>
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
         >
           <div className="grid md:grid-cols-[240px_1fr]">
-            {/* PROFILE IMAGE */}
-
             <div className="bg-orange-50 p-8 flex flex-col items-center border-r border-orange-100">
               <div className="relative">
                 <img
@@ -329,11 +279,7 @@ const UserInfo = () => {
               </div>
             </div>
 
-            {/* DETAILS */}
-
             <div className="p-8">
-              {/* PERSONAL */}
-
               <h2 className="text-lg font-bold font-serif text-gray-800 mb-5">
                 Personal Information
               </h2>
@@ -361,8 +307,6 @@ const UserInfo = () => {
                   />
                 </div>
               </div>
-
-              {/* CONTACT */}
 
               <h2 className="text-lg font-bold font-serif text-gray-800 mt-8 mb-5">
                 Contact Information
@@ -397,8 +341,6 @@ const UserInfo = () => {
                   />
                 </div>
               </div>
-
-              {/* ADDRESS */}
 
               <h2 className="text-lg font-bold font-serif text-gray-800 mt-8 mb-5 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-orange-500" />
@@ -442,8 +384,6 @@ const UserInfo = () => {
                 </div>
               </div>
 
-              {/* ROLE */}
-
               <div className="mt-8 p-5 rounded-xl bg-orange-50 border border-orange-200">
                 <Label className="font-bold text-gray-800">User Role</Label>
 
@@ -475,9 +415,6 @@ const UserInfo = () => {
                   </label>
                 </div>
               </div>
-
-              {/* BUTTON */}
-
               <Button
                 type="submit"
                 disabled={loading}

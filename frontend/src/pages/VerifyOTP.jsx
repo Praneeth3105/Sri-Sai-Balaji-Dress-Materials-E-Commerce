@@ -17,15 +17,11 @@ import axios from "axios";
 
 const VerifyOTP = () => {
   const { email } = useParams();
-
   const decodedEmail = decodeURIComponent(email);
-
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
-
   const navigate = useNavigate();
-
   const verifyHandler = async (e) => {
     e.preventDefault();
 
@@ -36,7 +32,6 @@ const VerifyOTP = () => {
 
     try {
       setLoading(true);
-
       const res = await axios.post(
         `http://localhost:8000/api/v1/user/verify-otp/${encodeURIComponent(
           decodedEmail,
@@ -53,12 +48,8 @@ const VerifyOTP = () => {
 
       if (res.data.success) {
         toast.success(res.data.message);
-
-        // Store reset token temporarily
         sessionStorage.setItem("passwordResetToken", res.data.resetToken);
-
         sessionStorage.setItem("passwordResetEmail", decodedEmail);
-
         navigate(`/reset-password/${encodeURIComponent(decodedEmail)}`);
       }
     } catch (error) {
@@ -100,16 +91,13 @@ const VerifyOTP = () => {
               <ShieldCheck className="w-7 h-7" />
             </div>
           </div>
-
           <CardTitle className="font-serif">Verify OTP</CardTitle>
-
           <CardDescription>
             Enter the 6-digit OTP sent to
             <br />
             <span className="font-medium text-black">{decodedEmail}</span>
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <form onSubmit={verifyHandler} className="space-y-5">
             <div className="grid gap-2">

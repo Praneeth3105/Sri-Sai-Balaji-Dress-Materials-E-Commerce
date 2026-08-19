@@ -73,7 +73,6 @@ const AdminUsers = () => {
                 h-5
               "
             />
-
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -96,7 +95,6 @@ const AdminUsers = () => {
             />
           </div>
 
-          {/* User Count */}
           <div className="bg-orange-50 border border-orange-200 rounded-lg px-5 py-2 text-center">
             <p className="text-xs text-gray-500">Total Users</p>
 
@@ -105,7 +103,6 @@ const AdminUsers = () => {
         </div>
       </div>
 
-      {/* User Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-7">
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user) => {
@@ -125,7 +122,7 @@ const AdminUsers = () => {
                   duration-200
                 "
               >
-                {/* Profile */}
+
                 <div className="flex items-center gap-4">
                   <img
                     src={user?.profilePic || UserLogo}

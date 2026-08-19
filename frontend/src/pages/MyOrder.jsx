@@ -59,10 +59,6 @@ const MyOrder = () => {
     getUserOrders();
   }, []);
 
-  // =========================
-  // LOADING
-  // =========================
-
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -72,10 +68,6 @@ const MyOrder = () => {
       </div>
     );
   }
-
-  // =========================
-  // NO ORDERS
-  // =========================
 
   if (userOrders.length === 0) {
     return (
@@ -97,8 +89,6 @@ const MyOrder = () => {
 
   return (
     <div className="space-y-6">
-      {/* Order Count */}
-
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold font-serif text-gray-800">
           My Orders
@@ -109,20 +99,14 @@ const MyOrder = () => {
         </span>
       </div>
 
-      {/* Orders */}
-
       {userOrders.map((order) => (
         <div
           key={order._id}
           className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm"
         >
-          {/* =========================
-              ORDER HEADER
-          ========================= */}
 
           <div className="bg-gray-50 border-b border-gray-200 px-5 py-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              {/* Order ID */}
 
               <div>
                 <p className="text-xs text-gray-500 font-serif">Order ID</p>
@@ -131,9 +115,6 @@ const MyOrder = () => {
                   {order._id}
                 </p>
               </div>
-
-              {/* Date */}
-
               <div className="flex items-center gap-2 text-gray-500">
                 <CalendarDays className="w-4 h-4" />
 
@@ -148,8 +129,6 @@ const MyOrder = () => {
                 </span>
               </div>
 
-              {/* Status */}
-
               <span
                 className={`px-4 py-1.5 rounded-full text-sm font-semibold font-serif w-fit ${
                   order.status === "Paid"
@@ -163,10 +142,6 @@ const MyOrder = () => {
               </span>
             </div>
           </div>
-
-          {/* =========================
-              USER DETAILS
-          ========================= */}
 
           <div className="px-5 py-4 border-b border-gray-100">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -188,9 +163,6 @@ const MyOrder = () => {
             </div>
           </div>
 
-          {/* =========================
-              PRODUCTS
-          ========================= */}
 
           <div className="px-5 py-5">
             <div className="flex items-center gap-2 mb-4">
@@ -205,7 +177,6 @@ const MyOrder = () => {
               {order.products?.map((item, index) => {
                 const product = item.productId;
 
-                // Product may have been deleted later.
                 if (!product) {
                   return (
                     <div
@@ -284,8 +255,6 @@ const MyOrder = () => {
               })}
             </div>
           </div>
-
-
           <div className="bg-orange-50 border-t border-orange-100 px-5 py-5">
             <div className="flex flex-col gap-3">
               <div className="flex justify-between text-sm">

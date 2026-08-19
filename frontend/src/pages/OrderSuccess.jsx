@@ -29,20 +29,16 @@ const OrderSuccess = () => {
               />
             </div>
           </div>
-
-          {/* TITLE */}
           <h1 className="text-3xl sm:text-4xl font-bold font-serif text-gray-800 mt-7">
             Thank You For Your Order!
           </h1>
 
-          {/* MESSAGE */}
           <p className="text-gray-600 font-serif mt-4 leading-7">
             Your order has been placed successfully.
             <br />
             Thank you for shopping with us!
           </p>
 
-          {/* PAYMENT STATUS */}
           <div className="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
             <p className="text-green-700 font-semibold font-serif">
               ✓ Payment Successful
@@ -53,9 +49,7 @@ const OrderSuccess = () => {
             </p>
           </div>
 
-          {/* BUTTONS */}
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
-            {/* CONTINUE SHOPPING */}
             <button
               type="button"
               onClick={() => navigate("/products")}
@@ -83,7 +77,6 @@ const OrderSuccess = () => {
               Continue Shopping
             </button>
 
-            {/* VIEW MY ORDERS */}
             <button
               type="button"
               onClick={handleViewOrders}
@@ -111,8 +104,6 @@ const OrderSuccess = () => {
               View My Orders
             </button>
           </div>
-
-          {/* FOOTER */}
           <p className="text-sm text-gray-400 font-serif mt-7">
             We appreciate your business and hope to see you again soon.
           </p>

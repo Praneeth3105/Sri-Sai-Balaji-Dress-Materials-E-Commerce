@@ -18,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -80,7 +79,6 @@ const AdminProduct = () => {
   const handleEdit = (product) => {
     setEditProduct({
       ...product,
-
       productName: product.productName || "",
       productPrice: product.productPrice || "",
       productDesc: product.productDesc || "",
@@ -110,7 +108,6 @@ const AdminProduct = () => {
 
     setEditProduct((prev) => ({
       ...prev,
-
       productImage: [...(prev.productImage || []), ...files],
     }));
 
@@ -120,7 +117,6 @@ const AdminProduct = () => {
   const removeImage = (index) => {
     setEditProduct((prev) => ({
       ...prev,
-
       productImage: prev.productImage.filter((_, i) => i !== index),
     }));
   };
@@ -433,9 +429,6 @@ const deleteProductHandler = async (productId) => {
                                               className="w-full h-full object-cover"
                                             />
                                           </div>
-
-                                          {/* REMOVE IMAGE */}
-
                                           <button
                                             type="button"
                                             onClick={() => removeImage(index)}

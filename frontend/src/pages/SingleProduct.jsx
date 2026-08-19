@@ -8,19 +8,14 @@ import { useParams } from "react-router-dom";
 const SingleProduct = () => {
   const params = useParams();
   const productId = params.id;
-
   const { products } = useSelector((store) => store.product);
-
   const product = products.find((item) => item._id === productId);
 
   return (
     <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      {/* Breadcrumb */}
       <div className="mb-8">
         <Breadcrums product={product} />
       </div>
-
-      {/* Product Section */}
       <div
         className="
           mt-6
@@ -34,7 +29,6 @@ const SingleProduct = () => {
           border border-gray-100
         "
       >
-        {/* Product Image */}
         <div
           className="
             rounded-2xl
@@ -51,8 +45,6 @@ const SingleProduct = () => {
         >
           <ProductImg images={product?.productImage} />
         </div>
-
-        {/* Product Details */}
         <div className="pt-2 lg:pt-5">
           <ProductDesc product={product} />
         </div>

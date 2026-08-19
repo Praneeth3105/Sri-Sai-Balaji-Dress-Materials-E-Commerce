@@ -20,13 +20,9 @@ import { toast } from "sonner";
 
 const AddProduct = () => {
   const [loading, setLoading] = useState(false);
-
   const { products } = useSelector((store) => store.product);
-
   const dispatch = useDispatch();
-
   const accessToken = localStorage.getItem("accessToken");
-
   const [productData, setProductData] = useState({
     productName: "",
     productPrice: 0,
@@ -35,7 +31,6 @@ const AddProduct = () => {
     brand: "",
     category: "",
   });
-
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -44,11 +39,8 @@ const AddProduct = () => {
       [name]: value,
     }));
   };
-
   const submitHandler = async (e) => {
     e.preventDefault();
-
-    // Basic validation
     if (
       !productData.productName ||
       !productData.productPrice ||
@@ -66,12 +58,8 @@ const AddProduct = () => {
     }
 
     const formData = new FormData();
-
     formData.append("productName", productData.productName);
-
-    // IMPORTANT: no space after productPrice
     formData.append("productPrice", productData.productPrice);
-
     formData.append("productDesc", productData.productDesc);
     formData.append("category", productData.category);
     formData.append("brand", productData.brand);
@@ -94,7 +82,6 @@ const AddProduct = () => {
       );
 
       if (res.data.success) {
-
         dispatch(setProducts([...products, res.data.product]));
 
         toast.success("Product Added Successfully");
@@ -132,7 +119,6 @@ const AddProduct = () => {
 
         <CardContent className="px-8 py-8 bg-white rounded-b-xl">
           <div className="flex flex-col gap-5">
-            {/* Product Name */}
             <div className="grid gap-2">
               <Label className="text-sm font-semibold font-serif text-gray-700">
                 Product Name
@@ -148,13 +134,10 @@ const AddProduct = () => {
                 className="h-11 rounded-lg border border-gray-300 px-4 font-serif text-gray-800 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
               />
             </div>
-
-            {/* Price */}
             <div className="grid gap-2">
               <Label className="text-sm font-semibold font-serif text-gray-700">
                 Price
               </Label>
-
               <Input
                 value={productData.productPrice}
                 onChange={handleChange}
@@ -166,9 +149,7 @@ const AddProduct = () => {
               />
             </div>
 
-            {/* Brand + Category */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Brand */}
               <div className="grid gap-2">
                 <Label className="text-sm font-semibold font-serif text-gray-700">
                   Brand
@@ -184,8 +165,6 @@ const AddProduct = () => {
                   className="h-11 rounded-lg border border-gray-300 px-4 font-serif text-gray-800 shadow-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none"
                 />
               </div>
-
-              {/* Category */}
               <div className="grid gap-2">
                 <Label className="text-sm font-semibold font-serif text-gray-700">
                   Category
@@ -202,8 +181,6 @@ const AddProduct = () => {
                 />
               </div>
             </div>
-
-            {/* Description */}
             <div className="grid gap-2">
               <Label className="text-sm font-semibold font-serif text-gray-700">
                 Description
@@ -218,14 +195,12 @@ const AddProduct = () => {
               />
             </div>
 
-            {/* Image Upload */}
             <ImageUpload
               productData={productData}
               setProductData={setProductData}
             />
           </div>
 
-          {/* Add Product Button */}
           <CardFooter className="flex-col gap-2 pt-8 px-0">
             <Button
               disabled={loading}

@@ -17,25 +17,18 @@ import axios from "axios";
 
 const ResetPassword = () => {
   const { email } = useParams();
-
   const decodedEmail = decodeURIComponent(email);
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
   });
 
   const navigate = useNavigate();
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -44,14 +37,10 @@ const ResetPassword = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
     const resetToken = sessionStorage.getItem("passwordResetToken");
-
     const resetEmail = sessionStorage.getItem("passwordResetEmail");
-
     if (!resetToken || resetEmail !== decodedEmail) {
       toast.error("Password reset session expired. Please request a new OTP.");
-
       navigate("/forgot-password");
       return;
     }
@@ -87,12 +76,8 @@ const ResetPassword = () => {
 
       if (res.data.success) {
         toast.success(res.data.message);
-
-        // Remove password reset information
         sessionStorage.removeItem("passwordResetToken");
-
         sessionStorage.removeItem("passwordResetEmail");
-
         navigate("/login");
       }
     } catch (error) {
@@ -115,22 +100,17 @@ const ResetPassword = () => {
               <LockKeyhole className="w-7 h-7" />
             </div>
           </div>
-
           <CardTitle className="font-serif ">Reset Password</CardTitle>
-
           <CardDescription>
             Create a new password for
             <br />
             <span className="font-medium text-black">{decodedEmail}</span>
           </CardDescription>
         </CardHeader>
-
         <CardContent>
           <form onSubmit={submitHandler} className="space-y-5">
-            {/* New Password */}
             <div className="grid gap-2">
               <Label htmlFor="newPassword">New Password</Label>
-
               <div className="relative">
                 <Input
                   id="newPassword"
@@ -156,8 +136,6 @@ const ResetPassword = () => {
                 </button>
               </div>
             </div>
-
-            {/* Confirm Password */}
             <div className="grid gap-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
 

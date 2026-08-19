@@ -105,7 +105,6 @@ export const updateProduct = async (req, res) => {
     const { productName, productDesc, productPrice, category, brand } =
       req.body;
 
-    // Find product
     const product = await Product.findById(productId);
 
     if (!product) {
@@ -116,10 +115,7 @@ export const updateProduct = async (req, res) => {
     }
 
     let updatedImages = [];
-
-    // If new images are uploaded
     if (req.files && req.files.length > 0) {
-      // Delete old images from Cloudinary
       if (product.productImage && product.productImage.length > 0) {
         for (const img of product.productImage) {
           if (img.public_id) {
@@ -128,7 +124,6 @@ export const updateProduct = async (req, res) => {
         }
       }
 
-      // Upload all new images
       for (const file of req.files) {
         const fileUri = getDataUri(file);
 
@@ -142,26 +137,15 @@ export const updateProduct = async (req, res) => {
         });
       }
     } else {
-      // No new images uploaded
-      // Keep existing images
       updatedImages = product.productImage;
     }
-
-    // Update product details
     product.productName = productName || product.productName;
-
     product.productDesc = productDesc || product.productDesc;
-
     product.productPrice = productPrice || product.productPrice;
-
     product.category = category || product.category;
-
     product.brand = brand || product.brand;
-
-    // Update images
     product.productImage = updatedImages;
 
-    // Save product
     const updatedProduct = await product.save();
 
     return res.status(200).json({

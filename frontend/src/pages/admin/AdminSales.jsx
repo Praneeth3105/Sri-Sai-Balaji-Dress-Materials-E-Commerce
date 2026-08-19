@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-
 import {
   LineChart,
   Line,
@@ -11,7 +10,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
 import { IndianRupee, ShoppingBag, Package } from "lucide-react";
 
 const AdminSales = () => {
@@ -63,10 +61,6 @@ const AdminSales = () => {
     getSalesData();
   }, []);
 
-  // ==========================================
-  // FORMAT GRAPH DATA
-  // ==========================================
-
   const chartData = salesData.map((item) => ({
     date: item._id,
     sales: item.totalSales,
@@ -75,10 +69,6 @@ const AdminSales = () => {
 
   return (
     <div className="pl-[350px] pr-10 pt-20 pb-10 min-h-screen bg-gray-100 font-serif">
-      {/* ==========================================
-          HEADER
-      ========================================== */}
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Sales Overview</h1>
 
@@ -86,14 +76,7 @@ const AdminSales = () => {
           Track your store sales and order performance
         </p>
       </div>
-
-      {/* ==========================================
-          SUMMARY CARDS
-      ========================================== */}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* TOTAL SALES */}
-
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -109,8 +92,6 @@ const AdminSales = () => {
             </div>
           </div>
         </div>
-
-        {/* TOTAL ORDERS */}
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
@@ -128,8 +109,6 @@ const AdminSales = () => {
           </div>
         </div>
 
-        {/* PRODUCTS SOLD */}
-
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -146,10 +125,6 @@ const AdminSales = () => {
           </div>
         </div>
       </div>
-
-      {/* ==========================================
-          SALES GRAPH
-      ========================================== */}
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
         <div className="mb-6">
@@ -213,11 +188,6 @@ const AdminSales = () => {
           </div>
         )}
       </div>
-
-      {/* ==========================================
-          DAILY SALES TABLE
-      ========================================== */}
-
       {!loading && salesData.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-8 overflow-hidden">
           <div className="p-6 border-b">
@@ -246,11 +216,8 @@ const AdminSales = () => {
                 {[...salesData].reverse().map((item, index) => (
                   <tr key={index} className="border-t hover:bg-gray-50">
                     <td className="p-4">{item._id}</td>
-
                     <td className="p-4">{item.totalOrders}</td>
-
                     <td className="p-4">{item.totalProducts}</td>
-
                     <td className="p-4 font-semibold text-orange-600">
                       ₹{Number(item.totalSales).toLocaleString("en-IN")}
                     </td>

@@ -35,31 +35,14 @@ const AddressForm = () => {
   const { cart, addresses, selectedAddress } = useSelector(
     (store) => store.product,
   );
-
-  // ==========================================
-  // FORM
-  // ==========================================
-
   const [formData, setFormData] = useState(emptyAddress);
-
-  // ==========================================
-  // SHOW FORM
-  // ==========================================
 
   const [showForm, setShowForm] = useState(
     !addresses || addresses.length === 0,
   );
 
-  // ==========================================
-  // PAYMENT LOADING
-  // ==========================================
 
   const [paymentLoading, setPaymentLoading] = useState(false);
-
-  // ==========================================
-  // IMPORTANT
-  // UPDATE FORM VISIBILITY WHEN REDUX CHANGES
-  // ==========================================
 
   useEffect(() => {
     if (!addresses || addresses.length === 0) {
@@ -69,9 +52,6 @@ const AddressForm = () => {
     }
   }, [addresses]);
 
-  // ==========================================
-  // HANDLE INPUT
-  // ==========================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -81,10 +61,6 @@ const AddressForm = () => {
       [name]: value,
     }));
   };
-
-  // ==========================================
-  // SAVE ADDRESS
-  // ==========================================
 
   const handleSave = () => {
     const requiredFields = [
@@ -105,27 +81,14 @@ const AddressForm = () => {
       return;
     }
 
-    // New address will be added at the end
     const newAddressIndex = addresses?.length || 0;
-
-    // Add address to Redux
     dispatch(addAddress({ ...formData }));
-
-    // Automatically select newly added address
     dispatch(setselectedAddress(newAddressIndex));
-
     toast.success("Address saved successfully");
-
-    // Hide form
     setShowForm(false);
-
-    // Clear form
     setFormData({ ...emptyAddress });
   };
 
-  // ==========================================
-  // DELETE ADDRESS
-  // ==========================================
 
   const handleDelete = (e, index) => {
     e.stopPropagation();
@@ -134,13 +97,9 @@ const AddressForm = () => {
 
     dispatch(deleteAddress(index));
 
-    // If deleting the selected address
     if (selectedAddress === index) {
       dispatch(setselectedAddress(null));
     }
-
-    // If selected address is after deleted address,
-    // move selected index one position back
     if (
       selectedAddress !== null &&
       selectedAddress !== undefined &&
@@ -148,9 +107,6 @@ const AddressForm = () => {
     ) {
       dispatch(setselectedAddress(selectedAddress - 1));
     }
-
-    // If this was the last address,
-    // show the address form again
     if (currentLength === 1) {
       setShowForm(true);
       dispatch(setselectedAddress(null));
@@ -159,19 +115,11 @@ const AddressForm = () => {
     toast.success("Address deleted successfully");
   };
 
-  // ==========================================
-  // SELECT ADDRESS
-  // ==========================================
-
   const handleSelectAddress = (index) => {
     dispatch(setselectedAddress(index));
 
     toast.success("Address selected");
   };
-
-  // ==========================================
-  // ADD ANOTHER ADDRESS
-  // ==========================================
 
   const handleAddAnother = () => {
     setFormData({ ...emptyAddress });
@@ -179,39 +127,25 @@ const AddressForm = () => {
     setShowForm(true);
   };
 
-  // ==========================================
-  // CART CALCULATIONS
-  // ==========================================
-
-  const subtotal = Number(cart?.totalPrice || 0);
-
+ 
+ const subtotal = Number(cart?.totalPrice || 0);
   const shipping = subtotal > 299 ? 0 : 10;
-
   const tax = Number((subtotal * 0.05).toFixed(2));
-
   const total = Number((subtotal + shipping + tax).toFixed(2));
-
-  // ==========================================
-  // PAYMENT
-  // ==========================================
 
   const handlePayment = async () => {
     const accessToken = localStorage.getItem("accessToken");
 
-    // Login check
     if (!accessToken) {
       toast.error("Please login to continue");
       navigate("/login");
       return;
     }
-
-    // Cart check
     if (!cart?.items || cart.items.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
 
-    // Address selection check
     if (selectedAddress === null || selectedAddress === undefined) {
       toast.error("Please select a delivery address");
       return;
@@ -227,10 +161,6 @@ const AddressForm = () => {
     try {
       setPaymentLoading(true);
 
-      // ==========================================
-      // CREATE ORDER
-      // ==========================================
-
       const response = await axios.post(
         `${import.meta.env.VITE_URL}/api/v1/orders/create-order`,
         {
@@ -242,13 +172,9 @@ const AddressForm = () => {
             })),
 
           tax: tax,
-
           shipping: shipping,
-
           amount: total,
-
           currency: "INR",
-
           address: selected,
         },
         {
@@ -259,9 +185,7 @@ const AddressForm = () => {
       );
 
       const data = response.data;
-
       console.log("Create Order Response:", data);
-
       if (!data.success) {
         toast.error(data.message || "Unable to create order");
 
@@ -269,34 +193,19 @@ const AddressForm = () => {
         return;
       }
 
-      // ==========================================
-      // CHECK RAZORPAY
-      // ==========================================
-
       if (!window.Razorpay) {
         toast.error("Razorpay is not loaded. Please refresh the page.");
 
         setPaymentLoading(false);
         return;
       }
-
-      // ==========================================
-      // RAZORPAY OPTIONS
-      // ==========================================
-
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-
         amount: data.order.amount,
-
         currency: data.order.currency,
-
         order_id: data.order.id,
-
         name: "Sri Sai Balaji Dress Materials",
-
         description: "Order Payment",
-
         prefill: {
           name: selected.fullName,
           email: selected.email,
@@ -306,11 +215,6 @@ const AddressForm = () => {
         theme: {
           color: "#ea580c",
         },
-
-        // ==========================================
-        // PAYMENT SUCCESS
-        // ==========================================
-
         handler: async function (paymentResponse) {
           try {
             console.log("Razorpay Payment Response:", paymentResponse);
@@ -329,16 +233,12 @@ const AddressForm = () => {
 
             if (verifyResponse.data.success) {
               toast.success("Payment Successful!");
-
-              // Clear Redux cart
               dispatch(
                 setCart({
                   items: [],
                   totalPrice: 0,
                 }),
               );
-
-              // Go to success page
               navigate("/order-success");
             } else {
               toast.error(
@@ -355,10 +255,6 @@ const AddressForm = () => {
             setPaymentLoading(false);
           }
         },
-
-        // ==========================================
-        // PAYMENT WINDOW CLOSED
-        // ==========================================
 
         modal: {
           ondismiss: async function () {
@@ -388,16 +284,7 @@ const AddressForm = () => {
         },
       };
 
-      // ==========================================
-      // CREATE RAZORPAY
-      // ==========================================
-
       const razorpay = new window.Razorpay(options);
-
-      // ==========================================
-      // PAYMENT FAILED
-      // ==========================================
-
       razorpay.on("payment.failed", async function () {
         try {
           await axios.post(
@@ -421,10 +308,6 @@ const AddressForm = () => {
         setPaymentLoading(false);
       });
 
-      // ==========================================
-      // OPEN RAZORPAY
-      // ==========================================
-
       razorpay.open();
     } catch (error) {
       console.error("ORDER PAYMENT ERROR:", error);
@@ -437,10 +320,6 @@ const AddressForm = () => {
       setPaymentLoading(false);
     }
   };
-
-  // ==========================================
-  // UI
-  // ==========================================
 
   return (
     <div className="min-h-screen bg-gray-50 py-24 px-4 sm:px-6 lg:px-8">
@@ -466,14 +345,8 @@ const AddressForm = () => {
               : "grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 items-start"
           }
         >
-          {/* ==========================================
-              LEFT SIDE
-          ========================================== */}
-
+  
           <div className="w-full">
-            {/* ==========================================
-                ADDRESS FORM
-            ========================================== */}
 
             {showForm ? (
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
@@ -489,10 +362,7 @@ const AddressForm = () => {
                   </p>
                 </div>
 
-                {/* FORM */}
-
                 <div className="p-8 space-y-5">
-                  {/* FULL NAME */}
 
                   <div className=" font-serif space-y-2">
                     <Label
@@ -511,8 +381,6 @@ const AddressForm = () => {
                       onChange={handleChange}
                     />
                   </div>
-
-                  {/* PHONE + EMAIL */}
 
                   <div className="font-serif grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
@@ -552,8 +420,6 @@ const AddressForm = () => {
                     </div>
                   </div>
 
-                  {/* ADDRESS */}
-
                   <div className="font-serif space-y-2">
                     <Label
                       htmlFor="address"
@@ -571,9 +437,6 @@ const AddressForm = () => {
                       onChange={handleChange}
                     />
                   </div>
-
-                  {/* CITY + STATE */}
-
                   <div className="font-serif grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <Label
@@ -611,8 +474,6 @@ const AddressForm = () => {
                       />
                     </div>
                   </div>
-
-                  {/* ZIP + COUNTRY */}
 
                   <div className="font-serif grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
@@ -652,8 +513,6 @@ const AddressForm = () => {
                     </div>
                   </div>
 
-                  {/* SAVE */}
-
                   <div className="pt-4">
                     <Button
                       type="button"
@@ -666,13 +525,8 @@ const AddressForm = () => {
                 </div>
               </div>
             ) : (
-              /* ==========================================
-                  SAVED ADDRESSES
-              ========================================== */
 
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                {/* HEADER */}
-
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-2xl font-bold font-serif text-gray-800">
@@ -689,8 +543,6 @@ const AddressForm = () => {
                   </span>
                 </div>
 
-                {/* ADDRESS LIST */}
-
                 <div className="space-y-4">
                   {addresses?.map((address, index) => (
                     <div
@@ -706,8 +558,6 @@ const AddressForm = () => {
                         }
                       `}
                     >
-                      {/* NAME */}
-
                       <div className="flex items-center justify-between">
                         <h3 className="font-bold font-serif text-lg text-gray-800">
                           {address.fullName}
@@ -719,8 +569,6 @@ const AddressForm = () => {
                           </span>
                         )}
                       </div>
-
-                      {/* ADDRESS */}
 
                       <div className="mt-3 space-y-1">
                         <p className="font-serif text-gray-600">
@@ -736,8 +584,6 @@ const AddressForm = () => {
                         </p>
                       </div>
 
-                      {/* CONTACT */}
-
                       <div className="mt-3 space-y-1">
                         <p className="font-serif text-gray-600 text-sm">
                           Phone: {address.phone}
@@ -747,9 +593,6 @@ const AddressForm = () => {
                           Email: {address.email}
                         </p>
                       </div>
-
-                      {/* DELETE */}
-
                       <Button
                         type="button"
                         variant="outline"
@@ -761,8 +604,6 @@ const AddressForm = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* ADD ANOTHER */}
 
                 <div className="mt-6">
                   <Button
@@ -777,10 +618,6 @@ const AddressForm = () => {
             )}
           </div>
 
-          {/* ==========================================
-              ORDER SUMMARY
-          ========================================== */}
-
           {!showForm && (
             <div className="w-full lg:sticky lg:top-24">
               <Card className="w-full shadow-lg border border-gray-200 font-serif">
@@ -791,8 +628,6 @@ const AddressForm = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-5 pt-6">
-                  {/* SUBTOTAL */}
-
                   <div className="flex justify-between">
                     <span className="text-gray-600">
                       Subtotal ({cart?.items?.length || 0} items)
@@ -802,8 +637,6 @@ const AddressForm = () => {
                       ₹{subtotal.toLocaleString("en-IN")}
                     </span>
                   </div>
-
-                  {/* SHIPPING */}
 
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
@@ -817,8 +650,6 @@ const AddressForm = () => {
                     </span>
                   </div>
 
-                  {/* TAX */}
-
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tax (5%)</span>
 
@@ -826,8 +657,6 @@ const AddressForm = () => {
                       ₹{tax.toLocaleString("en-IN")}
                     </span>
                   </div>
-
-                  {/* TOTAL */}
 
                   <div className="border-t pt-5">
                     <div className="flex justify-between">
@@ -838,8 +667,6 @@ const AddressForm = () => {
                       </span>
                     </div>
                   </div>
-
-                  {/* FREE SHIPPING */}
 
                   <div className="bg-orange-50 border border-orange-100 rounded-lg p-4">
                     {shipping === 0 ? (
@@ -852,9 +679,6 @@ const AddressForm = () => {
                       </p>
                     )}
                   </div>
-
-                  {/* PROMO */}
-
                   <div className="flex gap-2">
                     <Input placeholder="Promo Code" />
 
@@ -862,9 +686,6 @@ const AddressForm = () => {
                       Apply
                     </Button>
                   </div>
-
-                  {/* PAYMENT */}
-
                   <Button
                     type="button"
                     onClick={handlePayment}
@@ -877,8 +698,6 @@ const AddressForm = () => {
                   >
                     {paymentLoading ? "Processing..." : "Proceed To Checkout"}
                   </Button>
-
-                  {/* INFO */}
 
                   <div className="text-xs text-gray-500 space-y-2 pt-4 border-t">
                     <p>✓ Free Shipping on Orders Over ₹299</p>

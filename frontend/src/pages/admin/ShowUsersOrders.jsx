@@ -17,10 +17,8 @@ import { toast } from "sonner";
 const ShowUsersOrders = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const getUserOrders = async () => {
     const accessToken = localStorage.getItem("accessToken");
 
@@ -99,8 +97,6 @@ const ShowUsersOrders = () => {
             </p>
           </div>
         </div>
-
-        {/* NO ORDERS */}
         {orders.length === 0 ? (
           <Card className="shadow-sm">
             <CardContent className="py-16 flex flex-col items-center justify-center text-center">
@@ -119,7 +115,7 @@ const ShowUsersOrders = () => {
           </Card>
         ) : (
           <>
-            {/* ORDER COUNT */}
+
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-xl font-bold text-gray-800">Orders</h2>
 
@@ -127,15 +123,13 @@ const ShowUsersOrders = () => {
                 {orders.length} {orders.length === 1 ? "Order" : "Orders"}
               </span>
             </div>
-
-            {/* ORDERS */}
             <div className="space-y-6">
               {orders.map((order) => (
                 <Card
                   key={order._id}
                   className="shadow-sm border-gray-200 overflow-hidden"
                 >
-                  {/* ORDER HEADER */}
+
                   <CardHeader className="bg-white border-b">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
@@ -148,7 +142,6 @@ const ShowUsersOrders = () => {
 
                       <div className="flex items-center gap-2 text-gray-500">
                         <CalendarDays className="w-4 h-4" />
-
                         <span className="text-sm">
                           {order.createdAt
                             ? new Date(order.createdAt).toLocaleDateString(
@@ -162,7 +155,6 @@ const ShowUsersOrders = () => {
                             : "N/A"}
                         </span>
                       </div>
-
                       <span
                         className={`px-4 py-2 rounded-full text-sm font-semibold w-fit ${
                           order.status === "Paid"
@@ -176,28 +168,22 @@ const ShowUsersOrders = () => {
                       </span>
                     </div>
                   </CardHeader>
-
                   <CardContent className="p-6">
-                    {/* USER INFORMATION */}
                     {order.user && (
                       <div className="bg-gray-50 rounded-xl p-4 mb-6">
                         <h3 className="font-bold text-gray-800 mb-3">
                           Customer Information
                         </h3>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-orange-500" />
-
                             <span className="text-gray-700">
                               {order.user.firstName || ""}{" "}
                               {order.user.lastName || ""}
                             </span>
                           </div>
-
                           <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-orange-500" />
-
                             <span className="text-gray-700">
                               {order.user.email || "N/A"}
                             </span>
@@ -206,7 +192,6 @@ const ShowUsersOrders = () => {
                       </div>
                     )}
 
-                    {/* PRODUCTS */}
                     <div>
                       <div className="flex items-center gap-2 mb-4">
                         <Package className="w-5 h-5 text-orange-500" />
@@ -219,7 +204,6 @@ const ShowUsersOrders = () => {
                       <div className="space-y-3">
                         {order.products?.map((item, index) => {
                           const product = item.productId;
-
                           if (!product) {
                             return (
                               <div
@@ -236,13 +220,11 @@ const ShowUsersOrders = () => {
                               </div>
                             );
                           }
-
                           const image =
                             product?.productImage?.[0]?.url ||
                             product?.productImg?.[0]?.url ||
                             product?.productImg?.[0] ||
                             "/Profile.png";
-
                           return (
                             <div
                               key={product._id || index}
@@ -294,7 +276,6 @@ const ShowUsersOrders = () => {
                       </div>
                     </div>
 
-                    {/* TOTAL */}
                     <div className="mt-6 bg-orange-50 border border-orange-100 rounded-xl p-5">
                       <div className="flex justify-between mb-3">
                         <span className="text-gray-600">Subtotal</span>

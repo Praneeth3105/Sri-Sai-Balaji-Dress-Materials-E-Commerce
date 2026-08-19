@@ -204,84 +204,6 @@ export const logout = async (req, res) => {
   }
 };
 
-// export const forgotPassword = async (req, res) => {
-//   try {
-//     const { email } = req.body;
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "User Not Found",
-//       });
-//     }
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-//     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-//     user.otp = otp;
-//     user.otpExpiry = otpExpiry;
-//     await user.save();
-//     await sendOTPMail(otp, email);
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "OTP Send to Email",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// export const verifyOTP = async (req, res) => {
-//   try {
-//     const { otp } = req.body;
-//     const email = req.params.email;
-//     if (!otp) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "OTP is Required",
-//       });
-//     }
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "User Not Found",
-//       });
-//     }
-//     if (!user.otp || !user.otpExpiry) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "OTP is Not Generated or Already Verified",
-//       });
-//     }
-//     if (user.otpExpiry < new Date()) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "OTP Has Expried Please Request a New OTP",
-//       });
-//     }
-//     if (otp !== user.otp) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "OTP is Invalid ",
-//       });
-//     }
-//     user.otp = null;
-//     user.otpExpiry = null;
-//     await user.save();
-//     return res.status(200).json({
-//       success: true,
-//       message: "OTP Verified Successfully",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -369,13 +291,11 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // OTP successfully verified
     user.otp = null;
     user.otpExpiry = null;
 
     await user.save();
 
-    // Create short-lived password reset token
     const resetToken = jwt.sign(
       {
         id: user._id,
@@ -403,43 +323,6 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
-// export const changePassword = async (req, res) => {
-//   try {
-//     const { newPassword, confirmPassword } = req.body;
-//     const { email } = req.params;
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "User Not Found",
-//       });
-//     }
-//     if (!newPassword || !confirmPassword) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All Fields are Required",
-//       });
-//     }
-//     if (newPassword !== confirmPassword) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Password Do Not Match",
-//       });
-//     }
-//     const hashedPassword = await bcrypt.hash(newPassword, 10);
-//     user.password = hashedPassword;
-//     await user.save();
-//     return res.status(200).json({
-//       success: true,
-//       message: "Password Changed Successful",
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 export const changePassword = async (req, res) => {
   try {
@@ -467,7 +350,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Get reset token
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -497,7 +379,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Make sure this token was specifically created for password reset
     if (decoded.purpose !== "password_reset") {
       return res.status(401).json({
         success: false,
@@ -505,7 +386,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Make sure email matches
     if (decoded.email !== email) {
       return res.status(401).json({
         success: false,
@@ -522,21 +402,16 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
 
-    // Make sure OTP/reset information is cleared
     user.otp = null;
     user.otpExpiry = null;
-
-    // Logout existing sessions after password reset
     user.isLoggedIn = false;
 
     await user.save();
 
-    // Delete existing sessions
     await Session.deleteMany({
       userId: user._id,
     });
@@ -600,7 +475,6 @@ export const updateUser = async (req, res) => {
 
     const { firstName, lastName, address, city, zipCode, phoneNo } = req.body;
 
-    // Check permission
     if (
       loggedInUser._id.toString() !== userIdToUpdate &&
       loggedInUser.role !== "admin"
@@ -611,7 +485,6 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    // Find user
     const user = await User.findById(userIdToUpdate);
 
     if (!user) {
@@ -621,18 +494,14 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    // Existing profile picture
     let profilePicUrl = user.profilePic;
     let profilePicPublicId = user.profilePicPublicId;
 
-    // New profile picture
     if (req.file) {
-      // Delete old image from Cloudinary
       if (profilePicPublicId) {
         await cloudinary.uploader.destroy(profilePicPublicId);
       }
 
-      // Upload new image
       const uploadResult = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
@@ -655,22 +524,13 @@ export const updateUser = async (req, res) => {
       profilePicPublicId = uploadResult.public_id;
     }
 
-    // Update user information
     user.firstName = firstName || user.firstName;
-
     user.lastName = lastName || user.lastName;
-
     user.address = address || user.address;
-
     user.city = city || user.city;
-
     user.zipCode = zipCode || user.zipCode;
-
     user.phoneNo = phoneNo || user.phoneNo;
-
-    // Update profile picture
     user.profilePic = profilePicUrl;
-
     user.profilePicPublicId = profilePicPublicId;
 
     const updatedUser = await user.save();

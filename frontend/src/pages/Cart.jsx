@@ -63,7 +63,6 @@ const Cart = () => {
       const res = await axios.delete(`${API}/remove`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          // data:{productId}
         },
         data: { productId },
       });
@@ -140,8 +139,6 @@ const Cart = () => {
                         </Button>
                       </div>
                       <p className="font-serif">
-                        {/* ₹{product?.productId.productPrice * product?.quantity}
-                         */}
                         ₹
                         {(product?.productId?.productPrice || 0) *
                           (product?.quantity || 0)}
@@ -207,12 +204,10 @@ const Cart = () => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
-          {/* Icon  */}
+        <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">  
           <div className="font-serif bg-orange-100 p-6 rounded-full">
             <ShoppingCart className="w-16 h-16 text-black" />
           </div>
-          {/* title  */}
           <h2 className="font-serif mt-6 text-2xl font-bold text-gray-600">
             Your Cart is Empty
           </h2>

@@ -85,7 +85,6 @@ const Products = () => {
   return (
     <div className="pt-20 pb-10 min-h-screen">
       <div className="max-w-7xl mx-auto flex gap-7 font-serif">
-        {/* Sidebar */}
         <FilterSidebar
           search={search}
           setSearch={setSearch}
@@ -98,7 +97,6 @@ const Products = () => {
           setPriceRange={setPriceRange}
         />
 
-        {/* Main Product Section */}
         <div className="flex flex-col flex-1">
           {/* Sort */}
           <div className="flex justify-end mb-4">
@@ -118,8 +116,6 @@ const Products = () => {
               </SelectContent>
             </Select>
           </div>
-
-          {/* Product Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-7">
             {loading
               ? Array.from({ length: 5 }).map((_, index) => (

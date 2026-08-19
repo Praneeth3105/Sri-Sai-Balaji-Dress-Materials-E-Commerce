@@ -78,30 +78,6 @@ const Login = () => {
         <CardContent>
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-4">
-              {/* <div className="grid gap-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  placeholder="John"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  placeholder="Doe"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
-              </div> */}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
