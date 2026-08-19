@@ -16,7 +16,7 @@ const Features = () => {
               <h3 className="font-semibold font-serif text-gray-900">
                 Free Shipping
               </h3>
-              <p className="text-sm text-gray-600">On orders over $50</p>
+              <p className="text-sm text-gray-600">On orders over ₹299</p>
             </div>
           </div>
 
