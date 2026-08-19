@@ -109,7 +109,17 @@ const router = createBrowserRouter([
     element: (
       <>
         <ProtectedRoute>
-          <AddressForm/>
+          <AddressForm />
+        </ProtectedRoute>
+      </>
+    ),
+  },
+  {
+    path: "/order-success",
+    element: (
+      <>
+        <ProtectedRoute>
+          <OrderSuccess />
         </ProtectedRoute>
       </>
     ),
