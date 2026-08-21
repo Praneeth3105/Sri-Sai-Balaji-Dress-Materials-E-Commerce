@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { FaMapMarkerAlt, FaPhoneAlt, FaRegClock } from "react-icons/fa";
 
 const Contact = () => {
   const [form, setForm] = useState({
@@ -9,7 +10,6 @@ const Contact = () => {
     message: "",
   });
 
-  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -43,8 +43,6 @@ const Contact = () => {
       );
 
       if (res.data.success) {
-        setSent(true);
-
         setForm({
           name: "",
           email: "",
@@ -91,37 +89,65 @@ const Contact = () => {
             Visit The Store
           </h2>
 
-          <div>
-            <p className="font-semibold text-slate-800">Address</p>
-
-            <p className="text-slate-600 text-sm leading-relaxed mt-1">
-              Shop No. 311, Panja Center, Krishnaveni Cloth Market,
-              <br />
-              Mahanthi Puram, Vinchipeta, Vijayawada,
-              <br />
-              Andhra Pradesh 520001
-            </p>
+          {/* Address */}
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 flex-shrink-0 rounded-full bg-orange-100 flex items-center justify-center">
+              <FaMapMarkerAlt className="text-orange-600" size={18} />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">Address</p>
+              <p className="text-slate-600 text-sm leading-relaxed mt-1">
+                Shop No. 311, Panja Center, Krishnaveni Cloth Market,
+                <br />
+                Mahanthi Puram, Vinchipeta, Vijayawada,
+                <br />
+                Andhra Pradesh 520001
+              </p>
+            </div>
           </div>
 
-          <div>
-            <p className="font-semibold text-slate-800">Phone</p>
-
-            <a
-              href="tel:+919491955032"
-              className="text-slate-600 text-sm hover:text-orange-600"
-            >
-              094919 55032
-            </a>
+          {/* Phone */}
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 flex-shrink-0 rounded-full bg-orange-100 flex items-center justify-center">
+              <FaPhoneAlt className="text-orange-600" size={16} />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">Phone</p>
+              <a
+                href="tel:+919491955032"
+                className="text-slate-600 text-sm hover:text-orange-600"
+              >
+                +91 94919 55032
+              </a>
+            </div>
           </div>
 
-          <div>
-            <p className="font-semibold text-slate-800">Store Hours</p>
+          {/* Store Hours */}
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 flex-shrink-0 rounded-full bg-orange-100 flex items-center justify-center">
+              <FaRegClock className="text-orange-600" size={18} />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">Store Hours</p>
+              <p className="text-slate-600 text-sm">
+                Mon – Sat: 10:00 AM – 8:30 PM
+                <br />
+                Sunday: 11:00 AM – 2:00 PM
+              </p>
+            </div>
+          </div>
 
-            <p className="text-slate-600 text-sm">
-              Mon – Sat: 10:00 AM – 8:30 PM
-              <br />
-              Sunday: 11:00 AM – 6:00 PM
-            </p>
+          {/* Embedded Map */}
+          <div className="rounded-xl overflow-hidden border border-orange-100 shadow-sm">
+            <iframe
+              title="Sri Sai Balaji Dress Materials location"
+              src="https://www.google.com/maps?q=Panja+Center,+Krishnaveni+Cloth+Market,+Mahanthi+Puram,+Vinchipeta,+Vijayawada,+Andhra+Pradesh+520001&output=embed"
+              width="100%"
+              height="220"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
         </div>
 
@@ -133,12 +159,6 @@ const Contact = () => {
           <p className="text-slate-300 text-sm mb-6">
             Fill this in and we'll get back to you shortly.
           </p>
-
-          {sent && (
-            <div className="mb-5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-sm px-4 py-3">
-              Thanks! Your message has been received.
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
