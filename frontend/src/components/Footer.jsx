@@ -47,10 +47,7 @@ const Footer = () => {
 
             <ul className="mt-4 space-y-3 text-sm">
               <li>
-                <Link
-                  to="/contact"
-                  className="hover:text-orange-400 transition-colors"
-                >
+                <Link to="/contact" className="hover:text-orange-400">
                   Contact Us
                 </Link>
               </li>

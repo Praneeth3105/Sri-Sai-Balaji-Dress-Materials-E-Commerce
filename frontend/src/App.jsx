@@ -22,7 +22,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import SingleProduct from "./pages/SingleProduct";
 import AddressForm from "./pages/AddressForm";
 import OrderSuccess from "./pages/OrderSuccess";
-
+import Contact from "./pages/Contact";
+import About from "./pages/About";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyOTP from "./pages/VerifyOTP";
 import ResetPassword from "./pages/ResetPassword";
@@ -140,6 +141,26 @@ const router = createBrowserRouter([
   {
     path: "/reset-password/:email",
     element: <ResetPassword />,
+  },
+  {
+    path: "/contact",
+    element: (
+      <>
+        <Navbar />
+        <Contact />
+        <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/about",
+    element: (
+      <>
+        <Navbar />
+        <About />
+        <Footer />
+      </>
+    ),
   },
   {
     path: "/dashboard",
