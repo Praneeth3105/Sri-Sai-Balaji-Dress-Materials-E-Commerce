@@ -103,6 +103,14 @@ const Contact = () => {
                 <br />
                 Andhra Pradesh 520001
               </p>
+              <a
+                href="https://maps.app.goo.gl/Wqsvcj6JXR8rydcW9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-2 text-sm font-medium text-orange-600 hover:text-orange-700 underline underline-offset-2"
+              >
+                View on Google Maps →
+              </a>
             </div>
           </div>
 
@@ -138,7 +146,8 @@ const Contact = () => {
           </div>
 
           {/* Embedded Map */}
-          <div className="rounded-xl overflow-hidden border border-orange-100 shadow-sm">
+                  <div className="rounded-xl overflow-hidden border border-orange-100 shadow-sm">
+                      <p className="font-serif text-center">Reference Address</p>
             <iframe
               title="Sri Sai Balaji Dress Materials location"
               src="https://www.google.com/maps?q=Panja+Center,+Krishnaveni+Cloth+Market,+Mahanthi+Puram,+Vinchipeta,+Vijayawada,+Andhra+Pradesh+520001&output=embed"
