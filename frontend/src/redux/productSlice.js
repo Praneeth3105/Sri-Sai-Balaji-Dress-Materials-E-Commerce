@@ -64,7 +64,6 @@ const productSlice = createSlice({
     },
   },
 });
-
 export const {
   setProducts,
   setCart,
