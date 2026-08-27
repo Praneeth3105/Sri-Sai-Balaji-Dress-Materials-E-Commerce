@@ -49,7 +49,6 @@ const productSlice = createSlice({
       state.selectedAddress = null;
     },
 
-    // IMPORTANT FOR LOGOUT
     clearProductState: (state) => {
       state.products = [];
 
