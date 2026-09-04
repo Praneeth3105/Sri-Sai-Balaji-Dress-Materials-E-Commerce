@@ -55,7 +55,6 @@ const About = () => {
         </p>
       </section>
 
-      {/* Story */}
       <section className="px-6 py-16 max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
