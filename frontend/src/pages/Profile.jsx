@@ -39,15 +39,12 @@ const Profile = () => {
   };
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
-
     if (!selectedFile) {
       return;
     }
 
     setFile(selectedFile);
-
     const imageUrl = URL.createObjectURL(selectedFile);
-
     setProfileImage(imageUrl);
   };
 
