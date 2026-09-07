@@ -54,7 +54,6 @@ const VerifyOTP = () => {
       }
     } catch (error) {
       console.log(error);
-
       toast.error(error?.response?.data?.message || "OTP verification failed");
     } finally {
       setLoading(false);
