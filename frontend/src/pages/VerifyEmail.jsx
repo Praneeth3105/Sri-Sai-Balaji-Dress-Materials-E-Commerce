@@ -84,7 +84,6 @@ const VerifyEmail = () => {
             {status.replace(/✅|❌/g, "").trim()}
           </h2>
 
-          {/* Helper subtext */}
           <p className="text-gray-400 text-sm font-serif mt-3">
             {isLoading && "This will just take a moment..."}
             {isSuccess && "Redirecting you to login..."}
