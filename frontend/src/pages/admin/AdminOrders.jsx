@@ -340,7 +340,6 @@ const AdminOrders = () => {
                   </p>
                 </div>
 
-                {/* PRODUCTS */}
                 <div className="mt-5">
                   <h3 className="font-bold text-gray-800 mb-3">Products</h3>
 
@@ -356,7 +355,6 @@ const AdminOrders = () => {
                           <span className="text-sm text-gray-700">
                             {product?.productName || "Product unavailable"}
                           </span>
-
                           <span className="text-sm font-semibold">
                             × {item.quantity}
                           </span>
@@ -368,7 +366,6 @@ const AdminOrders = () => {
                 <div className="mt-5 bg-orange-50 rounded-lg p-4">
                   <div className="flex justify-between">
                     <span className="font-bold">Total</span>
-
                     <span className="font-bold text-orange-600">
                       ₹{Number(order.amount || 0).toLocaleString("en-IN")}
                     </span>
@@ -376,7 +373,6 @@ const AdminOrders = () => {
                 </div>
                 <div className="flex items-center gap-2 mt-4 text-sm text-gray-500">
                   <CalendarDays className="w-4 h-4 text-orange-500" />
-
                   {order.createdAt
                     ? new Date(order.createdAt).toLocaleDateString("en-IN")
                     : "N/A"}
