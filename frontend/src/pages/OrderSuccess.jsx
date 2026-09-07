@@ -32,7 +32,6 @@ const OrderSuccess = () => {
           <h1 className="text-3xl sm:text-4xl font-bold font-serif text-gray-800 mt-7">
             Thank You For Your Order!
           </h1>
-
           <p className="text-gray-600 font-serif mt-4 leading-7">
             Your order has been placed successfully.
             <br />
