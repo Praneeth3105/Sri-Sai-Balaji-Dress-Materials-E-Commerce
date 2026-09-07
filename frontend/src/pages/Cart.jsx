@@ -19,7 +19,6 @@ const Cart = () => {
   const tax = subtotal * 0.05;
   const total = subtotal + shipping + tax;
   const API = "http://localhost:8000/api/v1/cart";
-
   const loadCart = async () => {
     try {
       const res = await axios.get(API, {
