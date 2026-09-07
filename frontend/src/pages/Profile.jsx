@@ -42,7 +42,6 @@ const Profile = () => {
     if (!selectedFile) {
       return;
     }
-
     setFile(selectedFile);
     const imageUrl = URL.createObjectURL(selectedFile);
     setProfileImage(imageUrl);
