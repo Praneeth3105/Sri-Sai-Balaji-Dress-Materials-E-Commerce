@@ -65,7 +65,6 @@ export const addToCart = async (req, res) => {
     if (!cart) {
       cart = new Cart({
         userId,
-
         items: [
           {
             productId: productId,
