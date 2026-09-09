@@ -13,8 +13,6 @@ const router = express.Router();
 // Anyone can submit a contact message
 router.post("/", submitContact);
 
-// ADMIN ONLY
-// Admin can see all contact messages
 router.get("/", isAuthenticated, isAdmin, getContactMessages);
 
 export default router;
