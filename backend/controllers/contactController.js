@@ -35,7 +35,6 @@ export const submitContact = async (req, res) => {
 export const getContactMessages = async (req, res) => {
   try {
     const messages = await Contact.find().sort({ createdAt: -1 });
-
     return res.status(200).json({
       success: true,
       messages,
