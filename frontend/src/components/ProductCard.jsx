@@ -13,19 +13,26 @@ const ProductCard = ({ product, loading }) => {
 
   const accessToken = localStorage.getItem("accessToken");
 
-  // --------------------------------------------------
+  // ==================================================
   // ADD TO CART
-  // --------------------------------------------------
+  // ==================================================
   const addToCart = async (productId) => {
+    if (!accessToken) {
+      toast.error("Please login first");
+      return;
+    }
+
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/v1/cart/add",
+        `${import.meta.env.VITE_URL}/api/v1/cart/add`,
         {
           productId,
+          quantity: 1,
         },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
         },
       );
@@ -33,14 +40,14 @@ const ProductCard = ({ product, loading }) => {
       console.log("Cart response:", res.data);
 
       if (res.data.success) {
-        toast.success("Product Added to Cart");
         dispatch(setCart(res.data.cart));
+        toast.success("Product Added to Cart");
       }
     } catch (error) {
       console.log("Add to cart error:", error);
 
       toast.error(
-        error.response?.data?.message || "Failed to add product to cart",
+        error?.response?.data?.message || "Failed to add product to cart",
       );
     }
   };
@@ -57,15 +64,14 @@ const ProductCard = ({ product, loading }) => {
           border: "1px solid #e8ded2",
         }}
       >
-        {/* Image */}
         <div className="aspect-[4/5] overflow-hidden">
           <Skeleton className="w-full h-full rounded-none bg-[#eee7df]" />
         </div>
 
-        {/* Details */}
         <div className="p-5 space-y-4">
-          <Skeleton className="w-4/5 h-5 bg-[#eee7df]" />
-          <Skeleton className="w-1/3 h-5 bg-[#eee7df]" />
+          <Skeleton className="w-3/4 h-4 bg-[#eee7df]" />
+          <Skeleton className="w-full h-6 bg-[#eee7df]" />
+          <Skeleton className="w-1/3 h-6 bg-[#eee7df]" />
           <Skeleton className="w-full h-11 rounded-full bg-[#eee7df]" />
         </div>
       </div>
@@ -95,7 +101,7 @@ const ProductCard = ({ product, loading }) => {
       }}
     >
       {/* ==================================================
-          IMAGE
+          PRODUCT IMAGE
       ================================================== */}
       <div
         className="relative aspect-[4/5] overflow-hidden cursor-pointer"
@@ -123,25 +129,25 @@ const ProductCard = ({ product, loading }) => {
           </div>
         )}
 
-        {/* Soft image overlay */}
+        {/* Image overlay */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to top, rgba(61,44,35,0.18), transparent 45%)",
+              "linear-gradient(to top, rgba(61,44,35,0.20), transparent 50%)",
           }}
         />
 
-        {/* View Product */}
+        {/* View Details */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
           <div
-            className="px-4 py-2 rounded-full backdrop-blur-md whitespace-nowrap"
+            className="px-5 py-2.5 rounded-full whitespace-nowrap backdrop-blur-md"
             style={{
-              backgroundColor: "rgba(255,253,249,0.92)",
+              backgroundColor: "rgba(255,253,249,0.94)",
               color: "#3d2c23",
               fontFamily: "DM Sans, sans-serif",
-              fontSize: "10px",
-              letterSpacing: "0.15em",
+              fontSize: "9px",
+              letterSpacing: "0.16em",
               textTransform: "uppercase",
             }}
           >
@@ -149,29 +155,29 @@ const ProductCard = ({ product, loading }) => {
           </div>
         </div>
 
-        {/* Corner Icon */}
+        {/* Top-right view icon */}
         <button
           type="button"
+          aria-label="View product"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/products/${product._id}`);
           }}
           className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-105"
           style={{
-            backgroundColor: "rgba(255,253,249,0.92)",
+            backgroundColor: "rgba(255,253,249,0.94)",
             color: "#3d2c23",
           }}
-          aria-label="View product"
         >
-          <ArrowUpRight size={16} strokeWidth={1.6} />
+          <ArrowUpRight size={16} strokeWidth={1.5} />
         </button>
       </div>
 
       {/* ==================================================
           PRODUCT DETAILS
       ================================================== */}
-      <div className="p-5">
-        {/* Small category label */}
+      <div className="px-5 pt-5 pb-5">
+        {/* Collection */}
         <p
           className="mb-2 text-[9px] uppercase tracking-[0.22em]"
           style={{
@@ -185,7 +191,7 @@ const ProductCard = ({ product, loading }) => {
         {/* Product Name */}
         <h2
           onClick={() => navigate(`/products/${product._id}`)}
-          className="text-[20px] leading-[1.1] cursor-pointer line-clamp-2 min-h-[44px] transition-colors duration-300"
+          className="text-[20px] leading-[1.08] cursor-pointer line-clamp-2 min-h-[44px] transition-colors duration-300"
           style={{
             fontFamily: "Cormorant Garamond, serif",
             fontWeight: 600,
@@ -201,11 +207,11 @@ const ProductCard = ({ product, loading }) => {
           {productName}
         </h2>
 
-        {/* Price + small decorative line */}
+        {/* Price */}
         <div className="flex items-end justify-between mt-4">
           <div>
             <p
-              className="text-[10px] uppercase tracking-[0.16em] mb-1"
+              className="text-[9px] uppercase tracking-[0.16em] mb-1"
               style={{
                 fontFamily: "DM Sans, sans-serif",
                 color: "#927d6d",
@@ -215,7 +221,7 @@ const ProductCard = ({ product, loading }) => {
             </p>
 
             <p
-              className="text-[22px]"
+              className="text-[23px] leading-none"
               style={{
                 fontFamily: "Cormorant Garamond, serif",
                 fontWeight: 600,
@@ -227,7 +233,7 @@ const ProductCard = ({ product, loading }) => {
           </div>
 
           <span
-            className="w-8 h-px mb-2"
+            className="w-8 h-px mb-1.5"
             style={{
               backgroundColor: "#c8aa75",
             }}
@@ -245,21 +251,23 @@ const ProductCard = ({ product, loading }) => {
             backgroundColor: "#3d2c23",
             color: "#fffdf9",
             fontFamily: "DM Sans, sans-serif",
-            fontSize: "11px",
-            letterSpacing: "0.13em",
+            fontSize: "10px",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "#a47c43";
+
             e.currentTarget.style.boxShadow =
               "0 8px 20px rgba(164,124,67,0.20)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "#3d2c23";
+
             e.currentTarget.style.boxShadow = "none";
           }}
         >
-          <ShoppingBag size={15} strokeWidth={1.7} />
+          <ShoppingBag size={15} strokeWidth={1.6} />
           Add to Cart
         </button>
       </div>

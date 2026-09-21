@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { Minus, Plus, ShoppingBag, ShieldCheck } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
@@ -14,6 +13,9 @@ const ProductDesc = ({ product }) => {
 
   const accessToken = localStorage.getItem("accessToken");
 
+  // ==================================================
+  // QUANTITY
+  // ==================================================
   const handleIncrease = () => {
     setQuantity((prev) => prev + 1);
   };
@@ -28,6 +30,9 @@ const ProductDesc = ({ product }) => {
     });
   };
 
+  // ==================================================
+  // ADD TO CART
+  // ==================================================
   const handleAddToCart = async () => {
     if (!product?._id) {
       toast.error("Product not found");
@@ -46,8 +51,6 @@ const ProductDesc = ({ product }) => {
         `${import.meta.env.VITE_URL}/api/v1/cart/add`,
         {
           productId: product._id,
-
-          // IMPORTANT
           quantity: quantity,
         },
         {
@@ -65,7 +68,6 @@ const ProductDesc = ({ product }) => {
           `${quantity} ${quantity === 1 ? "item" : "items"} added to cart`,
         );
 
-        // Reset selected quantity after adding
         setQuantity(1);
       }
     } catch (error) {
@@ -79,84 +81,335 @@ const ProductDesc = ({ product }) => {
     }
   };
 
+  // ==================================================
+  // PRODUCT NOT FOUND
+  // ==================================================
   if (!product) {
-    return <div className="text-red-500 font-serif">Product not found</div>;
+    return (
+      <div
+        className="py-10"
+        style={{
+          fontFamily: "DM Sans, sans-serif",
+          color: "#8b7565",
+        }}
+      >
+        Product not found
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6 font-serif">
-      {/* Product Name */}
+    <div
+      className="space-y-7"
+      style={{
+        fontFamily: "DM Sans, sans-serif",
+      }}
+    >
+      {/* ==================================================
+          BRAND LABEL
+      ================================================== */}
+      <div className="flex items-center gap-3">
+        <span
+          className="w-8 h-px"
+          style={{
+            backgroundColor: "#c8aa75",
+          }}
+        />
 
+        <span
+          className="text-[10px] uppercase tracking-[0.3em]"
+          style={{
+            color: "#a47c43",
+          }}
+        >
+          Sri Sai Balaji
+        </span>
+      </div>
+
+      {/* ==================================================
+          PRODUCT NAME
+      ================================================== */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-800">
+        <h1
+          className="text-4xl sm:text-5xl lg:text-6xl leading-[0.95]"
+          style={{
+            fontFamily: "Cormorant Garamond, serif",
+            fontWeight: 500,
+            color: "#3d2c23",
+          }}
+        >
           {product.productName}
         </h1>
       </div>
 
-      {/* Price */}
-
-      <div>
-        <p className="text-3xl font-bold text-orange-600">
+      {/* ==================================================
+          PRICE
+      ================================================== */}
+      <div
+        className="pb-6 border-b"
+        style={{
+          borderColor: "#e5d9cc",
+        }}
+      >
+        <p
+          className="text-3xl sm:text-4xl"
+          style={{
+            fontFamily: "Cormorant Garamond, serif",
+            fontWeight: 600,
+            color: "#a47c43",
+          }}
+        >
           ₹{product.productPrice?.toLocaleString("en-IN")}
+        </p>
+
+        <p
+          className="mt-1 text-[10px] uppercase tracking-[0.15em]"
+          style={{
+            color: "#9b8878",
+          }}
+        >
+          Inclusive of listed price
         </p>
       </div>
 
-      {/* Description */}
-
+      {/* ==================================================
+          DESCRIPTION
+      ================================================== */}
       {product.description && (
         <div>
-          <h2 className="text-lg font-semibold mb-2">Description</h2>
+          <h2
+            className="text-xl mb-3"
+            style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontWeight: 600,
+              color: "#3d2c23",
+            }}
+          >
+            About this piece
+          </h2>
 
-          <p className="text-gray-600 leading-7">{product.description}</p>
+          <p
+            className="text-sm leading-7"
+            style={{
+              color: "#78675c",
+            }}
+          >
+            {product.description}
+          </p>
         </div>
       )}
 
-      {/* Quantity */}
-
+      {/* ==================================================
+          QUANTITY
+      ================================================== */}
       <div>
-        <h2 className="text-lg font-semibold mb-3">Quantity</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2
+            className="text-xl"
+            style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontWeight: 600,
+              color: "#3d2c23",
+            }}
+          >
+            Quantity
+          </h2>
 
-        <div className="flex items-center gap-4">
-          <Button
+          <span
+            className="text-[10px] uppercase tracking-[0.16em]"
+            style={{
+              color: "#9b8878",
+            }}
+          >
+            Select amount
+          </span>
+        </div>
+
+        <div
+          className="inline-flex items-center rounded-full p-1"
+          style={{
+            backgroundColor: "#f3ece3",
+            border: "1px solid #e1d5c7",
+          }}
+        >
+          {/* Minus */}
+          <button
             type="button"
-            variant="outline"
             disabled={quantity <= 1 || loading}
             onClick={handleDecrease}
-            className="w-10 h-10 cursor-pointer"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-35 cursor-pointer disabled:cursor-not-allowed"
+            style={{
+              color: "#3d2c23",
+            }}
+            onMouseEnter={(e) => {
+              if (quantity > 1 && !loading) {
+                e.currentTarget.style.backgroundColor = "#fffdf9";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
           >
-            <Minus className="w-4 h-4" />
-          </Button>
+            <Minus size={16} strokeWidth={1.6} />
+          </button>
 
-          <span className="text-xl font-semibold w-8 text-center">
+          {/* Quantity */}
+          <span
+            className="w-12 text-center text-base"
+            style={{
+              fontWeight: 500,
+              color: "#3d2c23",
+            }}
+          >
             {quantity}
           </span>
 
-          <Button
+          {/* Plus */}
+          <button
             type="button"
-            variant="outline"
             disabled={loading}
             onClick={handleIncrease}
-            className="w-10 h-10 cursor-pointer"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
+            style={{
+              color: "#3d2c23",
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = "#fffdf9";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
           >
-            <Plus className="w-4 h-4" />
-          </Button>
+            <Plus size={16} strokeWidth={1.6} />
+          </button>
         </div>
       </div>
 
-      {/* Add To Cart */}
-
-      <Button
+      {/* ==================================================
+          ADD TO CART
+      ================================================== */}
+      <button
         type="button"
         disabled={loading}
         onClick={handleAddToCart}
-        className="w-full sm:w-auto h-12 px-8 bg-orange-600 hover:bg-orange-700 text-white font-semibold cursor-pointer"
+        className="w-full h-14 rounded-full flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        style={{
+          backgroundColor: "#3d2c23",
+          color: "#fffdf9",
+          fontFamily: "DM Sans, sans-serif",
+          fontSize: "11px",
+          letterSpacing: "0.15em",
+          textTransform: "uppercase",
+        }}
+        onMouseEnter={(e) => {
+          if (!loading) {
+            e.currentTarget.style.backgroundColor = "#a47c43";
+            e.currentTarget.style.boxShadow =
+              "0 12px 25px rgba(164,124,67,0.20)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#3d2c23";
+          e.currentTarget.style.boxShadow = "none";
+        }}
       >
-        <ShoppingCart className="w-5 h-5 mr-2" />
+        <ShoppingBag size={18} strokeWidth={1.6} />
 
         {loading
           ? "Adding..."
           : `Add ${quantity} ${quantity === 1 ? "Item" : "Items"} to Cart`}
-      </Button>
+      </button>
+
+      {/* ==================================================
+          SERVICE PROMISE
+      ================================================== */}
+      <div
+        className="rounded-2xl p-5"
+        style={{
+          backgroundColor: "#f4ede4",
+          border: "1px solid #e5d9cc",
+        }}
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            style={{
+              backgroundColor: "#eadbc9",
+              color: "#a47c43",
+            }}
+          >
+            <ShieldCheck size={17} strokeWidth={1.5} />
+          </div>
+
+          <div>
+            <p
+              className="text-sm font-medium"
+              style={{
+                color: "#3d2c23",
+              }}
+            >
+              Shop with confidence
+            </p>
+
+            <p
+              className="text-xs leading-5 mt-1"
+              style={{
+                color: "#806f61",
+              }}
+            >
+              Carefully selected products with customer-focused service from Sri
+              Sai Balaji Dress Materials.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ==================================================
+          SMALL DETAILS
+      ================================================== */}
+      <div className="grid grid-cols-2 gap-4 pt-2">
+        <div>
+          <p
+            className="text-[9px] uppercase tracking-[0.18em] mb-1"
+            style={{
+              color: "#a08d7d",
+            }}
+          >
+            Collection
+          </p>
+
+          <p
+            className="text-sm"
+            style={{
+              color: "#3d2c23",
+            }}
+          >
+            Sri Sai Balaji
+          </p>
+        </div>
+
+        <div>
+          <p
+            className="text-[9px] uppercase tracking-[0.18em] mb-1"
+            style={{
+              color: "#a08d7d",
+            }}
+          >
+            Availability
+          </p>
+
+          <p
+            className="text-sm"
+            style={{
+              color: "#3d2c23",
+            }}
+          >
+            In Stock
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
