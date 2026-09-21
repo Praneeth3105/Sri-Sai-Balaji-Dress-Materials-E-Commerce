@@ -1,16 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Loader2, LockKeyhole } from "lucide-react";
+import { Eye, EyeOff, Loader2, LockKeyhole, ArrowRight } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
@@ -18,17 +7,23 @@ import axios from "axios";
 const ResetPassword = () => {
   const { email } = useParams();
   const decodedEmail = decodeURIComponent(email);
+
   const [showPassword, setShowPassword] = useState(false);
+
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
   });
 
   const navigate = useNavigate();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -37,10 +32,14 @@ const ResetPassword = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+
     const resetToken = sessionStorage.getItem("passwordResetToken");
+
     const resetEmail = sessionStorage.getItem("passwordResetEmail");
+
     if (!resetToken || resetEmail !== decodedEmail) {
       toast.error("Password reset session expired. Please request a new OTP.");
+
       navigate("/forgot-password");
       return;
     }
@@ -59,7 +58,7 @@ const ResetPassword = () => {
       setLoading(true);
 
       const res = await axios.post(
-        `http://localhost:8000/api/v1/user/change-password/${encodeURIComponent(
+        `${import.meta.env.VITE_URL}/api/v1/user/change-password/${encodeURIComponent(
           decodedEmail,
         )}`,
         {
@@ -76,8 +75,11 @@ const ResetPassword = () => {
 
       if (res.data.success) {
         toast.success(res.data.message);
+
         sessionStorage.removeItem("passwordResetToken");
+
         sessionStorage.removeItem("passwordResetEmail");
+
         navigate("/login");
       }
     } catch (error) {
@@ -92,109 +94,179 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="font-serif min-h-screen flex justify-center items-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md font-serif ">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-3">
-            <div className="p-3 rounded-full bg-gray-100">
-              <LockKeyhole className="w-7 h-7" />
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-24 relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, #fbf8f2 0%, #f5eee5 50%, #eee2d5 100%)",
+        fontFamily: "DM Sans, sans-serif",
+      }}
+    >
+      <div
+        className="relative z-10 w-full max-w-md rounded-[2rem] p-8 sm:p-10"
+        style={{
+          backgroundColor: "rgba(255,253,249,0.93)",
+          border: "1px solid #dfd1c0",
+          boxShadow: "0 25px 70px rgba(61,44,35,0.10)",
+        }}
+      >
+        <div className="text-center mb-8">
+          <div
+            className="mx-auto mb-5 w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: "#eadbc9",
+              color: "#a47c43",
+            }}
+          >
+            <LockKeyhole size={27} strokeWidth={1.5} />
+          </div>
+
+          <p
+            className="text-[10px] uppercase tracking-[0.3em] mb-3"
+            style={{ color: "#a47c43" }}
+          >
+            Secure Account
+          </p>
+
+          <h1
+            className="text-4xl"
+            style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontWeight: 500,
+              color: "#3d2c23",
+            }}
+          >
+            Reset Password
+          </h1>
+
+          <p className="mt-3 text-sm leading-6" style={{ color: "#806f61" }}>
+            Create a new password for
+          </p>
+
+          <p
+            className="mt-1 text-sm font-medium break-all"
+            style={{ color: "#3d2c23" }}
+          >
+            {decodedEmail}
+          </p>
+        </div>
+
+        <form onSubmit={submitHandler} className="space-y-5">
+          {/* New password */}
+          <div>
+            <label
+              htmlFor="newPassword"
+              className="block text-[10px] uppercase tracking-[0.18em] mb-2"
+              style={{ color: "#6f5b4d" }}
+            >
+              New Password
+            </label>
+
+            <div className="relative">
+              <input
+                id="newPassword"
+                name="newPassword"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter new password"
+                value={formData.newPassword}
+                onChange={handleChange}
+                className="w-full h-12 px-4 pr-12 rounded-xl outline-none"
+                required
+                style={{
+                  backgroundColor: "#fffdf9",
+                  border: "1px solid #dfd1c0",
+                  color: "#3d2c23",
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 -translate-y-1/2"
+                style={{ color: "#927d6d" }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
-          <CardTitle className="font-serif ">Reset Password</CardTitle>
-          <CardDescription>
-            Create a new password for
-            <br />
-            <span className="font-medium text-black">{decodedEmail}</span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submitHandler} className="space-y-5">
-            <div className="grid gap-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <div className="relative">
-                <Input
-                  id="newPassword"
-                  name="newPassword"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter new password"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  className="pr-12"
-                  required
-                />
 
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm new password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="pr-12"
-                  required
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <p className="text-xs text-gray-500">
-              Password must contain at least 6 characters.
-            </p>
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-black hover:bg-gray-700"
+          {/* Confirm */}
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-[10px] uppercase tracking-[0.18em] mb-2"
+              style={{ color: "#6f5b4d" }}
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Updating Password...
-                </>
-              ) : (
-                "Reset Password"
-              )}
-            </Button>
-          </form>
-        </CardContent>
+              Confirm Password
+            </label>
 
-        <CardFooter className="justify-center">
-          <p className="text-sm text-gray-600">
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm new password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full h-12 px-4 pr-12 rounded-xl outline-none"
+                required
+                style={{
+                  backgroundColor: "#fffdf9",
+                  border: "1px solid #dfd1c0",
+                  color: "#3d2c23",
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 -translate-y-1/2"
+                style={{ color: "#927d6d" }}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <p className="text-xs" style={{ color: "#927d6d" }}>
+            Password must contain at least 6 characters.
+          </p>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-12 rounded-full flex items-center justify-center gap-2 disabled:opacity-60"
+            style={{
+              backgroundColor: "#3d2c23",
+              color: "#fffdf9",
+              fontSize: "11px",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+            }}
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Updating Password...
+              </>
+            ) : (
+              <>
+                Reset Password
+                <ArrowRight size={16} />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-7 text-center">
+          <p className="text-sm" style={{ color: "#806f61" }}>
             Remember your password?{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
+            <Link to="/login" style={{ color: "#a47c43" }}>
               Login
             </Link>
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
