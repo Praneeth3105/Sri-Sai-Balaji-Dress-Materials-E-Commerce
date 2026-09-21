@@ -1,347 +1,481 @@
-
 import React, { useEffect, useRef, useState } from "react";
+
 import { Link } from "react-router-dom";
-import {
-  FaFacebook,
-  FaInstagram,
-  FaPinterest,
-} from "react-icons/fa";
+
+import { FaFacebook, FaInstagram, FaPinterest } from "react-icons/fa";
+
+import { ArrowUp, Mail, MapPin, Phone, ArrowRight } from "lucide-react";
 
 const styles = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
 
-.foot-root {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+.footer-root {
+  font-family: 'DM Sans', sans-serif;
 }
 
-.foot-display {
-  font-family: 'Playfair Display', Georgia, serif;
+.footer-serif {
+  font-family: 'Cormorant Garamond', Georgia, serif;
 }
 
-.foot-drift {
-  animation: foot-drift 18s ease-in-out infinite;
+/* reveal */
+
+.footer-reveal {
+  opacity: 0;
+  transform: translateY(25px);
 }
 
-.foot-drift-b {
-  animation: foot-drift 22s ease-in-out infinite reverse;
+.footer-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-@keyframes foot-drift {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
+/* social */
 
-  50% {
-    transform: translate3d(50px, -30px, 0) scale(1.15);
-  }
+.footer-social {
+  transition:
+    transform .3s ease,
+    background .3s ease,
+    color .3s ease,
+    border-color .3s ease;
 }
 
-.foot-line {
-  background-size: 200% auto;
-  animation: foot-line 6s linear infinite;
+.footer-social:hover {
+  transform: translateY(-4px);
 }
 
-@keyframes foot-line {
-  to {
-    background-position: 200% center;
-  }
-}
+/* newsletter button */
 
-.foot-shine {
+.footer-submit {
   position: relative;
   overflow: hidden;
 }
 
-.foot-shine::after {
+.footer-submit::after {
   content: "";
   position: absolute;
   top: 0;
-  left: -75%;
-  width: 50%;
+  left: -100%;
+  width: 55%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.5),
+      transparent
+    );
+
   transform: skewX(-20deg);
-  transition: left 0.7s ease;
+  transition: left .7s ease;
 }
 
-.foot-shine:hover::after {
-  left: 130%;
+.footer-submit:hover::after {
+  left: 140%;
 }
+
+/* background ornament */
+
+.footer-orbit {
+  animation: footerOrbit 10s ease-in-out infinite;
+}
+
+@keyframes footerOrbit {
+  0%,100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* links */
+
+.footer-link {
+  position: relative;
+  transition:
+    color .3s ease,
+    transform .3s ease;
+}
+
+.footer-link:hover {
+  color: #a47c43;
+  transform: translateX(4px);
+}
+
+/* reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
-  .foot-root * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .footer-root * {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
   }
 }
 `;
 
-// Reveal-on-scroll hook
 const useReveal = () => {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
+    const element = ref.current;
 
-    if (!el) return;
+    if (!element) return;
 
     if (!("IntersectionObserver" in window)) {
       setVisible(true);
       return;
     }
 
-    const io = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
-          io.disconnect();
+          observer.disconnect();
         }
       },
       {
         threshold: 0.1,
-      }
+      },
     );
 
-    io.observe(el);
+    observer.observe(element);
 
-    return () => io.disconnect();
+    return () => observer.disconnect();
   }, []);
 
   return [ref, visible];
 };
 
-const linkClass =
-  "group inline-flex items-center gap-2 text-white/70 transition-all duration-300 hover:translate-x-1 hover:text-amber-300";
-
-const Dash = () => (
-  <span className="h-px w-0 bg-amber-300 transition-all duration-300 group-hover:w-4" />
-);
-
 const Footer = () => {
   const [ref, visible] = useReveal();
 
-  const reveal = (i) => ({
+  const reveal = (index) => ({
     className: `transition-all duration-1000 ease-out ${
-      visible
-        ? "opacity-100 translate-y-0"
-        : "opacity-0 translate-y-10"
+      visible ? "footer-visible" : "footer-reveal"
     }`,
     style: {
-      transitionDelay: `${i * 130}ms`,
+      transitionDelay: `${index * 130}ms`,
     },
   });
+
+  const scrollTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <footer
       ref={ref}
-      className="foot-root relative overflow-hidden bg-gradient-to-b from-[#160828] via-[#12061f] to-[#0c0316] text-white/70"
+      className="footer-root relative overflow-hidden bg-[#f4efe7] text-[#65564c]"
     >
       <style>{styles}</style>
 
-      {/* Animated top line */}
-      <div className="foot-line absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-300 to-transparent [background-image:linear-gradient(90deg,#160828,#fcd34d,#e879f9,#fcd34d,#160828)]" />
+      {/* --------------------------------
+          Decorative background
+      -------------------------------- */}
 
-      {/* Background blobs */}
-      <div className="foot-drift pointer-events-none absolute -top-24 left-[5%] h-80 w-80 rounded-full bg-fuchsia-600/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#eadbc9]/50 blur-3xl" />
 
-      <div className="foot-drift-b pointer-events-none absolute bottom-0 right-[5%] h-96 w-96 rounded-full bg-amber-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-[#e9dfc9]/50 blur-3xl" />
 
-      {/* Big faint watermark */}
-      <div className="foot-display pointer-events-none select-none absolute inset-x-0 -bottom-3 overflow-hidden whitespace-nowrap text-center text-[11vw] font-bold leading-none text-transparent bg-clip-text bg-gradient-to-b from-white/[0.09] to-transparent">
-        Sri Sai Balaji
+      <div className="footer-orbit pointer-events-none absolute right-[15%] top-20 h-20 w-20 rounded-full border border-[#c5a56d]/20" />
+
+      {/* --------------------------------
+          Top brand statement
+      -------------------------------- */}
+
+      <div className="relative border-b border-[#ddd2c4]">
+        <div className="mx-auto max-w-7xl px-6 py-14 text-center sm:py-16">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[.3em] text-[#a47c43]">
+            Sri Sai Balaji Dress Materials
+          </p>
+
+          <h2 className="footer-serif text-4xl font-semibold text-[#3c2c23] sm:text-5xl">
+            Style that feels like you.
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#7d6e63]">
+            Beautiful fabrics, thoughtful collections and everyday elegance —
+            carefully selected for you.
+          </p>
+
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <span className="h-px w-12 bg-[#c8aa75]" />
+            <span className="text-[#a47c43]">✦</span>
+            <span className="h-px w-12 bg-[#c8aa75]" />
+          </div>
+        </div>
       </div>
 
-      {/* Main Footer */}
-      <div className="relative max-w-6xl mx-auto px-6 pt-14 pb-16 md:pb-24">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* --------------------------------
+          Main footer
+      -------------------------------- */}
 
-          {/* Store Information */}
+      <div className="relative mx-auto max-w-7xl px-6 py-14 sm:py-16">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.2fr_.8fr_.8fr_1.2fr]">
+          {/* --------------------------------
+              Brand
+          -------------------------------- */}
+
           <div {...reveal(0)}>
             <Link to="/" className="inline-block">
-              <div className="mb-4 w-fit rounded-2xl border border-white/20 bg-white/90 p-2 shadow-lg shadow-fuchsia-500/20 transition-all duration-500 hover:-rotate-6 hover:scale-110 hover:shadow-fuchsia-500/50">
+              <div className="rounded-2xl border border-[#d6c7b5] bg-white p-2 shadow-[0_12px_30px_-20px_rgba(70,50,35,.35)] transition-all duration-300 hover:-translate-y-1">
                 <img
                   src="/Shop.png"
                   alt="Sri Sai Balaji Dress Materials"
-                  className="w-16"
+                  className="h-16 w-16 object-contain"
                 />
               </div>
             </Link>
 
-            <p className="text-sm leading-6 text-white/60">
-              Discover beautiful fashion collections at the best prices.
-              Quality products, trusted service, and styles you'll love.
-            </p>
-
-            <p className="mt-3 text-sm text-white/60">
-              Shop No. 311, Panja Center,{" "}
-              <span>Krishnaveni Cloth Market</span>,
-              Mahanthi Puram, Vinchipeta, Vijayawada,
-              Andhra Pradesh 520001
-            </p>
-
-            <p className="mt-3 text-sm text-white/60">
-              Email: umamuvvala72@gmail.com
-            </p>
-
-            <p className="mt-3 text-sm text-white/60">
-              Phone: +91 9491955032
-            </p>
-          </div>
-
-          {/* Customer Service */}
-          <div {...reveal(1)}>
-            <h3 className="foot-display text-xl font-semibold text-white">
-              Customer Service
+            <h3 className="footer-serif mt-5 text-2xl font-semibold text-[#3c2c23]">
+              Sri Sai Balaji
             </h3>
 
-            <div className="mt-2 h-[3px] w-10 rounded-full bg-gradient-to-r from-amber-300 to-fuchsia-400" />
+            <p className="mt-1 text-[9px] font-semibold uppercase tracking-[.25em] text-[#a47c43]">
+              Dress Materials
+            </p>
 
-            <ul className="mt-5 space-y-3 text-sm">
+            <p className="mt-5 max-w-sm text-sm leading-7 text-[#78695e]">
+              Discover beautiful dress materials, sarees, leggings and everyday
+              fashion at prices you'll love.
+            </p>
 
-              <li>
-                <Link to="/contact" className={linkClass}>
-                  <Dash />
-                  Contact Us
-                </Link>
-              </li>
+            {/* Contact */}
 
-              <li>
-                <Link to="/shipping" className={linkClass}>
-                  <Dash />
-                  Shipping & Returns
-                </Link>
-              </li>
+            <div className="mt-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#a47c43]" />
 
-              <li>
-                <Link to="/faq" className={linkClass}>
-                  <Dash />
-                  FAQs
-                </Link>
-              </li>
+                <p className="text-xs leading-6 text-[#78695e]">
+                  Shop No. 311, Panja Center, Krishnaveni Cloth Market, Mahanthi
+                  Puram, Vinchipeta, Vijayawada, Andhra Pradesh 520001
+                </p>
+              </div>
 
-              <li>
-                <Link to="/orders" className={linkClass}>
-                  <Dash />
-                  Order Tracking
-                </Link>
-              </li>
+              <div className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-[#a47c43]" />
 
-              <li>
-                <Link to="/size-guide" className={linkClass}>
-                  <Dash />
-                  Size Guide
-                </Link>
-              </li>
+                <p className="text-xs text-[#78695e]">umamuvvala72@gmail.com</p>
+              </div>
 
-            </ul>
-          </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-[#a47c43]" />
 
-          {/* Social Media */}
-          <div {...reveal(2)}>
-            <h3 className="foot-display text-xl font-semibold text-white">
-              Follow Us
-            </h3>
-
-            <div className="mt-2 h-[3px] w-10 rounded-full bg-gradient-to-r from-amber-300 to-fuchsia-400" />
-
-            <div className="flex items-center gap-4 mt-6">
-
-              {/* Facebook */}
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:scale-110 hover:border-blue-400/60 hover:bg-blue-500/20 hover:text-blue-400 hover:shadow-lg hover:shadow-blue-500/30"
-              >
-                <FaFacebook size={20} />
-              </a>
-
-              {/* Instagram */}
-              <a
-                href="#"
-                aria-label="Instagram"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:scale-110 hover:border-pink-400/60 hover:bg-pink-500/20 hover:text-pink-400 hover:shadow-lg hover:shadow-pink-500/30"
-              >
-                <FaInstagram size={20} />
-              </a>
-
-              {/* Pinterest */}
-              <a
-                href="#"
-                aria-label="Pinterest"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:scale-110 hover:border-red-400/60 hover:bg-red-500/20 hover:text-red-400 hover:shadow-lg hover:shadow-red-500/30"
-              >
-                <FaPinterest size={20} />
-              </a>
-
+                <p className="text-xs text-[#78695e]">+91 9491955032</p>
+              </div>
             </div>
           </div>
 
-          {/* Newsletter */}
-          <div {...reveal(3)}>
-            <h3 className="foot-display text-xl font-semibold text-white">
-              Stay in the Loop
-            </h3>
+          {/* --------------------------------
+              Customer care
+          -------------------------------- */}
 
-            <div className="mt-2 h-[3px] w-10 rounded-full bg-gradient-to-r from-amber-300 to-fuchsia-400" />
-
-            <p className="mt-4 text-sm text-white/60 leading-6">
-              Subscribe to get special offers, new collections, and
-              exclusive deals.
+          <div {...reveal(1)}>
+            <p className="text-[10px] font-semibold uppercase tracking-[.25em] text-[#a47c43]">
+              Help
             </p>
 
-            <form className="mt-5 flex rounded-full border border-white/20 bg-white/10 p-1 backdrop-blur-xl transition-all duration-300 focus-within:border-amber-300/70 focus-within:shadow-[0_0_30px_-5px_rgba(252,211,77,0.4)]">
+            <h3 className="footer-serif mt-2 text-2xl font-semibold text-[#3c2c23]">
+              Customer Care
+            </h3>
 
+            <div className="mt-5 space-y-3">
+              <Link
+                to="/contact"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Contact Us
+              </Link>
+
+              <Link
+                to="/shipping"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Shipping & Returns
+              </Link>
+
+              <Link
+                to="/faq"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                FAQs
+              </Link>
+
+              <Link
+                to="/orders"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Order Tracking
+              </Link>
+
+              <Link
+                to="/size-guide"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Size Guide
+              </Link>
+            </div>
+          </div>
+
+          {/* --------------------------------
+              Explore
+          -------------------------------- */}
+
+          <div {...reveal(2)}>
+            <p className="text-[10px] font-semibold uppercase tracking-[.25em] text-[#a47c43]">
+              Discover
+            </p>
+
+            <h3 className="footer-serif mt-2 text-2xl font-semibold text-[#3c2c23]">
+              Explore
+            </h3>
+
+            <div className="mt-5 space-y-3">
+              <Link
+                to="/products"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                All Collections
+              </Link>
+
+              <Link
+                to="/products"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                New Arrivals
+              </Link>
+
+              <Link
+                to="/products"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Best Sellers
+              </Link>
+
+              <Link
+                to="/about"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Our Story
+              </Link>
+
+              <Link
+                to="/contact"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Visit Us
+              </Link>
+            </div>
+          </div>
+
+          {/* --------------------------------
+              Newsletter
+          -------------------------------- */}
+
+          <div {...reveal(3)}>
+            <p className="text-[10px] font-semibold uppercase tracking-[.25em] text-[#a47c43]">
+              Stay Connected
+            </p>
+
+            <h3 className="footer-serif mt-2 text-2xl font-semibold text-[#3c2c23]">
+              Be the first to know.
+            </h3>
+
+            <p className="mt-4 text-sm leading-7 text-[#78695e]">
+              Get updates about new collections, special offers and beautiful
+              arrivals.
+            </p>
+
+            <form
+              className="mt-6 flex overflow-hidden rounded-full border border-[#d3c4b2] bg-white p-1.5 shadow-sm"
+              onSubmit={(e) => e.preventDefault()}
+            >
               <input
                 type="email"
+                required
                 placeholder="Your email address"
-                className="w-full min-w-0 bg-transparent px-4 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none"
+                className="min-w-0 flex-1 bg-transparent px-4 text-sm text-[#4b3a30] outline-none placeholder:text-[#a69a90]"
               />
 
               <button
                 type="submit"
-                className="foot-shine rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 px-5 py-2 text-sm font-semibold text-gray-900 cursor-pointer shadow-lg shadow-amber-400/30 transition-all duration-300 hover:scale-105 hover:shadow-amber-400/60"
+                className="footer-submit flex h-10 items-center gap-2 rounded-full bg-[#3d2c23] px-5 text-xs font-semibold text-white transition-all duration-300 hover:bg-[#4c372c]"
               >
-                Subscribe
+                Join
+                <ArrowRight className="h-3.5 w-3.5" />
               </button>
-
             </form>
+
+            {/* Social */}
+
+            <div className="mt-7">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[.2em] text-[#a47c43]">
+                Follow our journey
+              </p>
+
+              <div className="flex gap-3">
+                <a
+                  href="#"
+                  aria-label="Facebook"
+                  className="footer-social flex h-10 w-10 items-center justify-center rounded-full border border-[#d4c5b4] bg-white text-[#76675c] hover:border-[#b99a65] hover:bg-[#f4eadc] hover:text-[#96703e]"
+                >
+                  <FaFacebook size={17} />
+                </a>
+
+                <a
+                  href="#"
+                  aria-label="Instagram"
+                  className="footer-social flex h-10 w-10 items-center justify-center rounded-full border border-[#d4c5b4] bg-white text-[#76675c] hover:border-[#b99a65] hover:bg-[#f4eadc] hover:text-[#96703e]"
+                >
+                  <FaInstagram size={17} />
+                </a>
+
+                <a
+                  href="#"
+                  aria-label="Pinterest"
+                  className="footer-social flex h-10 w-10 items-center justify-center rounded-full border border-[#d4c5b4] bg-white text-[#76675c] hover:border-[#b99a65] hover:bg-[#f4eadc] hover:text-[#96703e]"
+                >
+                  <FaPinterest size={17} />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom Section */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-center text-sm text-white/50 sm:flex-row">
+      {/* --------------------------------
+          Bottom bar
+      -------------------------------- */}
 
-          <p>
-            &copy; {new Date().getFullYear()}{" "}
-            <span className="text-amber-300 font-semibold">
+      <div className="border-t border-[#ddd2c4]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-5 text-center sm:flex-row sm:text-left">
+          <p className="text-[11px] text-[#8b7c70]">
+            © {new Date().getFullYear()}{" "}
+            <span className="font-semibold text-[#695446]">
               Sri Sai Balaji Dress Materials
             </span>
             . All rights reserved.
           </p>
 
-          <button
-            type="button"
-            aria-label="Back to top"
-            onClick={() =>
-              window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-              })
-            }
-            className="group flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 backdrop-blur-md cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/70 hover:text-amber-300"
-          >
-            <span className="transition-transform duration-300 group-hover:-translate-y-0.5">
-              ↑
+          <div className="flex items-center gap-5">
+            <span className="text-[10px] uppercase tracking-[.15em] text-[#a0958b]">
+              Made with care
             </span>
-          </button>
 
+            <button
+              type="button"
+              aria-label="Back to top"
+              onClick={scrollTop}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d4c5b4] bg-white text-[#765f4d] transition-all duration-300 hover:-translate-y-1 hover:border-[#b99a65] hover:bg-[#f5eadc]"
+            >
+              <ArrowUp className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </footer>
@@ -349,4 +483,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
