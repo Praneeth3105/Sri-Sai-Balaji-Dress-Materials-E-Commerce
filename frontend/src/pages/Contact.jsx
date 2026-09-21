@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { FaMapMarkerAlt, FaPhoneAlt, FaRegClock } from "react-icons/fa";
+import {
+  ArrowRight,
+  Clock3,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+} from "lucide-react";
 
 const Contact = () => {
   const [form, setForm] = useState({
@@ -61,175 +68,288 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-100 via-amber-50 to-white">
-      {/* Hero */}
+    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028]">
+      {/* ================= HERO ================= */}
+      <section className="relative overflow-hidden px-6 pt-28 pb-16 md:pt-36 md:pb-20">
+        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#e6d1b5]/40 blur-3xl" />
+        <div className="absolute top-32 -left-32 w-72 h-72 rounded-full bg-[#ead6d0]/30 blur-3xl" />
 
-      <section className="px-6 pt-16 pb-10 text-center">
-        <p className="text-orange-600 font-semibold tracking-widest uppercase text-sm mb-3">
-          We'd love to hear from you
-        </p>
-
-        <h1 className="font-serif text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-          Get In Touch
-        </h1>
-
-        <p className="text-slate-600 max-w-xl mx-auto">
-          Questions about an order, fabric availability, or bulk pricing? Reach
-          out — we usually reply the same day.
-        </p>
-      </section>
-
-      {/* Content */}
-
-      <section className="px-6 pb-20 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Store Details */}
-
-        <div className="bg-white/70 backdrop-blur-md border border-orange-100 rounded-2xl shadow-lg p-8 space-y-6">
-          <h2 className="font-serif text-2xl font-bold text-slate-900">
-            Visit The Store
-          </h2>
-
-          {/* Address */}
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 flex-shrink-0 rounded-full bg-orange-100 flex items-center justify-center">
-              <FaMapMarkerAlt className="text-orange-600" size={18} />
-            </div>
-            <div>
-              <p className="font-semibold text-slate-800">Address</p>
-              <p className="text-slate-600 text-sm leading-relaxed mt-1">
-                Shop No. 311, Panja Center, Krishnaveni Cloth Market,
-                <br />
-                Mahanthi Puram, Vinchipeta, Vijayawada,
-                <br />
-                Andhra Pradesh 520001
-              </p>
-              <a
-                href="https://maps.app.goo.gl/Wqsvcj6JXR8rydcW9"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-2 text-sm font-medium text-orange-600 hover:text-orange-700 underline underline-offset-2"
-              >
-                View on Google Maps →
-              </a>
-            </div>
-          </div>
-
-          {/* Phone */}
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 flex-shrink-0 rounded-full bg-orange-100 flex items-center justify-center">
-              <FaPhoneAlt className="text-orange-600" size={16} />
-            </div>
-            <div>
-              <p className="font-semibold text-slate-800">Phone</p>
-              <a
-                href="tel:+919491955032"
-                className="text-slate-600 text-sm hover:text-orange-600"
-              >
-                +91 94919 55032
-              </a>
-            </div>
-          </div>
-
-          {/* Store Hours */}
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 flex-shrink-0 rounded-full bg-orange-100 flex items-center justify-center">
-              <FaRegClock className="text-orange-600" size={18} />
-            </div>
-            <div>
-              <p className="font-semibold text-slate-800">Store Hours</p>
-              <p className="text-slate-600 text-sm">
-                Mon – Sat: 10:00 AM – 8:30 PM
-                <br />
-                Sunday: 11:00 AM – 2:00 PM
-              </p>
-            </div>
-          </div>
-
-          {/* Embedded Map */}
-                  <div className="rounded-xl overflow-hidden border border-orange-100 shadow-sm">
-                      <p className="font-serif text-center">Reference Address</p>
-            <iframe
-              title="Sri Sai Balaji Dress Materials location"
-              src="https://www.google.com/maps?q=Panja+Center,+Krishnaveni+Cloth+Market,+Mahanthi+Puram,+Vinchipeta,+Vijayawada,+Andhra+Pradesh+520001&output=embed"
-              width="100%"
-              height="220"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
-          </div>
-        </div>
-
-        {/* Contact Form */}
-
-        <div className="bg-slate-900 text-white rounded-2xl shadow-lg p-8">
-          <h2 className="font-serif text-2xl font-bold mb-1">Send a Message</h2>
-
-          <p className="text-slate-300 text-sm mb-6">
-            Fill this in and we'll get back to you shortly.
+        <div className="relative max-w-4xl mx-auto text-center">
+          <p className="text-[11px] md:text-xs uppercase tracking-[0.35em] text-[#a78352] font-semibold mb-4">
+            We'd Love To Hear From You
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
+          <h1 className="font-[Cormorant_Garamond] text-5xl md:text-7xl text-[#382b24] leading-none">
+            Get In
+            <span className="italic text-[#a78352]"> Touch</span>
+          </h1>
 
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Name</label>
+          <div className="w-14 h-px bg-[#b99a6b] mx-auto my-6" />
 
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="Your name"
-              />
+          <p className="max-w-xl mx-auto text-sm md:text-base leading-7 text-[#776961]">
+            Questions about an order, fabric availability, or bulk pricing?
+            Reach out — we're always happy to help.
+          </p>
+        </div>
+      </section>
+
+      {/* ================= CONTENT ================= */}
+      <section className="px-6 pb-24">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[0.9fr_1.1fr] gap-8">
+          {/* ================= STORE DETAILS ================= */}
+          <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.75rem] p-7 md:p-9 shadow-sm">
+            <div className="mb-8">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#a78352] font-semibold mb-2">
+                Come Say Hello
+              </p>
+
+              <h2 className="font-[Cormorant_Garamond] text-3xl md:text-4xl text-[#3e3028]">
+                Visit The Store
+              </h2>
+            </div>
+
+            {/* Address */}
+            <div className="flex items-start gap-4 mb-7">
+              <div className="w-11 h-11 flex-shrink-0 rounded-full bg-[#f0e4d3] flex items-center justify-center">
+                <MapPin className="w-5 h-5 text-[#9b794e]" strokeWidth={1.5} />
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-[#4a382c] mb-1">
+                  Address
+                </p>
+
+                <p className="text-sm leading-6 text-[#776961]">
+                  Shop No. 311, Panja Center,
+                  <br />
+                  Krishnaveni Cloth Market,
+                  <br />
+                  Mahanthi Puram, Vinchipeta,
+                  <br />
+                  Vijayawada, Andhra Pradesh 520001
+                </p>
+
+                <a
+                  href="https://maps.app.goo.gl/Wqsvcj6JXR8rydcW9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-[#9a784e] hover:text-[#735637] transition-colors"
+                >
+                  View on Google Maps
+                  <ArrowRight className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            <div className="h-px bg-[#eadfd3] mb-7" />
+
+            {/* Phone */}
+            <div className="flex items-start gap-4 mb-7">
+              <div className="w-11 h-11 flex-shrink-0 rounded-full bg-[#f0e4d3] flex items-center justify-center">
+                <Phone className="w-5 h-5 text-[#9b794e]" strokeWidth={1.5} />
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-[#4a382c] mb-1">
+                  Phone
+                </p>
+
+                <a
+                  href="tel:+919491955032"
+                  className="text-sm text-[#776961] hover:text-[#9a784e] transition-colors"
+                >
+                  +91 94919 55032
+                </a>
+              </div>
             </div>
 
             {/* Email */}
+            <div className="flex items-start gap-4 mb-7">
+              <div className="w-11 h-11 flex-shrink-0 rounded-full bg-[#f0e4d3] flex items-center justify-center">
+                <Mail className="w-5 h-5 text-[#9b794e]" strokeWidth={1.5} />
+              </div>
 
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Email</label>
+              <div>
+                <p className="text-sm font-semibold text-[#4a382c] mb-1">
+                  Email
+                </p>
 
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                placeholder="you@example.com"
-              />
+                <a
+                  href="mailto:umamuvvala72@gmail.com"
+                  className="text-sm text-[#776961] hover:text-[#9a784e] transition-colors break-all"
+                >
+                  umamuvvala72@gmail.com
+                </a>
+              </div>
             </div>
 
-            {/* Message */}
+            {/* Hours */}
+            <div className="flex items-start gap-4 mb-8">
+              <div className="w-11 h-11 flex-shrink-0 rounded-full bg-[#f0e4d3] flex items-center justify-center">
+                <Clock3 className="w-5 h-5 text-[#9b794e]" strokeWidth={1.5} />
+              </div>
 
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">
-                Message
-              </label>
+              <div>
+                <p className="text-sm font-semibold text-[#4a382c] mb-1">
+                  Store Hours
+                </p>
 
-              <textarea
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                required
-                rows={4}
-                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
-                placeholder="How can we help?"
-              />
+                <p className="text-sm leading-6 text-[#776961]">
+                  Mon – Sat: 10:00 AM – 8:30 PM
+                  <br />
+                  Sunday: 11:00 AM – 2:00 PM
+                </p>
+              </div>
             </div>
 
-            {/* Submit */}
+            {/* Map */}
+            <div className="rounded-2xl overflow-hidden border border-[#e4d7c7] bg-[#f1e9df]">
+              <div className="px-4 py-3 bg-[#f7f1e9] border-b border-[#e4d7c7]">
+                <p className="font-[Cormorant_Garamond] text-lg text-[#4a382c]">
+                  Find Us In Vijayawada
+                </p>
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 transition-colors text-white font-semibold rounded-lg py-2.5 cursor-pointer"
-            >
-              {loading ? "Sending..." : "Send Message"}
-            </button>
-          </form>
+              <iframe
+                title="Sri Sai Balaji Dress Materials location"
+                src="https://www.google.com/maps?q=Panja+Center,+Krishnaveni+Cloth+Market,+Mahanthi+Puram,+Vinchipeta,+Vijayawada,+Andhra+Pradesh+520001&output=embed"
+                width="100%"
+                height="220"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </div>
+
+          {/* ================= CONTACT FORM ================= */}
+          <div className="relative overflow-hidden bg-[#4a382c] rounded-[1.75rem] p-7 md:p-10 text-white shadow-xl">
+            {/* Decorative circles */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full border border-[#d0b383]/20" />
+            <div className="absolute -bottom-32 -left-24 w-72 h-72 rounded-full border border-[#d0b383]/10" />
+
+            <div className="relative">
+              <div className="w-12 h-12 rounded-full bg-[#b99a6b]/20 flex items-center justify-center mb-6">
+                <MessageCircle
+                  className="w-5 h-5 text-[#dfc49b]"
+                  strokeWidth={1.5}
+                />
+              </div>
+
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#d2b888] font-semibold mb-2">
+                Let's Talk
+              </p>
+
+              <h2 className="font-[Cormorant_Garamond] text-4xl md:text-5xl mb-3">
+                Send a Message
+              </h2>
+
+              <p className="text-sm leading-7 text-[#d5c7bb] mb-8 max-w-md">
+                Tell us what you're looking for and we'll get back to you as
+                soon as possible.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Name */}
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-xs uppercase tracking-wider text-[#dfd1c5] mb-2"
+                  >
+                    Your Name
+                  </label>
+
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter your name"
+                    className="w-full rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 text-sm text-white placeholder:text-[#bcaea3] focus:outline-none focus:border-[#cdb27f] focus:ring-1 focus:ring-[#cdb27f] transition-all"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-xs uppercase tracking-wider text-[#dfd1c5] mb-2"
+                  >
+                    Email Address
+                  </label>
+
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="you@example.com"
+                    className="w-full rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 text-sm text-white placeholder:text-[#bcaea3] focus:outline-none focus:border-[#cdb27f] focus:ring-1 focus:ring-[#cdb27f] transition-all"
+                  />
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label
+                    htmlFor="message"
+                    className="block text-xs uppercase tracking-wider text-[#dfd1c5] mb-2"
+                  >
+                    Your Message
+                  </label>
+
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    required
+                    rows={5}
+                    placeholder="How can we help you?"
+                    className="w-full rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 text-sm text-white placeholder:text-[#bcaea3] focus:outline-none focus:border-[#cdb27f] focus:ring-1 focus:ring-[#cdb27f] transition-all resize-none"
+                  />
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 bg-[#d1b47f] hover:bg-[#dec494] disabled:opacity-50 disabled:cursor-not-allowed text-[#3d2e24] font-semibold rounded-full py-3.5 text-sm transition-all cursor-pointer"
+                >
+                  {loading ? (
+                    "Sending..."
+                  ) : (
+                    <>
+                      Send Message
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <p className="text-center text-[11px] text-[#bcaea3] mt-6">
+                We usually reply within the same day.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= BOTTOM MESSAGE ================= */}
+      <section className="px-6 pb-24 text-center">
+        <div className="max-w-2xl mx-auto">
+          <div className="w-12 h-px bg-[#b99a6b] mx-auto mb-6" />
+
+          <p className="font-[Cormorant_Garamond] italic text-2xl md:text-3xl text-[#6b5441]">
+            "Style that feels like you."
+          </p>
+
+          <p className="text-xs uppercase tracking-[0.25em] text-[#a78352] mt-4">
+            Sri Sai Balaji Dress Materials
+          </p>
         </div>
       </section>
     </div>

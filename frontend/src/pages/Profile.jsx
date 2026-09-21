@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Camera, User, ShoppingBag, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Camera,
+  User,
+  ShoppingBag,
+  Mail,
+  Phone,
+  MapPin,
+  Save,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +21,11 @@ import MyOrder from "./MyOrder";
 const Profile = () => {
   const { user } = useSelector((store) => store.user);
   const dispatch = useDispatch();
+
   const [activeTab, setActiveTab] = useState("profile");
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
+
   const [profileImage, setProfileImage] = useState(
     user?.profilePic || "/Profile.png",
   );
@@ -29,6 +40,9 @@ const Profile = () => {
     zipCode: user?.zipCode || "",
   });
 
+  // =========================
+  // INPUT CHANGE
+  // =========================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -37,16 +51,26 @@ const Profile = () => {
       [name]: value,
     }));
   };
+
+  // =========================
+  // PROFILE IMAGE
+  // =========================
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
+
     if (!selectedFile) {
       return;
     }
+
     setFile(selectedFile);
+
     const imageUrl = URL.createObjectURL(selectedFile);
     setProfileImage(imageUrl);
   };
 
+  // =========================
+  // UPDATE PROFILE
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,6 +90,7 @@ const Profile = () => {
       }
 
       const formData = new FormData();
+
       formData.append("firstName", updateUser.firstName);
       formData.append("lastName", updateUser.lastName);
       formData.append("email", updateUser.email);
@@ -73,12 +98,13 @@ const Profile = () => {
       formData.append("address", updateUser.address);
       formData.append("city", updateUser.city);
       formData.append("zipCode", updateUser.zipCode);
+
       if (file) {
         formData.append("file", file);
       }
 
       const res = await axios.put(
-        `http://localhost:8000/api/v1/user/update/${user._id}`,
+        `${import.meta.env.VITE_URL}/api/v1/user/update/${user._id}`,
         formData,
         {
           headers: {
@@ -91,7 +117,9 @@ const Profile = () => {
 
       if (res.data.success) {
         dispatch(setUser(res.data.user));
+
         setProfileImage(res.data.user.profilePic || "/Profile.png");
+
         setUpdateUser({
           firstName: res.data.user.firstName || "",
           lastName: res.data.user.lastName || "",
@@ -101,12 +129,13 @@ const Profile = () => {
           city: res.data.user.city || "",
           zipCode: res.data.user.zipCode || "",
         });
+
         setFile(null);
-        toast.success(res.data.message);
+
+        toast.success(res.data.message || "Profile updated successfully");
       }
     } catch (error) {
       console.log("UPDATE PROFILE ERROR:", error);
-
       console.log("SERVER RESPONSE:", error?.response?.data);
 
       toast.error(error?.response?.data?.message || "Failed to Update Profile");
@@ -119,243 +148,427 @@ const Profile = () => {
     `${updateUser.firstName} ${updateUser.lastName}`.trim() || "Your Name";
 
   return (
-    <div className="pt-20 min-h-screen bg-orange-50">
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <div className="text-center mb-8">
-          <p className="text-xs tracking-[0.25em] uppercase text-orange-600 font-semibold mb-2">
+    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pt-20">
+      {/* =====================================================
+          PAGE HEADER
+      ====================================================== */}
+      <section className="relative overflow-hidden px-6 pt-12 pb-14 md:pt-16 md:pb-16">
+        {/* Decorative background */}
+        <div className="absolute -top-28 -left-24 w-72 h-72 rounded-full bg-[#ead8bd]/40 blur-3xl" />
+
+        <div className="absolute -top-20 -right-28 w-80 h-80 rounded-full bg-[#e7d0c8]/30 blur-3xl" />
+
+        <div className="relative max-w-6xl mx-auto text-center">
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-[#a78352] font-semibold mb-3">
             Sri Sai Balaji Dress Materials
           </p>
-          <h1 className="text-3xl md:text-4xl font-bold font-serif text-gray-900">
-            Your Account
+
+          <h1 className="font-[Cormorant_Garamond] text-5xl md:text-6xl text-[#382b24] leading-none">
+            Your
+            <span className="italic text-[#a78352]"> Account</span>
           </h1>
+
+          <div className="w-12 h-px bg-[#b99a6b] mx-auto mt-5" />
+
+          <p className="text-sm text-[#7b6d64] mt-5">
+            Manage your personal details and keep track of your orders.
+          </p>
         </div>
-        <div className="flex justify-center mb-10">
-          <div className="bg-white border border-orange-100 rounded-full p-1 shadow-sm flex">
+      </section>
+
+      {/* =====================================================
+          TABS
+      ====================================================== */}
+      <div className="px-6 pb-8">
+        <div className="max-w-6xl mx-auto flex justify-center">
+          <div className="inline-flex items-center gap-1 bg-[#fffdf9] border border-[#e5d9ca] rounded-full p-1.5 shadow-sm">
+            {/* Profile */}
             <button
               type="button"
               onClick={() => setActiveTab("profile")}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full font-serif text-sm cursor-pointer transition ${
+              className={`flex items-center gap-2 px-5 md:px-7 py-2.5 rounded-full text-sm transition-all duration-300 cursor-pointer ${
                 activeTab === "profile"
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-600 hover:bg-orange-50"
+                  ? "bg-[#4a382c] text-white shadow-md"
+                  : "text-[#6f6259] hover:bg-[#f2e9de]"
               }`}
             >
-              <User className="w-4 h-4" />
-              Profile
+              <User className="w-4 h-4" strokeWidth={1.7} />
+
+              <span>Profile</span>
             </button>
 
+            {/* Orders */}
             <button
               type="button"
               onClick={() => setActiveTab("orders")}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full font-serif text-sm cursor-pointer transition ${
+              className={`flex items-center gap-2 px-5 md:px-7 py-2.5 rounded-full text-sm transition-all duration-300 cursor-pointer ${
                 activeTab === "orders"
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-600 hover:bg-orange-50"
+                  ? "bg-[#4a382c] text-white shadow-md"
+                  : "text-[#6f6259] hover:bg-[#f2e9de]"
               }`}
             >
-              <ShoppingBag className="w-4 h-4" />
-              Orders
+              <ShoppingBag className="w-4 h-4" strokeWidth={1.7} />
+
+              <span>Orders</span>
             </button>
           </div>
         </div>
+      </div>
+
+      {/* =====================================================
+          MAIN CONTENT
+      ====================================================== */}
+      <div className="max-w-6xl mx-auto px-6 pb-24">
+        {/* ===================================================
+            PROFILE TAB
+        ==================================================== */}
         {activeTab === "profile" && (
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden"
-          >
-            <div className="grid md:grid-cols-[240px_1fr]">
-              <div className="bg-orange-50 border-b md:border-b-0 md:border-r border-orange-100 px-6 py-10 flex flex-col items-center text-center">
-                <div className="relative">
-                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-orange-400 bg-orange-100">
-                    <img
-                      src={profileImage || "/Profile.png"}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <input
-                    id="profilePicture"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                  <label
-                    htmlFor="profilePicture"
-                    className="absolute -bottom-1 -right-1 bg-orange-500 hover:bg-orange-600 text-white w-9 h-9 rounded-full cursor-pointer flex items-center justify-center shadow-sm"
-                  >
-                    <Camera className="w-4 h-4" />
-                  </label>
-                </div>
+          <form onSubmit={handleSubmit}>
+            <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.75rem] overflow-hidden shadow-sm">
+              <div className="grid lg:grid-cols-[280px_1fr]">
+                {/* ==========================================
+                    PROFILE SIDEBAR
+                =========================================== */}
+                <div className="relative bg-[#eee5da] border-b lg:border-b-0 lg:border-r border-[#e2d4c4] px-7 py-10">
+                  {/* Decorative circle */}
+                  <div className="absolute -top-20 -left-20 w-48 h-48 rounded-full border border-[#b99a6b]/20" />
 
-                <p className="mt-5 font-serif text-lg text-gray-900">
-                  {fullName}
-                </p>
+                  <div className="relative flex flex-col items-center text-center">
+                    {/* Profile Image */}
+                    <div className="relative">
+                      <div className="absolute inset-[-7px] rounded-full border border-[#b99a6b]/50" />
 
-                <p className="text-xs text-gray-500 mt-1">{updateUser.email}</p>
-              </div>
-              <div className="px-6 py-8 md:px-10 md:py-10">
-                <div className="mb-8">
-                  <h2 className="text-xs tracking-[0.2em] uppercase text-orange-600 font-semibold mb-5">
-                    Personal Details
-                  </h2>
+                      <div className="relative w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-[#fffdf9] bg-[#e4d5c2] shadow-lg">
+                        <img
+                          src={profileImage || "/Profile.png"}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
 
-                  <div className="grid md:grid-cols-2 gap-5">
-                    <div className="grid gap-2">
-                      <Label htmlFor="firstName">First Name</Label>
-
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        type="text"
-                        value={updateUser.firstName}
-                        onChange={handleChange}
+                      {/* Upload */}
+                      <input
+                        id="profilePicture"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
                       />
-                    </div>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        type="text"
-                        value={updateUser.lastName}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-dashed border-orange-200 mb-8" />
-
-                <div className="mb-8">
-                  <h2 className="text-xs tracking-[0.2em] uppercase text-orange-600 font-semibold mb-5">
-                    Contact
-                  </h2>
-
-                  <div className="grid md:grid-cols-2 gap-5">
-                    <div className="grid gap-2">
-                      <Label
-                        htmlFor="email"
-                        className="flex items-center gap-2"
+                      <label
+                        htmlFor="profilePicture"
+                        className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-[#4a382c] hover:bg-[#35271f] text-white flex items-center justify-center cursor-pointer shadow-lg transition-colors"
                       >
-                        <Mail className="w-4 h-4 text-orange-500" />
-                        Email
-                      </Label>
-
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        disabled
-                        value={updateUser.email}
-                        onChange={handleChange}
-                      />
+                        <Camera className="w-4 h-4" strokeWidth={1.7} />
+                      </label>
                     </div>
 
-                    <div className="grid gap-2">
-                      <Label
-                        htmlFor="phoneNo"
-                        className="flex items-center gap-2"
-                      >
-                        <Phone className="w-4 h-4 text-orange-500" />
-                        Phone Number
-                      </Label>
+                    {/* Name */}
+                    <h2 className="font-[Cormorant_Garamond] text-2xl text-[#3e3028] mt-7">
+                      {fullName}
+                    </h2>
 
-                      <Input
-                        id="phoneNo"
-                        name="phoneNo"
-                        type="tel"
-                        value={updateUser.phoneNo}
-                        onChange={handleChange}
-                      />
-                    </div>
+                    <p className="text-xs text-[#81736a] mt-1 break-all">
+                      {updateUser.email}
+                    </p>
+
+                    <div className="w-10 h-px bg-[#b99a6b] my-6" />
+
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-[#9a784e] font-semibold">
+                      Member Account
+                    </p>
+
+                    <p className="text-xs text-[#81736a] mt-2 leading-5 max-w-[190px]">
+                      Keep your details updated for a smoother shopping and
+                      delivery experience.
+                    </p>
                   </div>
                 </div>
 
-                <div className="border-t border-dashed border-orange-200 mb-8" />
+                {/* ==========================================
+                    PROFILE FORM
+                =========================================== */}
+                <div className="px-6 py-8 md:px-10 md:py-11 lg:px-12">
+                  {/* Personal Details */}
+                  <div className="mb-9">
+                    <div className="mb-6">
+                      <p className="text-[10px] uppercase tracking-[0.28em] text-[#a78352] font-semibold mb-1">
+                        Your Information
+                      </p>
 
-                <div className="mb-8">
-                  <h2 className="text-xs tracking-[0.2em] uppercase text-orange-600 font-semibold mb-5 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-orange-500" />
-                    Delivery Address
-                  </h2>
-
-                  <div className="grid gap-5">
-                    <div className="grid gap-2">
-                      <Label htmlFor="address">Address</Label>
-
-                      <Input
-                        id="address"
-                        name="address"
-                        type="text"
-                        value={updateUser.address}
-                        onChange={handleChange}
-                      />
+                      <h2 className="font-[Cormorant_Garamond] text-3xl text-[#44352c]">
+                        Personal Details
+                      </h2>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-5">
-                      <div className="grid gap-2">
-                        <Label htmlFor="city">City</Label>
+                      {/* First Name */}
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="firstName"
+                          className="text-xs text-[#665850]"
+                        >
+                          First Name
+                        </Label>
 
                         <Input
-                          id="city"
-                          name="city"
+                          id="firstName"
+                          name="firstName"
                           type="text"
-                          value={updateUser.city}
+                          value={updateUser.firstName}
                           onChange={handleChange}
+                          className="h-11 rounded-xl border-[#e2d7ca] bg-[#faf7f2] text-[#44352c] focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
                         />
                       </div>
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="zipCode">Zip Code</Label>
+                      {/* Last Name */}
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="lastName"
+                          className="text-xs text-[#665850]"
+                        >
+                          Last Name
+                        </Label>
 
                         <Input
-                          id="zipCode"
-                          name="zipCode"
+                          id="lastName"
+                          name="lastName"
                           type="text"
-                          value={updateUser.zipCode}
+                          value={updateUser.lastName}
                           onChange={handleChange}
+                          className="h-11 rounded-xl border-[#e2d7ca] bg-[#faf7f2] text-[#44352c] focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
                         />
                       </div>
                     </div>
                   </div>
+
+                  <div className="h-px bg-[#eadfd3] mb-9" />
+
+                  {/* Contact */}
+                  <div className="mb-9">
+                    <div className="mb-6">
+                      <p className="text-[10px] uppercase tracking-[0.28em] text-[#a78352] font-semibold mb-1">
+                        Stay Connected
+                      </p>
+
+                      <h2 className="font-[Cormorant_Garamond] text-3xl text-[#44352c]">
+                        Contact Details
+                      </h2>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-5">
+                      {/* Email */}
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="email"
+                          className="flex items-center gap-2 text-xs text-[#665850]"
+                        >
+                          <Mail
+                            className="w-3.5 h-3.5 text-[#a78352]"
+                            strokeWidth={1.7}
+                          />
+                          Email
+                        </Label>
+
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          disabled
+                          value={updateUser.email}
+                          onChange={handleChange}
+                          className="h-11 rounded-xl border-[#e2d7ca] bg-[#f1ece5] text-[#8b7d73] cursor-not-allowed"
+                        />
+
+                        <p className="text-[10px] text-[#9a8b81]">
+                          Email address cannot be changed here.
+                        </p>
+                      </div>
+
+                      {/* Phone */}
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="phoneNo"
+                          className="flex items-center gap-2 text-xs text-[#665850]"
+                        >
+                          <Phone
+                            className="w-3.5 h-3.5 text-[#a78352]"
+                            strokeWidth={1.7}
+                          />
+                          Phone Number
+                        </Label>
+
+                        <Input
+                          id="phoneNo"
+                          name="phoneNo"
+                          type="tel"
+                          value={updateUser.phoneNo}
+                          onChange={handleChange}
+                          className="h-11 rounded-xl border-[#e2d7ca] bg-[#faf7f2] text-[#44352c] focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-[#eadfd3] mb-9" />
+
+                  {/* Address */}
+                  <div className="mb-9">
+                    <div className="mb-6">
+                      <p className="text-[10px] uppercase tracking-[0.28em] text-[#a78352] font-semibold mb-1 flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5" strokeWidth={1.7} />
+                        Delivery
+                      </p>
+
+                      <h2 className="font-[Cormorant_Garamond] text-3xl text-[#44352c]">
+                        Delivery Address
+                      </h2>
+                    </div>
+
+                    <div className="space-y-5">
+                      {/* Address */}
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="address"
+                          className="text-xs text-[#665850]"
+                        >
+                          Address
+                        </Label>
+
+                        <Input
+                          id="address"
+                          name="address"
+                          type="text"
+                          value={updateUser.address}
+                          onChange={handleChange}
+                          placeholder="Enter your delivery address"
+                          className="h-11 rounded-xl border-[#e2d7ca] bg-[#faf7f2] text-[#44352c] placeholder:text-[#aaa098] focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
+                        />
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-5">
+                        {/* City */}
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="city"
+                            className="text-xs text-[#665850]"
+                          >
+                            City
+                          </Label>
+
+                          <Input
+                            id="city"
+                            name="city"
+                            type="text"
+                            value={updateUser.city}
+                            onChange={handleChange}
+                            className="h-11 rounded-xl border-[#e2d7ca] bg-[#faf7f2] text-[#44352c] focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
+                          />
+                        </div>
+
+                        {/* Zip */}
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="zipCode"
+                            className="text-xs text-[#665850]"
+                          >
+                            Zip Code
+                          </Label>
+
+                          <Input
+                            id="zipCode"
+                            name="zipCode"
+                            type="text"
+                            value={updateUser.zipCode}
+                            onChange={handleChange}
+                            className="h-11 rounded-xl border-[#e2d7ca] bg-[#faf7f2] text-[#44352c] focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Update Button */}
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-12 rounded-full bg-[#4a382c] hover:bg-[#35271f] text-white font-medium cursor-pointer transition-all shadow-md shadow-[#4a382c]/10"
+                  >
+                    {loading ? (
+                      "Updating Profile..."
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" strokeWidth={1.7} />
+                        Update Profile
+                      </>
+                    )}
+                  </Button>
                 </div>
-
-                {/* Update */}
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-serif cursor-pointer py-3 rounded-lg"
-                >
-                  {loading ? "Updating..." : "Update Profile"}
-                </Button>
               </div>
             </div>
           </form>
         )}
 
+        {/* ===================================================
+            ORDERS TAB
+        ==================================================== */}
         {activeTab === "orders" && (
-          <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 md:p-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-orange-500" />
-              </div>
+          <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.75rem] shadow-sm overflow-hidden">
+            {/* Orders Header */}
+            <div className="px-6 py-8 md:px-10 border-b border-[#eadfd3] bg-[#f5eee6]">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#e7d7c2] flex items-center justify-center">
+                    <ShoppingBag
+                      className="w-5 h-5 text-[#9a784e]"
+                      strokeWidth={1.6}
+                    />
+                  </div>
 
-              <div>
-                <h2 className="text-2xl font-bold font-serif">Your Orders</h2>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-[#a78352] font-semibold mb-1">
+                      Your Shopping History
+                    </p>
 
-                <p className="text-sm text-gray-500">
-                  Track your previous purchases
-                </p>
+                    <h2 className="font-[Cormorant_Garamond] text-3xl md:text-4xl text-[#44352c]">
+                      Your Orders
+                    </h2>
+
+                    <p className="text-xs text-[#81736a] mt-1">
+                      Track your previous purchases
+                    </p>
+                  </div>
+                </div>
+
+                <ChevronRight
+                  className="hidden sm:block w-5 h-5 text-[#b99a6b]"
+                  strokeWidth={1.5}
+                />
               </div>
             </div>
-            <MyOrder />
+
+            {/* Orders */}
+            <div className="p-6 md:p-10">
+              <MyOrder />
+            </div>
           </div>
         )}
       </div>
+
+      {/* =====================================================
+          BOTTOM BRAND MESSAGE
+      ====================================================== */}
+      <section className="px-6 pb-20 text-center">
+        <div className="w-12 h-px bg-[#b99a6b] mx-auto mb-5" />
+
+        <p className="font-[Cormorant_Garamond] italic text-2xl text-[#6b5441]">
+          Style that feels like you.
+        </p>
+
+        <p className="text-[10px] uppercase tracking-[0.3em] text-[#a78352] mt-3">
+          Sri Sai Balaji Dress Materials
+        </p>
+      </section>
     </div>
   );
 };
