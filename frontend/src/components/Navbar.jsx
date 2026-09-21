@@ -1,58 +1,200 @@
 import { setUser } from "@/redux/UserSlice";
-// import { Button } from "@base-ui/react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { Menu, ShoppingCart, X } from "lucide-react";
+import { Menu, ShoppingBag, X, ChevronDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const styles = `
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
 
-.nav-root{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+.nav-root {
+  font-family: 'DM Sans', sans-serif;
+}
 
-/* slide-down entrance */
-.nav-drop{animation:nav-drop .9s cubic-bezier(.2,.8,.2,1) both}
-@keyframes nav-drop{from{transform:translateY(-100%);opacity:0}to{transform:none;opacity:1}}
+.nav-brand {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
 
-/* animated gold underline */
-.nav-link{position:relative;padding:.35rem 0}
-.nav-link::after{content:"";position:absolute;left:0;bottom:-2px;height:2px;width:100%;border-radius:2px;background:linear-gradient(90deg,#fcd34d,#e879f9);transform:scaleX(0);transform-origin:right;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
-.nav-link:hover::after,.nav-link-active::after{transform:scaleX(1);transform-origin:left}
+/* entrance */
 
-/* cart badge pop when count changes */
-.nav-pop{animation:nav-pop .55s cubic-bezier(.34,1.56,.64,1)}
-@keyframes nav-pop{0%{transform:scale(.3)}100%{transform:scale(1)}}
+.nav-enter {
+  animation: navEnter .8s cubic-bezier(.2,.8,.2,1) both;
+}
 
-/* button shine */
-.nav-shine{position:relative;overflow:hidden}
-.nav-shine::after{content:"";position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);transition:left .7s ease}
-.nav-shine:hover::after{left:130%}
+@keyframes navEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
 
-@media (prefers-reduced-motion:reduce){
-  .nav-root *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* navigation underline */
+
+.nav-item {
+  position: relative;
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 0;
+  height: 1.5px;
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #b18a4b,
+      #dfc38b
+    );
+
+  transform: translateX(-50%);
+  transition:
+    width .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.nav-item:hover::after,
+.nav-item.active::after {
+  width: 100%;
+}
+
+/* cart */
+
+.nav-cart {
+  transition:
+    transform .3s ease,
+    box-shadow .3s ease,
+    background .3s ease;
+}
+
+.nav-cart:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 30px -15px rgba(83,59,42,.45);
+}
+
+/* cart badge */
+
+.nav-badge {
+  animation: badgePop .4s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes badgePop {
+  from {
+    transform: scale(.4);
+    opacity: .5;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* login button shine */
+
+.nav-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 55%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.5),
+      transparent
+    );
+
+  transform: skewX(-20deg);
+  transition: left .7s ease;
+}
+
+.nav-button:hover::after {
+  left: 140%;
+}
+
+/* logo */
+
+.nav-logo {
+  transition:
+    transform .4s cubic-bezier(.2,.8,.2,1),
+    box-shadow .4s ease;
+}
+
+.nav-logo:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 12px 30px -15px rgba(91,65,42,.4);
+}
+
+/* mobile menu */
+
+.nav-mobile {
+  animation: mobileMenu .4s ease both;
+}
+
+@keyframes mobileMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-root * {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
 }
 `;
 
 const Navbar = () => {
   const { user } = useSelector((store) => store.user);
+  const { cart } = useSelector((store) => store.product);
+
   const accessToken = localStorage.getItem("accessToken");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const admin = user?.role === "admin" ? true : false;
-  const { cart } = useSelector((store) => store.product);
 
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const admin = user?.role === "admin";
+
+  /* --------------------------------
+     Logout
+  -------------------------------- */
+
   const logoutHandler = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/v1/user/logout`,
+        "http://localhost:8000/api/v1/user/logout",
         {},
         {
           headers: {
@@ -60,162 +202,262 @@ const Navbar = () => {
           },
         },
       );
+
       if (res.data.success) {
         dispatch(setUser(null));
         toast.success(res.data.message);
+        navigate("/");
       }
     } catch (error) {
       console.log(error);
+      toast.error("Unable to logout. Please try again.");
     }
   };
-  console.log(cart);
 
-  // glass gets stronger after scrolling
+  /* --------------------------------
+     Scroll effect
+  -------------------------------- */
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 25);
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // close mobile menu on route change
+  /* --------------------------------
+     Close mobile menu
+  -------------------------------- */
+
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
+  /* --------------------------------
+     Navigation
+  -------------------------------- */
+
   const navItems = [
-    { to: "/", label: "Home" },
-    { to: "/products", label: "Products" },
-    { to: "/about", label: "About" },
-    { to: "/contact", label: "Contact" },
+    {
+      to: "/",
+      label: "Home",
+    },
+    {
+      to: "/products",
+      label: "Collections",
+    },
+    {
+      to: "/about",
+      label: "Our Story",
+    },
+    {
+      to: "/contact",
+      label: "Contact",
+    },
+
     ...(user
-      ? [{ to: `/profile/${user._id}`, label: `Hello, ${user.firstName}` }]
+      ? [
+          {
+            to: `/profile/${user._id}`,
+            label: `Hello, ${user.firstName}`,
+          },
+        ]
       : []),
-    ...(admin ? [{ to: `/dashboard/sales`, label: "Dashboard" }] : []),
+
+    ...(admin
+      ? [
+          {
+            to: "/dashboard/sales",
+            label: "Dashboard",
+          },
+        ]
+      : []),
   ];
 
-  const isActive = (to) =>
-    to === "/" ? pathname === "/" : pathname.startsWith(to);
+  const isActive = (to) => {
+    if (to === "/") {
+      return pathname === "/";
+    }
+
+    return pathname.startsWith(to);
+  };
 
   const cartCount = cart?.items?.length || 0;
 
+  /* --------------------------------
+     Cart
+  -------------------------------- */
+
   const cartLink = (
     <Link
-      to={"/cart"}
-      className="group relative flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/70 hover:bg-white/20 hover:text-amber-200"
+      to="/cart"
+      aria-label="Shopping cart"
+      className="nav-cart group relative flex h-11 w-11 items-center justify-center rounded-full border border-[#d8c9b5] bg-white/75 text-[#49382d] backdrop-blur-md"
     >
-      <ShoppingCart className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-      <span
-        key={cartCount}
-        className="nav-pop absolute -top-1.5 -right-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-rose-500 px-1.5 text-xs font-semibold text-white shadow-lg shadow-fuchsia-500/40"
-      >
-        {cartCount}
-      </span>
+      <ShoppingBag
+        className="h-[19px] w-[19px] transition-transform duration-300 group-hover:scale-110"
+        strokeWidth={1.7}
+      />
+
+      {cartCount > 0 && (
+        <span
+          key={cartCount}
+          className="nav-badge absolute -right-1 -top-1 flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-[#3d2c23] px-1 text-[10px] font-semibold text-white"
+        >
+          {cartCount}
+        </span>
+      )}
     </Link>
   );
+
+  /* --------------------------------
+     Auth button
+  -------------------------------- */
 
   const authButton = user ? (
     <Button
       onClick={logoutHandler}
-      className="nav-shine h-10 rounded-full bg-gradient-to-r from-rose-500 to-red-600 px-6 font-semibold text-white cursor-pointer shadow-lg shadow-rose-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-rose-500/50"
+      className="nav-button h-10 rounded-full bg-[#3d2c23] px-6 text-sm font-medium text-white shadow-[0_10px_25px_-12px_rgba(61,44,35,.65)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4b362b]"
     >
       Logout
     </Button>
   ) : (
     <Button
       onClick={() => navigate("/login")}
-      className="nav-shine h-10 rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 px-6 font-semibold text-gray-900 cursor-pointer shadow-lg shadow-amber-400/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-amber-400/60"
+      className="nav-button h-10 rounded-full bg-[#3d2c23] px-7 text-sm font-medium text-white shadow-[0_10px_25px_-12px_rgba(61,44,35,.65)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4b362b]"
     >
       Login
     </Button>
   );
 
   return (
-    <header
-      className={`nav-root nav-drop fixed top-0 w-full z-20 border-b backdrop-blur-xl transition-all duration-500 ${
-        scrolled
-          ? "bg-[#160828]/90 border-white/15 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)]"
-          : "bg-[#160828]/60 border-white/10"
-      }`}
-    >
+    <>
       <style>{styles}</style>
 
-      <div
-        className={`max-w-7xl mx-auto flex justify-between items-center px-4 transition-all duration-500 ${
-          scrolled ? "py-2" : "py-3"
+      <header
+        className={`nav-root nav-enter fixed left-0 top-0 z-50 w-full border-b transition-all duration-500 ${
+          scrolled
+            ? "border-[#ddd0bf] bg-[#fbf8f2]/95 shadow-[0_10px_40px_-25px_rgba(60,42,30,.35)] backdrop-blur-xl"
+            : "border-transparent bg-[#fbf8f2]/80 backdrop-blur-md"
         }`}
       >
-        {/* Logo Section */}
-        <div className="group">
-          <div className="rounded-xl border border-white/20 bg-white/90 p-1.5 shadow-lg shadow-fuchsia-500/20 transition-all duration-500 group-hover:-rotate-6 group-hover:scale-110 group-hover:shadow-fuchsia-500/50">
-            <img src="/Shop.png" alt="Shop Logo" className="w-[34px] h-auto" />
+        {/* Main navbar */}
+
+        <div
+          className={`mx-auto flex max-w-7xl items-center justify-between px-5 transition-all duration-500 sm:px-7 lg:px-10 ${
+            scrolled ? "py-2.5" : "py-3.5"
+          }`}
+        >
+          {/* --------------------------------
+              Logo
+          -------------------------------- */}
+
+          <Link to="/" className="group flex items-center gap-3">
+            <div className="nav-logo rounded-xl border border-[#d8c7ad] bg-white p-1.5 shadow-[0_8px_25px_-15px_rgba(65,45,30,.4)]">
+              <img
+                src="/Shop.png"
+                alt="Sri Sai Balaji Dress Materials"
+                className="h-[38px] w-[38px] object-contain"
+              />
+            </div>
+
+            <div className="hidden sm:block">
+              <p className="nav-brand text-[21px] font-semibold leading-none text-[#3d2c23]">
+                Sri Sai Balaji
+              </p>
+
+              <p className="mt-1 text-[8px] font-semibold uppercase tracking-[.25em] text-[#a27b43]">
+                Dress Materials
+              </p>
+            </div>
+          </Link>
+
+          {/* --------------------------------
+              Desktop navigation
+          -------------------------------- */}
+
+          <nav className="hidden items-center gap-7 md:flex lg:gap-9">
+            <ul className="flex items-center gap-7 lg:gap-9">
+              {navItems.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className={`nav-item text-[13px] font-medium tracking-[.04em] transition-colors duration-300 ${
+                      isActive(item.to)
+                        ? "active text-[#9a713b]"
+                        : "text-[#65564c] hover:text-[#9a713b]"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="h-5 w-px bg-[#ded2c2]" />
+
+            {cartLink}
+
+            {authButton}
+          </nav>
+
+          {/* --------------------------------
+              Mobile controls
+          -------------------------------- */}
+
+          <div className="flex items-center gap-3 md:hidden">
+            {cartLink}
+
+            <button
+              type="button"
+              aria-label="Toggle menu"
+              onClick={() => setOpen((value) => !value)}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d8c9b5] bg-white/75 text-[#49382d] backdrop-blur-md transition-all duration-300 hover:bg-white"
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex gap-8 justify-between items-center">
-          <ul className="flex gap-8 items-center text-[15px] font-medium tracking-wide">
-            {navItems.map((item) => (
-              <li key={item.to}>
-                <Link
-                  to={item.to}
-                  className={`nav-link transition-colors duration-300 ${
-                    isActive(item.to)
-                      ? "nav-link-active text-amber-300"
-                      : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {cartLink}
-          {authButton}
-        </nav>
+        {/* --------------------------------
+            Mobile menu
+        -------------------------------- */}
 
-        {/* Mobile controls */}
-        <div className="flex items-center gap-4 md:hidden">
-          {cartLink}
-          <button
-            type="button"
-            aria-label="Toggle menu"
-            onClick={() => setOpen((o) => !o)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md cursor-pointer transition-colors hover:bg-white/20"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-      </div>
+        {open && (
+          <div className="nav-mobile border-t border-[#e2d8ca] bg-[#fbf8f2]/98 px-5 pb-5 pt-4 backdrop-blur-xl md:hidden">
+            <div className="rounded-2xl border border-[#ded2c2] bg-white/70 p-2">
+              <ul className="flex flex-col">
+                {navItems.map((item) => (
+                  <li key={item.to}>
+                    <Link
+                      to={item.to}
+                      className={`block rounded-xl px-4 py-3.5 text-sm transition-all duration-300 ${
+                        isActive(item.to)
+                          ? "bg-[#f1e7d8] font-semibold text-[#9a713b]"
+                          : "text-[#62544a] hover:bg-[#f7f2ea] hover:text-[#9a713b]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
 
-      {/* Mobile menu */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-500 ${
-          open ? "max-h-[520px] opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="mx-4 mb-4 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl">
-          <ul className="flex flex-col gap-1 text-base font-medium">
-            {navItems.map((item) => (
-              <li key={item.to}>
-                <Link
-                  to={item.to}
-                  className={`block rounded-xl px-4 py-3 transition-colors duration-300 ${
-                    isActive(item.to)
-                      ? "bg-white/15 text-amber-300"
-                      : "text-white/85 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4">{authButton}</div>
-        </div>
-      </div>
-    </header>
+              <div className="mt-2 border-t border-[#e5dbcd] pt-3">
+                {authButton}
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
+    </>
   );
 };
 
 export default Navbar;
+  
