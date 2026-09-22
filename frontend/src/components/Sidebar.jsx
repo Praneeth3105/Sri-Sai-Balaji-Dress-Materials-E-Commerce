@@ -3,76 +3,142 @@ import {
   PackagePlus,
   PackageSearch,
   Users,
+  ClipboardList,
+  Sparkles,
 } from "lucide-react";
 import React from "react";
-import { FaRegEdit } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
+  const menuItems = [
+    {
+      to: "/dashboard/sales",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      to: "/dashboard/add-product",
+      label: "Add Product",
+      icon: PackagePlus,
+    },
+    {
+      to: "/dashboard/products",
+      label: "Products",
+      icon: PackageSearch,
+    },
+    {
+      to: "/dashboard/users",
+      label: "Users",
+      icon: Users,
+    },
+    {
+      to: "/dashboard/orders",
+      label: "Orders",
+      icon: ClipboardList,
+    },
+  ];
+
   return (
-    <div className="hidden fixed md:block border-r bg-orange-200 w-[300px] p-10 space-y-2 h-screen">
-      <div className="text-center pt-10 px-3 space-y-2">
-        <NavLink
-          to="/dashboard/sales"
-          className={({ isActive }) =>
-            `text-xl ${
-              isActive ? "bg-orange-600 text-gray-200" : "bg-transparent"
-            } flex items-center gap-2 font-bold cursor-pointer p-3 rounded-2xl w-full`
-          }
-        >
-          <LayoutDashboard />
-          <span>Dashboard</span>
-        </NavLink>
+    <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-[300px] flex-col border-r border-[#e3d6c7] bg-[#f5efe7]">
+      {/* =====================================================
+          BRAND
+      ====================================================== */}
 
-        <NavLink
-          to="/dashboard/add-product"
-          className={({ isActive }) =>
-            `text-xl ${
-              isActive ? "bg-orange-600 text-gray-200" : "bg-transparent"
-            } flex items-center gap-2 font-bold cursor-pointer p-3 rounded-2xl w-full`
-          }
-        >
-          <PackagePlus />
-          <span>Add Product</span>
-        </NavLink>
+      <div className="px-8 pt-10 pb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-full bg-[#4a382c] flex items-center justify-center shadow-sm">
+            <Sparkles className="w-5 h-5 text-[#d7bc91]" strokeWidth={1.4} />
+          </div>
 
-        <NavLink
-          to="/dashboard/products"
-          className={({ isActive }) =>
-            `text-xl ${
-              isActive ? "bg-orange-600 text-gray-200" : "bg-transparent"
-            } flex items-center gap-2 font-bold cursor-pointer p-3 rounded-2xl w-full`
-          }
-        >
-          <PackageSearch />
-          <span>Products</span>
-        </NavLink>
+          <div>
+            <p className="font-[Cormorant_Garamond] text-2xl leading-none text-[#44352c]">
+              Sri Sai Balaji
+            </p>
 
-        <NavLink
-          to="/dashboard/users"
-          className={({ isActive }) =>
-            `text-xl ${
-              isActive ? "bg-orange-600 text-gray-200" : "bg-transparent"
-            } flex items-center gap-2 font-bold cursor-pointer p-3 rounded-2xl w-full`
-          }
-        >
-          <Users />
-          <span>Users</span>
-        </NavLink>
+            <p className="text-[8px] uppercase tracking-[0.3em] text-[#a78352] mt-1">
+              Admin Studio
+            </p>
+          </div>
+        </div>
 
-        <NavLink
-          to="/dashboard/orders"
-          className={({ isActive }) =>
-            `text-xl ${
-              isActive ? "bg-orange-600 text-gray-200" : "bg-transparent"
-            } flex items-center gap-2 font-bold cursor-pointer p-3 rounded-2xl w-full`
-          }
-        >
-          <FaRegEdit />
-          <span>Orders</span>
-        </NavLink>
+        <div className="w-10 h-px bg-[#b99a6b] mt-7" />
       </div>
-    </div>
+
+      {/* =====================================================
+          NAVIGATION
+      ====================================================== */}
+
+      <nav className="px-5 space-y-2">
+        <p className="px-4 mb-4 text-[9px] uppercase tracking-[0.3em] font-semibold text-[#9a8a7e]">
+          Management
+        </p>
+
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3 w-full px-4 py-3.5 rounded-xl transition-all duration-300 ${
+                  isActive
+                    ? "bg-[#4a382c] text-white shadow-md shadow-[#4a382c]/10"
+                    : "text-[#66584e] hover:bg-[#eee5da] hover:text-[#44352c]"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 rounded-r-full bg-[#c9aa7a]" />
+                  )}
+
+                  <Icon
+                    className={`w-[18px] h-[18px] transition-colors ${
+                      isActive
+                        ? "text-[#d7bc91]"
+                        : "text-[#9b8060] group-hover:text-[#a78352]"
+                    }`}
+                    strokeWidth={1.6}
+                  />
+
+                  <span className="text-sm font-medium tracking-wide">
+                    {item.label}
+                  </span>
+
+                  {isActive && (
+                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#d7bc91]" />
+                  )}
+                </>
+              )}
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* =====================================================
+          BOTTOM BRAND CARD
+      ====================================================== */}
+
+      <div className="mt-auto px-6 pb-7">
+        <div className="rounded-2xl bg-[#4a382c] p-5 text-white">
+          <p className="text-[9px] uppercase tracking-[0.25em] text-[#d5b98b]">
+            Sri Sai Balaji
+          </p>
+
+          <p className="font-[Cormorant_Garamond] italic text-xl mt-2 text-white/90">
+            Style that feels like you.
+          </p>
+
+          <div className="w-8 h-px bg-[#b99a6b] mt-4" />
+
+          <p className="text-[9px] leading-4 text-white/50 mt-3">
+            Manage your boutique collection with elegance.
+          </p>
+        </div>
+      </div>
+    </aside>
   );
 };
 
