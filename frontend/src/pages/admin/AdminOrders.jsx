@@ -283,9 +283,6 @@ const AdminOrders = () => {
             </div>
           ) : (
             <>
-              {/* =================================================
-                  DESKTOP TABLE
-              ================================================== */}
 
               <div className="hidden xl:block overflow-x-auto">
                 <table className="w-full">
