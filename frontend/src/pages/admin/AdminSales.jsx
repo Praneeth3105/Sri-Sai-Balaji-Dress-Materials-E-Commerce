@@ -1,19 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { toast } from "sonner";
 import {
-  LineChart,
+  BarChart3,
+  IndianRupee,
+  ShoppingBag,
+  Package,
+  TrendingUp,
+  CalendarDays,
+  RefreshCw,
+} from "lucide-react";
+import {
+  CartesianGrid,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
-import { IndianRupee, ShoppingBag, Package } from "lucide-react";
+import { toast } from "sonner";
 
 const AdminSales = () => {
   const [salesData, setSalesData] = useState([]);
+
   const [summary, setSummary] = useState({
     totalSales: 0,
     totalOrders: 0,
@@ -22,11 +31,15 @@ const AdminSales = () => {
 
   const [loading, setLoading] = useState(true);
 
-  const getSalesData = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  // =========================================================
+  // FETCH SALES
+  // =========================================================
+
+  const fetchSales = async () => {
     try {
       setLoading(true);
-
-      const accessToken = localStorage.getItem("accessToken");
 
       const res = await axios.get(
         `${import.meta.env.VITE_URL}/api/v1/orders/sales`,
@@ -38,196 +51,392 @@ const AdminSales = () => {
       );
 
       if (res.data.success) {
-        setSalesData(res.data.salesData || []);
+        setSalesData(res.data.sales || []);
 
-        setSummary(
-          res.data.summary || {
-            totalSales: 0,
-            totalOrders: 0,
-            totalProducts: 0,
-          },
-        );
+        setSummary({
+          totalSales: res.data.totalSales || 0,
+          totalOrders: res.data.totalOrders || 0,
+          totalProducts: res.data.totalProducts || 0,
+        });
       }
     } catch (error) {
-      console.error("GET SALES DATA ERROR:", error);
+      console.log("SALES ERROR:", error);
 
-      toast.error(error.response?.data?.message || "Failed to load sales data");
+      toast.error(
+        error?.response?.data?.message || "Unable to load sales data",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getSalesData();
+    fetchSales();
   }, []);
 
-  const chartData = salesData.map((item) => ({
-    date: item._id,
-    sales: item.totalSales,
-    orders: item.totalOrders,
-  }));
+  // =========================================================
+  // CHART DATA
+  // =========================================================
 
-  return (
-    <div className="pl-[350px] pr-10 pt-20 pb-10 min-h-screen bg-gray-100 font-serif">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Sales Overview</h1>
+  const chartData = useMemo(() => {
+    return (salesData || []).map((item) => ({
+      date: item?._id || "",
+      totalSales: Number(item?.totalSales || 0),
+      totalOrders: Number(item?.totalOrders || 0),
+    }));
+  }, [salesData]);
 
-        <p className="text-gray-500 mt-2">
-          Track your store sales and order performance
+  const formatCurrency = (value) => {
+    return `₹${Number(value || 0).toLocaleString("en-IN")}`;
+  };
+
+  // =========================================================
+  // CUSTOM TOOLTIP
+  // =========================================================
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) {
+      return null;
+    }
+
+    return (
+      <div className="bg-[#fffdf9] border border-[#dfd2c2] rounded-xl shadow-lg p-4">
+        <p className="text-[10px] uppercase tracking-wider text-[#a78352] mb-2">
+          {label}
         </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total Sales</p>
 
-              <h2 className="text-3xl font-bold text-gray-800 mt-2">
-                ₹{Number(summary.totalSales || 0).toLocaleString("en-IN")}
-              </h2>
-            </div>
+        <p className="text-sm text-[#4a382c]">
+          Sales:{" "}
+          <span className="font-semibold">
+            {formatCurrency(payload[0]?.value)}
+          </span>
+        </p>
 
-            <div className="bg-orange-100 p-4 rounded-xl">
-              <IndianRupee className="text-orange-600 w-7 h-7" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Paid Orders</p>
-
-              <h2 className="text-3xl font-bold text-gray-800 mt-2">
-                {summary.totalOrders || 0}
-              </h2>
-            </div>
-
-            <div className="bg-green-100 p-4 rounded-xl">
-              <ShoppingBag className="text-green-600 w-7 h-7" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Products Sold</p>
-
-              <h2 className="text-3xl font-bold text-gray-800 mt-2">
-                {summary.totalProducts || 0}
-              </h2>
-            </div>
-
-            <div className="bg-blue-100 p-4 rounded-xl">
-              <Package className="text-blue-600 w-7 h-7" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Sales Performance</h2>
-
-          <p className="text-sm text-gray-500 mt-1">Daily paid sales</p>
-        </div>
-
-        {loading ? (
-          <div className="h-[400px] flex items-center justify-center">
-            <p className="text-gray-500">Loading sales data...</p>
-          </div>
-        ) : chartData.length === 0 ? (
-          <div className="h-[400px] flex items-center justify-center">
-            <div className="text-center">
-              <ShoppingBag className="mx-auto w-12 h-12 text-gray-300" />
-
-              <p className="mt-4 text-gray-500">No paid orders yet</p>
-            </div>
-          </div>
-        ) : (
-          <div className="w-full h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={chartData}
-                margin={{
-                  top: 10,
-                  right: 30,
-                  left: 20,
-                  bottom: 10,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-
-                <XAxis dataKey="date" />
-
-                <YAxis />
-
-                <Tooltip
-                  formatter={(value, name) => {
-                    if (name === "sales") {
-                      return [
-                        `₹${Number(value).toLocaleString("en-IN")}`,
-                        "Sales",
-                      ];
-                    }
-
-                    return [value, "Orders"];
-                  }}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="sales"
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 7 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+        {payload[1] && (
+          <p className="text-sm text-[#7b6d64] mt-1">
+            Orders: <span className="font-semibold">{payload[1]?.value}</span>
+          </p>
         )}
       </div>
-      {!loading && salesData.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mt-8 overflow-hidden">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-bold text-gray-800">Daily Sales</h2>
+    );
+  };
+
+  // =========================================================
+  // LOADING
+  // =========================================================
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f8f4ee] pl-0 lg:pl-[350px] pt-24 px-6">
+        <div className="max-w-[1450px] mx-auto animate-pulse">
+          <div className="h-4 w-32 bg-[#e5d9ca] rounded mb-4" />
+
+          <div className="h-14 w-80 bg-[#e5d9ca] rounded mb-10" />
+
+          <div className="grid md:grid-cols-3 gap-5 mb-8">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-36 bg-[#fffdf9] border border-[#e5d9ca] rounded-2xl"
+              />
+            ))}
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left p-4 text-sm text-gray-600">Date</th>
+          <div className="h-[450px] bg-[#fffdf9] border border-[#e5d9ca] rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
-                  <th className="text-left p-4 text-sm text-gray-600">
-                    Orders
-                  </th>
+  return (
+    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 lg:pl-[350px] pt-20 pb-20">
+      {/* =====================================================
+          DECORATIVE BACKGROUND
+      ====================================================== */}
 
-                  <th className="text-left p-4 text-sm text-gray-600">
-                    Products Sold
-                  </th>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 right-0 w-[500px] h-[500px] rounded-full bg-[#ead8bd]/25 blur-3xl" />
 
-                  <th className="text-left p-4 text-sm text-gray-600">Sales</th>
-                </tr>
-              </thead>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-[#ead6d0]/20 blur-3xl" />
+      </div>
 
-              <tbody>
-                {[...salesData].reverse().map((item, index) => (
-                  <tr key={index} className="border-t hover:bg-gray-50">
-                    <td className="p-4">{item._id}</td>
-                    <td className="p-4">{item.totalOrders}</td>
-                    <td className="p-4">{item.totalProducts}</td>
-                    <td className="p-4 font-semibold text-orange-600">
-                      ₹{Number(item.totalSales).toLocaleString("en-IN")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="relative px-4 sm:px-6 lg:px-10 max-w-[1450px] mx-auto">
+        {/* ===================================================
+            HEADER
+        ==================================================== */}
+
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="w-4 h-4 text-[#a78352]" />
+
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#a78352] font-semibold">
+                Business Insights
+              </span>
+            </div>
+
+            <h1 className="font-[Cormorant_Garamond] text-5xl md:text-6xl text-[#382b24] leading-none">
+              Sales
+              <span className="italic text-[#a78352]"> Overview</span>
+            </h1>
+
+            <div className="w-12 h-px bg-[#b99a6b] mt-5 mb-4" />
+
+            <p className="text-sm text-[#7b6d64]">
+              Track your store's sales and order activity.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={fetchSales}
+            className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full border border-[#d8c9b8] bg-[#fffdf9] text-[#66564a] hover:bg-[#eee5da] transition-colors cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
+
+        {/* ===================================================
+            SUMMARY CARDS
+        ==================================================== */}
+
+        <div className="grid md:grid-cols-3 gap-5 mb-8">
+          {/* Total Sales */}
+          <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] p-6 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#88786d]">
+                  Total Sales
+                </p>
+
+                <p className="font-[Cormorant_Garamond] text-4xl text-[#44352c] mt-3">
+                  {formatCurrency(summary.totalSales)}
+                </p>
+              </div>
+
+              <div className="w-11 h-11 rounded-full bg-[#eee5da] flex items-center justify-center">
+                <IndianRupee
+                  className="w-5 h-5 text-[#a78352]"
+                  strokeWidth={1.5}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-5 text-xs text-[#7d8a6b]">
+              <TrendingUp className="w-3.5 h-3.5" />
+              Overall revenue
+            </div>
+          </div>
+
+          {/* Orders */}
+          <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] p-6 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#88786d]">
+                  Total Orders
+                </p>
+
+                <p className="font-[Cormorant_Garamond] text-4xl text-[#44352c] mt-3">
+                  {summary.totalOrders}
+                </p>
+              </div>
+
+              <div className="w-11 h-11 rounded-full bg-[#eee5da] flex items-center justify-center">
+                <ShoppingBag
+                  className="w-5 h-5 text-[#a78352]"
+                  strokeWidth={1.5}
+                />
+              </div>
+            </div>
+
+            <p className="text-xs text-[#88786d] mt-5">Orders recorded</p>
+          </div>
+
+          {/* Products */}
+          <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] p-6 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#88786d]">
+                  Products Sold
+                </p>
+
+                <p className="font-[Cormorant_Garamond] text-4xl text-[#44352c] mt-3">
+                  {summary.totalProducts}
+                </p>
+              </div>
+
+              <div className="w-11 h-11 rounded-full bg-[#eee5da] flex items-center justify-center">
+                <Package className="w-5 h-5 text-[#a78352]" strokeWidth={1.5} />
+              </div>
+            </div>
+
+            <p className="text-xs text-[#88786d] mt-5">Total units sold</p>
           </div>
         </div>
-      )}
+
+        {/* ===================================================
+            SALES CHART
+        ==================================================== */}
+
+        <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] shadow-sm overflow-hidden">
+          <div className="px-6 md:px-8 py-6 border-b border-[#eadfd3] flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-[#a78352] font-semibold">
+                Revenue Trend
+              </p>
+
+              <h2 className="font-[Cormorant_Garamond] text-3xl text-[#44352c] mt-1">
+                Daily Sales
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-[#7b6d64]">
+              <CalendarDays className="w-4 h-4 text-[#a78352]" />
+              Sales performance
+            </div>
+          </div>
+
+          <div className="p-5 md:p-8">
+            {chartData.length > 0 ? (
+              <div className="w-full h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{
+                      top: 10,
+                      right: 15,
+                      left: 5,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid stroke="#eadfd3" strokeDasharray="4 4" />
+
+                    <XAxis
+                      dataKey="date"
+                      tick={{
+                        fill: "#82746a",
+                        fontSize: 11,
+                      }}
+                      axisLine={{
+                        stroke: "#dfd2c2",
+                      }}
+                      tickLine={false}
+                    />
+
+                    <YAxis
+                      tick={{
+                        fill: "#82746a",
+                        fontSize: 11,
+                      }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(value) =>
+                        `₹${Number(value).toLocaleString("en-IN")}`
+                      }
+                    />
+
+                    <Tooltip content={<CustomTooltip />} />
+
+                    <Line
+                      type="monotone"
+                      dataKey="totalSales"
+                      name="Sales"
+                      stroke="#a78352"
+                      strokeWidth={3}
+                      dot={{
+                        r: 4,
+                        fill: "#a78352",
+                        strokeWidth: 0,
+                      }}
+                      activeDot={{
+                        r: 6,
+                      }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[400px] flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full bg-[#eee5da] flex items-center justify-center mb-5">
+                  <BarChart3 className="w-7 h-7 text-[#a78352]" />
+                </div>
+
+                <h3 className="font-[Cormorant_Garamond] text-2xl text-[#44352c]">
+                  No Sales Data
+                </h3>
+
+                <p className="text-sm text-[#7b6d64] mt-2">
+                  Sales information will appear here once orders are recorded.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ===================================================
+            DAILY SALES TABLE
+        ==================================================== */}
+
+        <div className="mt-8 bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] overflow-hidden shadow-sm">
+          <div className="px-6 md:px-8 py-6 border-b border-[#eadfd3]">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-[#a78352] font-semibold">
+              Sales Records
+            </p>
+
+            <h2 className="font-[Cormorant_Garamond] text-3xl text-[#44352c] mt-1">
+              Daily Breakdown
+            </h2>
+          </div>
+
+          {salesData.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#f5efe7] border-b border-[#eadfd3]">
+                    <th className="text-left px-6 py-4 text-[10px] uppercase tracking-wider text-[#806f63] font-semibold">
+                      Date
+                    </th>
+
+                    <th className="text-right px-6 py-4 text-[10px] uppercase tracking-wider text-[#806f63] font-semibold">
+                      Sales
+                    </th>
+
+                    <th className="text-right px-6 py-4 text-[10px] uppercase tracking-wider text-[#806f63] font-semibold">
+                      Orders
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {salesData.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-[#f0e7dc] last:border-0 hover:bg-[#faf7f2] transition-colors"
+                    >
+                      <td className="px-6 py-5 text-sm text-[#5e5047]">
+                        {item?._id}
+                      </td>
+
+                      <td className="px-6 py-5 text-right font-[Cormorant_Garamond] text-xl text-[#9a784e]">
+                        {formatCurrency(item?.totalSales)}
+                      </td>
+
+                      <td className="px-6 py-5 text-right text-sm text-[#5e5047]">
+                        {item?.totalOrders || 0}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-10 text-center text-sm text-[#7b6d64]">
+              No daily sales records available.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
