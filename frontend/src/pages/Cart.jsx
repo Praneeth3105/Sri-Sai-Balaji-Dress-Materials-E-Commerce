@@ -23,26 +23,15 @@ import { setCart } from "@/redux/productSlice";
 
 const Cart = () => {
   const { cart } = useSelector((store) => store.product);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const accessToken = localStorage.getItem("accessToken");
-
   const API = `${import.meta.env.VITE_URL}/api/v1/cart`;
-
-
   const subtotal = Number(cart?.totalPrice || 0);
-
   const shipping = subtotal > 299 ? 0 : 10;
-
   const tax = subtotal * 0.05;
-
   const total = subtotal + shipping + tax;
 
-  // =========================================================
-  // LOAD CART
-  // =========================================================
 
   const loadCart = async () => {
     if (!accessToken) {
