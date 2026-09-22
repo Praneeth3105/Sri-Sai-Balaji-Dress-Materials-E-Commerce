@@ -254,9 +254,6 @@ const AdminOrders = () => {
           </div>
         </div>
 
-        {/* ===================================================
-            ORDERS
-        ==================================================== */}
 
         <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] overflow-hidden shadow-sm">
           <div className="px-6 md:px-8 py-6 border-b border-[#eadfd3]">
