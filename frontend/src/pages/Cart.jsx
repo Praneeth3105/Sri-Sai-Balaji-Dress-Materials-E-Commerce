@@ -31,9 +31,6 @@ const Cart = () => {
 
   const API = `${import.meta.env.VITE_URL}/api/v1/cart`;
 
-  // =========================================================
-  // CART TOTALS
-  // =========================================================
 
   const subtotal = Number(cart?.totalPrice || 0);
 
