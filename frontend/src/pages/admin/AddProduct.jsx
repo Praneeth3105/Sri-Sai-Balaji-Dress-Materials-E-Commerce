@@ -135,7 +135,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 md:pl-[300px] pt-20 pb-20">
+    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 md:pl-[300px] pt-[125px] pb-24">
       {/* =====================================================
           DECORATIVE BACKGROUND
       ====================================================== */}
@@ -155,7 +155,7 @@ const AddProduct = () => {
             HEADER
         ==================================================== */}
 
-        <div className="mb-10">
+        <div className="mb-12">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-[#a78352]" strokeWidth={1.5} />
 
@@ -386,7 +386,7 @@ const AddProduct = () => {
         </Card>
 
         {/* Brand note */}
-        <div className="text-center mt-8">
+        <div className="text-center mt-10 pb-4">
           <p className="font-[Cormorant_Garamond] italic text-lg text-[#9a784e]">
             Style that feels like you.
           </p>
