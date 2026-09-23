@@ -109,7 +109,7 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 md:pl-[300px] pt-20 pb-20">
+    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 md:pl-[300px] pt-[125px] pb-24">
       {/* =====================================================
           DECORATIVE BACKGROUND
       ====================================================== */}
@@ -124,8 +124,7 @@ const AdminUsers = () => {
         {/* ===================================================
             HEADER
         ==================================================== */}
-
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Users className="w-4 h-4 text-[#a78352]" strokeWidth={1.5} />
@@ -349,8 +348,7 @@ const AdminUsers = () => {
         {/* ===================================================
             FOOTER
         ==================================================== */}
-
-        <div className="text-center mt-10">
+        <div className="text-center mt-12 pb-6">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 h-px bg-[#d5c4ad]" />
 
