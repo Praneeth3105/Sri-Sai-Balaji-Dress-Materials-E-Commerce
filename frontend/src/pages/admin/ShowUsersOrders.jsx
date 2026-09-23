@@ -9,16 +9,19 @@ import {
   User,
   Mail,
   ShoppingBag,
+  ReceiptText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { toast } from "sonner";
 
 const ShowUsersOrders = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const getUserOrders = async () => {
     const accessToken = localStorage.getItem("accessToken");
 
@@ -39,8 +42,6 @@ const ShowUsersOrders = () => {
           },
         },
       );
-
-      console.log("USER ORDERS:", res.data);
 
       if (res.data.success) {
         setOrders(res.data.orders || []);
@@ -64,85 +65,145 @@ const ShowUsersOrders = () => {
     }
   }, [userId]);
 
+  const getStatusStyle = (status) => {
+    if (status === "Paid") {
+      return "bg-[#e8f1e8] text-[#536b53] border-[#cddfcd]";
+    }
+
+    if (status === "Pending") {
+      return "bg-[#f7f0df] text-[#967a45] border-[#ead9b5]";
+    }
+
+    return "bg-[#f6e8e5] text-[#9a625a] border-[#e8cbc6]";
+  };
+
   if (loading) {
     return (
-      <div className="pl-[350px] min-h-screen bg-gray-100 pt-24 pr-10 font-serif">
-        <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin" />
+      <div className="md:pl-[300px] min-h-screen bg-[#f8f4ee] pt-24 px-5 md:px-10">
+        <div className="min-h-[65vh] flex flex-col items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-[#eee5da] flex items-center justify-center">
+            <div className="w-7 h-7 border-[3px] border-[#d9c9b8] border-t-[#4a382c] rounded-full animate-spin" />
+          </div>
 
-          <p className="mt-4 text-gray-500">Loading user orders...</p>
+          <p className="mt-4 text-sm text-[#7b6d64] font-[DM_Sans]">
+            Loading user orders...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="pl-[350px] min-h-screen bg-gray-100 pt-20 pr-10 pb-10 font-serif">
+    <div className="md:pl-[300px] min-h-screen bg-[#f8f4ee] pt-24 pb-14 px-5 md:px-10">
       <div className="max-w-6xl mx-auto">
         {/* HEADER */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate(-1)}
-            className="bg-white"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mb-9">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="
+                w-11
+                h-11
+                rounded-full
+                bg-[#fffdf9]
+                border-[#e5d9ca]
+                text-[#4a382c]
+                hover:bg-[#eee5da]
+                cursor-pointer
+              "
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
 
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">User Orders</h1>
+            <div>
+              <p className="text-xs uppercase tracking-[0.22em] text-[#a78352] font-semibold font-[DM_Sans]">
+                Admin Panel
+              </p>
 
-            <p className="text-gray-500 mt-1">
-              View all orders placed by this user
-            </p>
+              <h1 className="text-3xl md:text-4xl font-[Cormorant_Garamond] font-semibold text-[#35271f]">
+                User Orders
+              </h1>
+
+              <p className="text-sm text-[#7b6d64] font-[DM_Sans] mt-1">
+                View all orders placed by this customer
+              </p>
+            </div>
+          </div>
+
+          {/* ORDER COUNT */}
+          <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#fffdf9] border border-[#e5d9ca]">
+            <div className="w-9 h-9 rounded-full bg-[#eee5da] flex items-center justify-center">
+              <ShoppingBag className="w-4 h-4 text-[#a78352]" />
+            </div>
+
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-[#8b7d73]">
+                Total Orders
+              </p>
+
+              <p className="text-lg font-semibold text-[#4a382c]">
+                {orders.length}
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* EMPTY */}
         {orders.length === 0 ? (
-          <Card className="shadow-sm">
-            <CardContent className="py-16 flex flex-col items-center justify-center text-center">
-              <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center">
-                <ShoppingBag className="w-10 h-10 text-orange-500" />
+          <Card className="border-[#e5d9ca] bg-[#fffdf9] rounded-3xl shadow-[0_15px_40px_rgba(74,56,44,0.06)]">
+            <CardContent className="py-20 flex flex-col items-center justify-center text-center">
+              <div className="w-20 h-20 rounded-full bg-[#f4efe7] flex items-center justify-center">
+                <ShoppingBag className="w-9 h-9 text-[#b99a6b]" />
               </div>
 
-              <h2 className="text-xl font-bold text-gray-800 mt-5">
+              <h2 className="text-2xl font-[Cormorant_Garamond] font-semibold text-[#35271f] mt-6">
                 No Orders Found
               </h2>
 
-              <p className="text-gray-500 mt-2">
+              <p className="text-sm text-[#7b6d64] mt-2 font-[DM_Sans]">
                 This user has not placed any orders yet.
               </p>
             </CardContent>
           </Card>
         ) : (
-          <>
+          <div className="space-y-7">
+            {orders.map((order) => (
+              <Card
+                key={order._id}
+                className="
+                  overflow-hidden
+                  rounded-3xl
+                  border-[#e5d9ca]
+                  bg-[#fffdf9]
+                  shadow-[0_15px_45px_rgba(74,56,44,0.07)]
+                "
+              >
+                {/* ORDER HEADER */}
+                <CardHeader className="bg-[#f4efe7] border-b border-[#e5d9ca] p-6 md:p-7">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 rounded-xl bg-[#fffdf9] border border-[#e5d9ca] flex items-center justify-center shrink-0">
+                        <ReceiptText className="w-5 h-5 text-[#a78352]" />
+                      </div>
 
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-xl font-bold text-gray-800">Orders</h2>
-
-              <span className="bg-orange-100 text-orange-700 px-4 py-2 rounded-full text-sm font-semibold">
-                {orders.length} {orders.length === 1 ? "Order" : "Orders"}
-              </span>
-            </div>
-            <div className="space-y-6">
-              {orders.map((order) => (
-                <Card
-                  key={order._id}
-                  className="shadow-sm border-gray-200 overflow-hidden"
-                >
-
-                  <CardHeader className="bg-white border-b">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
-                        <p className="text-xs text-gray-500">Order ID</p>
+                        <p className="text-[10px] uppercase tracking-[0.18em] text-[#8b7d73] font-[DM_Sans]">
+                          Order ID
+                        </p>
 
-                        <p className="font-mono text-sm font-semibold text-gray-800 break-all">
+                        <p className="mt-1 font-mono text-sm font-semibold text-[#4a382c] break-all">
                           {order._id}
                         </p>
                       </div>
+                    </div>
 
-                      <div className="flex items-center gap-2 text-gray-500">
-                        <CalendarDays className="w-4 h-4" />
-                        <span className="text-sm">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {/* DATE */}
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#fffdf9] border border-[#e5d9ca]">
+                        <CalendarDays className="w-4 h-4 text-[#a78352]" />
+
+                        <span className="text-xs text-[#6f625a]">
                           {order.createdAt
                             ? new Date(order.createdAt).toLocaleDateString(
                                 "en-IN",
@@ -155,167 +216,227 @@ const ShowUsersOrders = () => {
                             : "N/A"}
                         </span>
                       </div>
+
+                      {/* STATUS */}
                       <span
-                        className={`px-4 py-2 rounded-full text-sm font-semibold w-fit ${
-                          order.status === "Paid"
-                            ? "bg-green-100 text-green-700"
-                            : order.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-red-100 text-red-700"
-                        }`}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold border ${getStatusStyle(
+                          order.status,
+                        )}`}
                       >
                         {order.status}
                       </span>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {order.user && (
-                      <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                        <h3 className="font-bold text-gray-800 mb-3">
-                          Customer Information
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-orange-500" />
-                            <span className="text-gray-700">
-                              {order.user.firstName || ""}{" "}
-                              {order.user.lastName || ""}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-orange-500" />
-                            <span className="text-gray-700">
-                              {order.user.email || "N/A"}
-                            </span>
-                          </div>
+                  </div>
+                </CardHeader>
+
+                {/* ORDER CONTENT */}
+                <CardContent className="p-6 md:p-7">
+                  {/* CUSTOMER */}
+                  {order.user && (
+                    <div className="mb-7 rounded-2xl border border-[#e5d9ca] bg-[#faf7f2] p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-9 h-9 rounded-full bg-[#eee5da] flex items-center justify-center">
+                          <User className="w-4 h-4 text-[#a78352]" />
+                        </div>
+
+                        <div>
+                          <h3 className="font-[Cormorant_Garamond] text-xl font-semibold text-[#35271f]">
+                            Customer Information
+                          </h3>
+
+                          <p className="text-xs text-[#8b7d73]">
+                            Account details
+                          </p>
                         </div>
                       </div>
-                    )}
 
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <Package className="w-5 h-5 text-orange-500" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="flex items-center gap-3 bg-[#fffdf9] rounded-xl p-3 border border-[#eadfd3]">
+                          <User className="w-4 h-4 text-[#a78352]" />
 
-                        <h3 className="font-bold text-gray-800">
-                          Ordered Products
-                        </h3>
+                          <span className="text-sm text-[#4a382c]">
+                            {order.user.firstName || ""}{" "}
+                            {order.user.lastName || ""}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3 bg-[#fffdf9] rounded-xl p-3 border border-[#eadfd3]">
+                          <Mail className="w-4 h-4 text-[#a78352]" />
+
+                          <span className="text-sm text-[#4a382c] break-all">
+                            {order.user.email || "N/A"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* PRODUCTS */}
+                  <div>
+                    <div className="flex items-center justify-between gap-3 mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-[#eee5da] flex items-center justify-center">
+                          <Package className="w-4 h-4 text-[#a78352]" />
+                        </div>
+
+                        <div>
+                          <h3 className="font-[Cormorant_Garamond] text-xl font-semibold text-[#35271f]">
+                            Ordered Products
+                          </h3>
+
+                          <p className="text-xs text-[#8b7d73]">
+                            Items in this order
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="space-y-3">
-                        {order.products?.map((item, index) => {
-                          const product = item.productId;
-                          if (!product) {
-                            return (
-                              <div
-                                key={index}
-                                className="border rounded-xl p-4"
-                              >
-                                <p className="text-gray-500">
-                                  Product no longer available
+                      <span className="text-xs text-[#8b7d73]">
+                        {order.products?.length || 0} items
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {order.products?.map((item, index) => {
+                        const product = item.productId;
+
+                        if (!product) {
+                          return (
+                            <div
+                              key={index}
+                              className="
+                                border
+                                border-[#e5d9ca]
+                                rounded-2xl
+                                p-4
+                                bg-[#faf7f2]
+                              "
+                            >
+                              <p className="text-sm text-[#7b6d64]">
+                                Product no longer available
+                              </p>
+
+                              <p className="text-xs text-[#a0968f] mt-1">
+                                Quantity: {item.quantity}
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        const image =
+                          product?.productImage?.[0]?.url ||
+                          product?.productImg?.[0]?.url ||
+                          product?.productImg?.[0] ||
+                          "/Profile.png";
+
+                        return (
+                          <div
+                            key={product._id || index}
+                            className="
+                              flex
+                              flex-col
+                              sm:flex-row
+                              sm:items-center
+                              justify-between
+                              gap-5
+                              rounded-2xl
+                              border
+                              border-[#e5d9ca]
+                              bg-[#fffdf9]
+                              p-4
+                              hover:border-[#cdbb9f]
+                              transition
+                            "
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-20 h-20 rounded-xl bg-[#f4efe7] overflow-hidden border border-[#e5d9ca] shrink-0">
+                                <img
+                                  src={image}
+                                  alt={product.productName}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+
+                              <div>
+                                <h4 className="font-[Cormorant_Garamond] text-lg font-semibold text-[#35271f]">
+                                  {product.productName}
+                                </h4>
+
+                                <p className="text-sm text-[#a78352] font-semibold mt-1">
+                                  ₹
+                                  {Number(
+                                    product.productPrice || 0,
+                                  ).toLocaleString("en-IN")}
                                 </p>
 
-                                <p className="text-sm text-gray-400">
+                                <p className="text-xs text-[#8b7d73] mt-1">
                                   Quantity: {item.quantity}
                                 </p>
                               </div>
-                            );
-                          }
-                          const image =
-                            product?.productImage?.[0]?.url ||
-                            product?.productImg?.[0]?.url ||
-                            product?.productImg?.[0] ||
-                            "/Profile.png";
-                          return (
-                            <div
-                              key={product._id || index}
-                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-gray-200 rounded-xl p-4 bg-white"
-                            >
-                              <div className="flex items-center gap-4">
-                                <div className="w-20 h-20 rounded-lg bg-gray-100 overflow-hidden">
-                                  <img
-                                    src={image}
-                                    alt={product.productName}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-
-                                <div>
-                                  <h4 className="font-bold text-gray-800">
-                                    {product.productName}
-                                  </h4>
-
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    ₹
-                                    {Number(
-                                      product.productPrice || 0,
-                                    ).toLocaleString("en-IN")}
-                                  </p>
-
-                                  <p className="text-sm text-gray-500">
-                                    Quantity: {item.quantity}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="text-right">
-                                <p className="text-xs text-gray-500">
-                                  Product Total
-                                </p>
-
-                                <p className="font-bold text-orange-600">
-                                  ₹
-                                  {(
-                                    Number(product.productPrice || 0) *
-                                    Number(item.quantity || 0)
-                                  ).toLocaleString("en-IN")}
-                                </p>
-                              </div>
                             </div>
-                          );
-                        })}
-                      </div>
+
+                            <div className="sm:text-right">
+                              <p className="text-[10px] uppercase tracking-wider text-[#8b7d73]">
+                                Product Total
+                              </p>
+
+                              <p className="font-semibold text-lg text-[#4a382c] mt-1">
+                                ₹
+                                {(
+                                  Number(product.productPrice || 0) *
+                                  Number(item.quantity || 0)
+                                ).toLocaleString("en-IN")}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
+                  </div>
 
-                    <div className="mt-6 bg-orange-50 border border-orange-100 rounded-xl p-5">
-                      <div className="flex justify-between mb-3">
-                        <span className="text-gray-600">Subtotal</span>
+                  {/* TOTALS */}
+                  <div className="mt-7 rounded-2xl bg-[#f4efe7] border border-[#e5d9ca] p-5 md:p-6">
+                    <div className="max-w-md ml-auto">
+                      <div className="flex justify-between py-2">
+                        <span className="text-sm text-[#7b6d64]">Subtotal</span>
 
-                        <span className="font-semibold">
+                        <span className="text-sm font-semibold text-[#4a382c]">
                           ₹{Number(order.amount || 0).toLocaleString("en-IN")}
                         </span>
                       </div>
 
-                      <div className="flex justify-between mb-3">
-                        <span className="text-gray-600">Tax</span>
+                      <div className="flex justify-between py-2">
+                        <span className="text-sm text-[#7b6d64]">Tax</span>
 
-                        <span className="font-semibold">
+                        <span className="text-sm font-semibold text-[#4a382c]">
                           ₹{Number(order.tax || 0).toLocaleString("en-IN")}
                         </span>
                       </div>
 
-                      <div className="flex justify-between mb-3">
-                        <span className="text-gray-600">Shipping</span>
+                      <div className="flex justify-between py-2">
+                        <span className="text-sm text-[#7b6d64]">Shipping</span>
 
-                        <span className="font-semibold">
+                        <span className="text-sm font-semibold text-[#4a382c]">
                           ₹{Number(order.shipping || 0).toLocaleString("en-IN")}
                         </span>
                       </div>
 
-                      <div className="border-t border-orange-200 pt-4 flex justify-between">
-                        <span className="font-bold text-lg">Total Amount</span>
+                      <div className="border-t border-[#d9cabb] mt-3 pt-4 flex items-center justify-between">
+                        <span className="font-[Cormorant_Garamond] text-xl font-semibold text-[#35271f]">
+                          Total Amount
+                        </span>
 
-                        <span className="font-bold text-xl text-orange-600 flex items-center">
+                        <span className="font-semibold text-xl text-[#4a382c] flex items-center">
                           <IndianRupee className="w-5 h-5" />
 
                           {Number(order.amount || 0).toLocaleString("en-IN")}
                         </span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     </div>
