@@ -109,7 +109,7 @@ const AdminOrders = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f4ee] pl-0 lg:pl-[350px] pt-24 px-6">
+      <div className="min-h-screen bg-[#f8f4ee] pl-0 lg:pl-[350px] pt-20 pb-20 px-6">
         <div className="max-w-[1450px] mx-auto animate-pulse">
           <div className="h-4 w-32 bg-[#e5d9ca] rounded mb-4" />
 
@@ -131,7 +131,7 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 lg:pl-[350px] pt-20 pb-20">
+    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 lg:pl-[300px] pt-[125px] pb-24">
       {/* =====================================================
           DECORATIVE BACKGROUND
       ====================================================== */}
@@ -146,8 +146,7 @@ const AdminOrders = () => {
         {/* ===================================================
             HEADER
         ==================================================== */}
-
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <ClipboardList className="w-4 h-4 text-[#a78352]" />
@@ -254,7 +253,6 @@ const AdminOrders = () => {
           </div>
         </div>
 
-
         <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] overflow-hidden shadow-sm">
           <div className="px-6 md:px-8 py-6 border-b border-[#eadfd3]">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#a78352] font-semibold">
@@ -265,7 +263,6 @@ const AdminOrders = () => {
               All Orders
             </h2>
           </div>
-
 
           {orders.length === 0 ? (
             <div className="py-20 px-6 text-center">
@@ -283,7 +280,6 @@ const AdminOrders = () => {
             </div>
           ) : (
             <>
-
               <div className="hidden xl:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
