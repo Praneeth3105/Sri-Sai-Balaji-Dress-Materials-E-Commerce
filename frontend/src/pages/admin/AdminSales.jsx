@@ -127,7 +127,7 @@ const AdminSales = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f4ee] pl-0 lg:pl-[350px] pt-24 px-6">
+      <div className="min-h-screen bg-[#f8f4ee] pl-0 lg:pl-[300px] pt-[125px] pb-20 px-6">
         <div className="max-w-[1450px] mx-auto animate-pulse">
           <div className="h-4 w-32 bg-[#e5d9ca] rounded mb-4" />
 
@@ -149,7 +149,7 @@ const AdminSales = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 lg:pl-[350px] pt-20 pb-20">
+    <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028] pl-0 lg:pl-[300px] pt-[125px] pb-24">
       {/* =====================================================
           DECORATIVE BACKGROUND
       ====================================================== */}
@@ -165,7 +165,7 @@ const AdminSales = () => {
             HEADER
         ==================================================== */}
 
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="w-4 h-4 text-[#a78352]" />
