@@ -176,7 +176,6 @@ const ProductImg = ({ images = [] }) => {
           }}
         >
           <span className="hidden lg:inline">Move mouse to zoom</span>
-
           <span className="inline lg:hidden">Click image to zoom</span>
         </div>
       </div>
