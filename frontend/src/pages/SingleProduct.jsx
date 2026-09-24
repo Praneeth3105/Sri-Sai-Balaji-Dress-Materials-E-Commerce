@@ -157,7 +157,6 @@
               </p>
             </div>
 
-            {/* Item 2 */}
             <div
               className="rounded-2xl px-6 py-5 text-center"
               style={{
