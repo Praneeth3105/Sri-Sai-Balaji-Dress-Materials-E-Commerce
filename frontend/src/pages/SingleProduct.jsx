@@ -216,9 +216,6 @@
             </div>
           </div>
 
-          {/* ==================================================
-              EDITORIAL FOOTER MESSAGE
-          ================================================== */}
           <div className="text-center mt-16">
             <div className="flex items-center justify-center gap-4 mb-4">
               <span
