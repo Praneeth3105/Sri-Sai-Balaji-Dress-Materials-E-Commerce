@@ -18,6 +18,7 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import ShowUsersOrders from "./pages/admin/ShowUsersOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
 import UserInfo from "./pages/admin/UserInfo";
+import OutOfStock from "./pages/admin/OutOfStock";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SingleProduct from "./pages/SingleProduct";
 import AddressForm from "./pages/AddressForm";
@@ -188,6 +189,10 @@ const router = createBrowserRouter([
       {
         path: "orders",
         element: <AdminOrders />,
+      },
+      {
+        path: "out-of-stock",
+        element: <OutOfStock />,
       },
       {
         path: "users/orders/:userId",

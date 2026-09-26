@@ -2,6 +2,60 @@ import razorpayInstance from "../Config/razorpay.js";
 import { Order } from "../models/OrderModel.js";
 import crypto from "crypto";
 import { Cart } from "../models/cartModel.js";
+import { Product } from "../models/productModel.js";
+
+const normalize = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
+
+const getVariantStock = (variant, size) => {
+  const stockItem = (variant?.sizeStock || []).find(
+    (item) => normalize(item.size) === normalize(size),
+  );
+
+  if (stockItem) return Math.max(0, Number(stockItem.quantity) || 0);
+
+  const sizeExists = (variant?.sizes || []).some(
+    (item) => normalize(item) === normalize(size),
+  );
+
+  return sizeExists ? 1 : 0;
+};
+
+const validateOrderStock = async (products) => {
+  for (const item of products) {
+    const product = await Product.findById(item.productId);
+
+    if (!product) {
+      throw new Error("One of the selected products is no longer available");
+    }
+
+    if (!product.variants?.length) continue;
+
+    const variant = product.variants.find(
+      (entry) => normalize(entry.color) === normalize(item.color),
+    );
+
+    if (!variant) {
+      throw new Error(`Color ${item.color || ""} is no longer available`);
+    }
+
+    const stock = getVariantStock(variant, item.size);
+
+    if (stock <= 0) {
+      throw new Error(
+        `${product.productName} - ${variant.color} / ${item.size || "size"} is out of stock`,
+      );
+    }
+
+    if (Number(item.quantity) > stock) {
+      throw new Error(
+        `Only ${stock} item${stock === 1 ? "" : "s"} available for ${product.productName} - ${variant.color} / ${item.size}`,
+      );
+    }
+  }
+};
 
 export const createOrder = async (req, res) => {
   try {
@@ -22,6 +76,8 @@ export const createOrder = async (req, res) => {
         message: "No products found",
       });
     }
+
+    await validateOrderStock(products);
 
     const options = {
       amount: Math.round(Number(amount) * 100),
@@ -142,10 +198,112 @@ export const verifyPayment = async (req, res) => {
 
     console.log("✅ RAZORPAY SIGNATURE VERIFIED");
 
+    const existingOrder = await Order.findOne({
+      razorpayOrderId: razorpay_order_id,
+      user: userId,
+    });
+
+    if (!existingOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Prevent repeated Razorpay callbacks from reducing stock twice.
+    if (existingOrder.status === "Paid") {
+      return res.status(200).json({
+        success: true,
+        message: "Payment Already Verified",
+        order: existingOrder,
+      });
+    }
+
+    const productsToSave = new Map();
+
+    // Validate and reduce each purchased variant in memory first.
+    for (const orderItem of existingOrder.products) {
+      const product = await Product.findById(orderItem.productId);
+
+      if (!product || !product.variants?.length) {
+        continue;
+      }
+
+      const variant = product.variants.find(
+        (item) =>
+          String(item.color || "")
+            .trim()
+            .toLowerCase() ===
+          String(orderItem.color || "")
+            .trim()
+            .toLowerCase(),
+      );
+
+      if (!variant) {
+        throw new Error(
+          `Color ${orderItem.color || ""} is no longer available`,
+        );
+      }
+
+      let stockItem = variant.sizeStock?.find(
+        (item) =>
+          String(item.size || "")
+            .trim()
+            .toLowerCase() ===
+          String(orderItem.size || "")
+            .trim()
+            .toLowerCase(),
+      );
+
+      // Backward compatibility: older products had sizes but no stock field.
+      // Treat the old record as one available unit and create the stock entry.
+      if (!stockItem) {
+        const sizeExists = (variant.sizes || []).some(
+          (size) =>
+            String(size).trim().toLowerCase() ===
+            String(orderItem.size || "")
+              .trim()
+              .toLowerCase(),
+        );
+
+        if (!sizeExists) {
+          throw new Error(
+            `Size ${orderItem.size || ""} is no longer available for ${variant.color}`,
+          );
+        }
+
+        if (!variant.sizeStock) {
+          variant.sizeStock = [];
+        }
+
+        stockItem = {
+          size: orderItem.size,
+          quantity: 1,
+        };
+
+        variant.sizeStock.push(stockItem);
+      }
+
+      if (Number(stockItem.quantity) < Number(orderItem.quantity)) {
+        throw new Error(
+          `Only ${stockItem.quantity} item${Number(stockItem.quantity) === 1 ? "" : "s"} available for ${variant.color} / ${orderItem.size}`,
+        );
+      }
+
+      stockItem.quantity =
+        Number(stockItem.quantity) - Number(orderItem.quantity);
+
+      productsToSave.set(String(product._id), product);
+    }
+
+    for (const product of productsToSave.values()) {
+      await product.save();
+    }
+
     const order = await Order.findOneAndUpdate(
       {
-        razorpayOrderId: razorpay_order_id,
-        user: userId,
+        _id: existingOrder._id,
+        status: "Pending",
       },
       {
         status: "Paid",

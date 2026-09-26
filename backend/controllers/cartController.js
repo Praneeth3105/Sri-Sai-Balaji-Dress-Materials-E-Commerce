@@ -14,6 +14,20 @@ const findVariant = (product, color) => {
   );
 };
 
+const getVariantStock = (variant, size) => {
+  const stockItem = (variant?.sizeStock || []).find(
+    (item) => normalize(item.size) === normalize(size),
+  );
+
+  if (stockItem) return Math.max(0, Number(stockItem.quantity) || 0);
+
+  const sizeExists = (variant?.sizes || []).some(
+    (item) => normalize(item) === normalize(size),
+  );
+
+  return sizeExists ? 1 : 0;
+};
+
 export const getCart = async (req, res) => {
   try {
     const userId = req.id;
@@ -98,6 +112,7 @@ export const addToCart = async (req, res) => {
 
       selectedColor = variant.color;
 
+      // If the color has sizes, the customer must select one.
       if (variant.sizes?.length > 0) {
         if (!selectedSize) {
           return res.status(400).json({
@@ -120,6 +135,22 @@ export const addToCart = async (req, res) => {
         selectedSize = variant.sizes.find(
           (item) => normalize(item) === normalize(selectedSize),
         );
+
+        const availableStock = getVariantStock(variant, selectedSize);
+
+        if (availableStock <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: `This color and size is out of stock`,
+          });
+        }
+
+        if (selectedQuantity > availableStock) {
+          return res.status(400).json({
+            success: false,
+            message: `Only ${availableStock} item${availableStock === 1 ? "" : "s"} available for ${selectedColor} / ${selectedSize}`,
+          });
+        }
       } else {
         selectedSize = "";
       }
@@ -172,6 +203,24 @@ export const addToCart = async (req, res) => {
       );
     }
 
+    if (product.variants?.length > 0 && selectedSize) {
+      const variant = findVariant(product, selectedColor);
+      const availableStock = getVariantStock(variant, selectedSize);
+      const cartItem = cart.items.find(
+        (item) =>
+          item.productId.toString() === productId.toString() &&
+          normalize(item.color) === normalize(selectedColor) &&
+          normalize(item.size) === normalize(selectedSize),
+      );
+
+      if (Number(cartItem?.quantity || 0) > availableStock) {
+        return res.status(400).json({
+          success: false,
+          message: `Only ${availableStock} item${availableStock === 1 ? "" : "s"} available for ${selectedColor} / ${selectedSize}`,
+        });
+      }
+    }
+
     await cart.save();
 
     const populatedCart = await Cart.findById(cart._id).populate(
@@ -222,6 +271,20 @@ export const updateQuantity = async (req, res) => {
     }
 
     if (type === "increase") {
+      const product = await Product.findById(productId);
+
+      if (product?.variants?.length > 0 && item.size) {
+        const variant = findVariant(product, item.color);
+        const availableStock = getVariantStock(variant, item.size);
+
+        if (item.quantity >= availableStock) {
+          return res.status(400).json({
+            success: false,
+            message: `Only ${availableStock} item${availableStock === 1 ? "" : "s"} available for ${item.color} / ${item.size}`,
+          });
+        }
+      }
+
       item.quantity += 1;
     }
 

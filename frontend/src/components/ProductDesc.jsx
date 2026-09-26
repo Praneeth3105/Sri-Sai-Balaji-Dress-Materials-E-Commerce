@@ -20,7 +20,40 @@ const ProductDesc = ({
   const accessToken = localStorage.getItem("accessToken");
 
   const hasVariants = variants?.length > 0;
-  const availableSizes = selectedVariant?.sizes || [];
+
+  const getSizeStock = (variant, size) => {
+    const stock = variant?.sizeStock?.find(
+      (item) =>
+        String(item?.size || "")
+          .trim()
+          .toLowerCase() ===
+        String(size || "")
+          .trim()
+          .toLowerCase(),
+    );
+
+    if (stock) return Math.max(0, Number(stock.quantity) || 0);
+
+    // Backward compatibility for old products that have no sizeStock field.
+    const exists = (variant?.sizes || []).some(
+      (item) =>
+        String(item).trim().toLowerCase() ===
+        String(size || "")
+          .trim()
+          .toLowerCase(),
+    );
+
+    return exists ? 1 : 0;
+  };
+
+  const availableSizes = (selectedVariant?.sizes || []).filter(
+    (size) => getSizeStock(selectedVariant, size) > 0,
+  );
+
+  const selectedStock = getSizeStock(selectedVariant, selectedSize);
+
+  const variantHasStock = (variant) =>
+    (variant?.sizes || []).some((size) => getSizeStock(variant, size) > 0);
 
   // When the color changes, reset the size because the previous size may
   // not exist for the newly selected color.
@@ -32,8 +65,19 @@ const ProductDesc = ({
   // QUANTITY
   // ==================================================
   const handleIncrease = () => {
-    setQuantity((prev) => prev + 1);
+    setQuantity((prev) => Math.min(prev + 1, Number(selectedStock || 0)));
   };
+
+  useEffect(() => {
+    const maxStock = Number(selectedStock || 0);
+
+    if (maxStock <= 0) {
+      setQuantity(1);
+      return;
+    }
+
+    setQuantity((prev) => Math.min(Math.max(prev, 1), maxStock));
+  }, [selectedStock]);
 
   const handleDecrease = () => {
     setQuantity((prev) => {
@@ -66,6 +110,22 @@ const ProductDesc = ({
 
     if (hasVariants && availableSizes.length > 0 && !selectedSize) {
       toast.error("Please select a size");
+      return;
+    }
+
+    if (
+      hasVariants &&
+      availableSizes.length > 0 &&
+      Number(selectedStock) <= 0
+    ) {
+      toast.error("This color and size is out of stock");
+      return;
+    }
+
+    if (quantity > Number(selectedStock || 0)) {
+      toast.error(
+        `Only ${selectedStock} item${Number(selectedStock) === 1 ? "" : "s"} available`,
+      );
       return;
     }
 
@@ -229,18 +289,24 @@ const ProductDesc = ({
           <div className="flex flex-wrap gap-2">
             {variants.map((variant) => {
               const selected = selectedVariant?._id === variant._id;
+              const inStock = variantHasStock(variant);
 
               return (
                 <button
                   key={variant._id || variant.color}
                   type="button"
-                  disabled={loading}
+                  disabled={loading || !inStock}
                   onClick={() => onVariantChange?.(variant)}
                   className="px-5 py-2.5 rounded-full border text-xs transition-all duration-200 cursor-pointer disabled:opacity-50"
                   style={{
                     backgroundColor: selected ? "#3d2c23" : "#fffdf9",
-                    color: selected ? "#fffdf9" : "#66584f",
+                    color: selected
+                      ? "#fffdf9"
+                      : inStock
+                        ? "#66584f"
+                        : "#a9a09a",
                     borderColor: selected ? "#3d2c23" : "#ded1c2",
+                    textDecoration: inStock ? "none" : "line-through",
                   }}
                 >
                   {variant.color}
@@ -279,20 +345,27 @@ const ProductDesc = ({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {availableSizes.map((size) => {
+            {(selectedVariant?.sizes || []).map((size) => {
               const selected = selectedSize === size;
+              const sizeStock = getSizeStock(selectedVariant, size);
+              const inStock = sizeStock > 0;
 
               return (
                 <button
                   key={size}
                   type="button"
-                  disabled={loading}
+                  disabled={loading || !inStock}
                   onClick={() => setSelectedSize(size)}
                   className="min-w-[52px] px-4 py-2.5 rounded-full border text-xs transition-all duration-200 cursor-pointer disabled:opacity-50"
                   style={{
                     backgroundColor: selected ? "#3d2c23" : "#fffdf9",
-                    color: selected ? "#fffdf9" : "#66584f",
+                    color: selected
+                      ? "#fffdf9"
+                      : inStock
+                        ? "#66584f"
+                        : "#a9a09a",
                     borderColor: selected ? "#3d2c23" : "#ded1c2",
+                    textDecoration: inStock ? "none" : "line-through",
                   }}
                 >
                   {size}
@@ -328,6 +401,14 @@ const ProductDesc = ({
             {product.productDesc}
           </p>
         </div>
+      )}
+
+      {hasVariants && selectedSize && (
+        <p className="text-xs" style={{ color: "#9b8878" }}>
+          {Number(selectedStock) > 0
+            ? `${selectedStock} item${Number(selectedStock) === 1 ? "" : "s"} available for ${selectedVariant?.color || "this color"} / ${selectedSize}`
+            : "Out of stock for this color and size"}
+        </p>
       )}
 
       {/* ==================================================

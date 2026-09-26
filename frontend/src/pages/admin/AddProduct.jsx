@@ -51,6 +51,7 @@ const createEmptyVariant = () => ({
   color: "",
   images: [],
   sizes: [],
+  sizeStock: [],
   customSize: "",
 });
 
@@ -126,10 +127,19 @@ const AddProduct = () => {
     const variant = productData.variants[variantIndex];
     const exists = variant.sizes.includes(size);
 
+    if (exists) {
+      updateVariant(variantIndex, {
+        sizes: variant.sizes.filter((item) => item !== size),
+        sizeStock: (variant.sizeStock || []).filter(
+          (item) => item.size !== size,
+        ),
+      });
+      return;
+    }
+
     updateVariant(variantIndex, {
-      sizes: exists
-        ? variant.sizes.filter((item) => item !== size)
-        : [...variant.sizes, size],
+      sizes: [...variant.sizes, size],
+      sizeStock: [...(variant.sizeStock || []), { size, quantity: 0 }],
     });
   };
 
@@ -156,7 +166,22 @@ const AddProduct = () => {
 
     updateVariant(variantIndex, {
       sizes: [...variant.sizes, customSize],
+      sizeStock: [
+        ...(variant.sizeStock || []),
+        { size: customSize, quantity: 0 },
+      ],
       customSize: "",
+    });
+  };
+
+  const handleStockChange = (variantIndex, size, value) => {
+    updateVariant(variantIndex, {
+      sizeStock: (productData.variants[variantIndex]?.sizeStock || []).map(
+        (item) =>
+          item.size === size
+            ? { ...item, quantity: Math.max(0, Number(value) || 0) }
+            : item,
+      ),
     });
   };
 
@@ -247,6 +272,10 @@ const AddProduct = () => {
       return {
         color: variant.color.trim(),
         sizes: variant.sizes,
+        sizeStock: (variant.sizeStock || []).map((item) => ({
+          size: item.size,
+          quantity: Math.max(0, Number(item.quantity) || 0),
+        })),
         imageIndexes,
       };
     });
@@ -676,6 +705,56 @@ const AddProduct = () => {
                                 </button>
                               </span>
                             ))}
+                          </div>
+                        )}
+
+                        {/* STOCK / QUANTITY */}
+                        {variant.sizes.length > 0 && (
+                          <div className="mt-4 grid gap-3">
+                            <div>
+                              <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
+                                Available Quantity for Each Size
+                              </Label>
+                              <p className="text-xs text-[#8b7d73] mt-1">
+                                Enter how many pieces are available for this
+                                color and size.
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {variant.sizes.map((size) => {
+                                const stock =
+                                  variant.sizeStock?.find(
+                                    (item) =>
+                                      String(item.size).toLowerCase() ===
+                                      String(size).toLowerCase(),
+                                  )?.quantity ?? 0;
+
+                                return (
+                                  <div
+                                    key={`stock-${variantIndex}-${size}`}
+                                    className="flex items-center justify-between gap-3 rounded-xl border border-[#ded1c2] bg-[#fffdf9] px-3 py-2"
+                                  >
+                                    <span className="text-sm font-medium text-[#66584f]">
+                                      {size}
+                                    </span>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={stock}
+                                      onChange={(e) =>
+                                        handleStockChange(
+                                          variantIndex,
+                                          size,
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="w-24 h-9 rounded-lg border-[#ded1c2] bg-white text-center text-sm text-[#44352c]"
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>

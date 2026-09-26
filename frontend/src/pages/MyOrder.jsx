@@ -484,6 +484,11 @@ const MyOrder = () => {
             );
           })}
         </div>
+
+        {/* =====================================================
+            FOOTER BRAND LINE
+        ====================================================== */}
+
         <div className="text-center mt-12 pb-4">
           <div className="flex items-center justify-center gap-3">
             <span className="w-12 h-px bg-[#d5c4ad]" />
@@ -492,6 +497,7 @@ const MyOrder = () => {
 
             <span className="w-12 h-px bg-[#d5c4ad]" />
           </div>
+
           <p className="font-[Cormorant_Garamond] italic text-lg text-[#9a784e] mt-3">
             Style that feels like you.
           </p>

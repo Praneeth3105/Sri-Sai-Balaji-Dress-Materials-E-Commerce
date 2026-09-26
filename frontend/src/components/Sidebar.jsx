@@ -4,6 +4,7 @@ import {
   PackageSearch,
   Users,
   ClipboardList,
+  AlertTriangle,
   Sparkles,
 } from "lucide-react";
 import React from "react";
@@ -35,6 +36,11 @@ const Sidebar = () => {
       to: "/dashboard/orders",
       label: "Orders",
       icon: ClipboardList,
+    },
+    {
+      to: "/dashboard/out-of-stock",
+      label: "Out of Stock",
+      icon: AlertTriangle,
     },
   ];
 
@@ -82,9 +88,11 @@ const Sidebar = () => {
         <p className="px-4 mb-4 text-[9px] uppercase tracking-[0.3em] font-semibold text-[#9a8a7e]">
           Management
         </p>
+
         <div className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
+
             return (
               <NavLink
                 key={item.to}

@@ -1,5 +1,21 @@
 import mongoose from "mongoose";
 
+const sizeStockSchema = new mongoose.Schema(
+  {
+    size: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    quantity: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+  },
+  { _id: false },
+);
+
 const variantSchema = new mongoose.Schema(
   {
     color: {
@@ -15,6 +31,10 @@ const variantSchema = new mongoose.Schema(
     ],
     sizes: {
       type: [String],
+      default: [],
+    },
+    sizeStock: {
+      type: [sizeStockSchema],
       default: [],
     },
   },

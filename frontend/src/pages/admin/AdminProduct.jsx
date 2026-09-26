@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Edit, Search, Trash2, X, Package, Plus } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import {
   Select,
@@ -53,6 +53,34 @@ const AdminProduct = () => {
   const { products } = useSelector((store) => store.product);
 
   const accessToken = localStorage.getItem("accessToken");
+
+  useEffect(() => {
+    const getAdminProducts = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_URL}/api/v1/product/getallproducts`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
+
+        if (res.data.success) {
+          dispatch(setProducts(res.data.products || []));
+        }
+      } catch (error) {
+        console.error("Admin Products Load Error:", error);
+        toast.error(
+          error?.response?.data?.message || "Failed to load products",
+        );
+      }
+    };
+
+    if (accessToken) {
+      getAdminProducts();
+    }
+  }, [accessToken, dispatch]);
 
   const normalizeEditVariants = (variants = []) =>
     variants.map((variant) => {
@@ -131,7 +159,7 @@ const AdminProduct = () => {
 
             return {
               size,
-              quantity: Math.max(0, Number(existing?.quantity ?? 1) || 0),
+              quantity: Math.max(0, Number(existing?.quantity ?? 0) || 0),
             };
           }),
         };

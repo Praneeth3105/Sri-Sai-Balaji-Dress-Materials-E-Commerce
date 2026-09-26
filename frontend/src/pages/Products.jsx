@@ -42,7 +42,7 @@ const Products = () => {
       setLoading(true);
 
       const res = await axios.get(
-        "http://localhost:8000/api/v1/product/getallproducts"
+        `${import.meta.env.VITE_URL}/api/v1/product/getavailableproducts`,
       );
 
       if (res.data.success) {
@@ -52,9 +52,7 @@ const Products = () => {
     } catch (error) {
       console.log(error);
 
-      toast.error(
-        error.response?.data?.message || "Failed to load products"
-      );
+      toast.error(error.response?.data?.message || "Failed to load products");
     } finally {
       setLoading(false);
     }
@@ -71,54 +69,34 @@ const Products = () => {
     // Search
     if (search.trim() !== "") {
       filtered = filtered.filter((p) =>
-        p.productName
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
+        p.productName?.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
     // Category
     if (category !== "All") {
-      filtered = filtered.filter(
-        (p) => p.category === category
-      );
+      filtered = filtered.filter((p) => p.category === category);
     }
 
     // Brand
     if (brand !== "All") {
-      filtered = filtered.filter(
-        (p) => p.brand === brand
-      );
+      filtered = filtered.filter((p) => p.brand === brand);
     }
 
     // Price
     filtered = filtered.filter(
-      (p) =>
-        p.productPrice >= priceRange[0] &&
-        p.productPrice <= priceRange[1]
+      (p) => p.productPrice >= priceRange[0] && p.productPrice <= priceRange[1],
     );
 
     // Sorting
     if (sortOrder === "lowToHigh") {
-      filtered.sort(
-        (a, b) => a.productPrice - b.productPrice
-      );
+      filtered.sort((a, b) => a.productPrice - b.productPrice);
     } else if (sortOrder === "highToLow") {
-      filtered.sort(
-        (a, b) => b.productPrice - a.productPrice
-      );
+      filtered.sort((a, b) => b.productPrice - a.productPrice);
     }
 
     dispatch(setProducts(filtered));
-  }, [
-    search,
-    category,
-    brand,
-    sortOrder,
-    priceRange,
-    allProducts,
-    dispatch,
-  ]);
+  }, [search, category, brand, sortOrder, priceRange, allProducts, dispatch]);
 
   // --------------------------------------------------
   // INITIAL LOAD
@@ -131,8 +109,7 @@ const Products = () => {
     <div
       className="min-h-screen pt-24 pb-20"
       style={{
-        background:
-          "linear-gradient(180deg, #fbf8f2 0%, #f7f1e8 100%)",
+        background: "linear-gradient(180deg, #fbf8f2 0%, #f7f1e8 100%)",
       }}
     >
       {/* --------------------------------------------------
@@ -140,7 +117,6 @@ const Products = () => {
       -------------------------------------------------- */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="text-center max-w-3xl mx-auto">
-          
           {/* Small Label */}
           <div className="flex items-center justify-center gap-3 mb-4">
             <span className="w-10 h-px bg-[#b8945a]" />
@@ -178,9 +154,8 @@ const Products = () => {
               color: "#78675c",
             }}
           >
-            Discover thoughtfully selected fabrics, elegant dress
-            materials and everyday styles designed to make you feel
-            beautiful.
+            Discover thoughtfully selected fabrics, elegant dress materials and
+            everyday styles designed to make you feel beautiful.
           </p>
         </div>
       </section>
@@ -190,7 +165,6 @@ const Products = () => {
       -------------------------------------------------- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
-
           {/* --------------------------------------------------
               FILTER SIDEBAR
           -------------------------------------------------- */}
@@ -200,8 +174,7 @@ const Products = () => {
               style={{
                 backgroundColor: "rgba(255,255,255,0.58)",
                 borderColor: "#e7dccd",
-                boxShadow:
-                  "0 12px 35px rgba(61,44,35,0.05)",
+                boxShadow: "0 12px 35px rgba(61,44,35,0.05)",
               }}
             >
               <FilterSidebar
@@ -222,7 +195,6 @@ const Products = () => {
               PRODUCTS SECTION
           -------------------------------------------------- */}
           <div className="flex flex-col flex-1 min-w-0">
-
             {/* TOP BAR */}
             <div
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7 pb-5 border-b"
@@ -240,15 +212,10 @@ const Products = () => {
                   }}
                 >
                   Showing{" "}
-                  <span
-                    className="font-semibold"
-                    style={{ color: "#3d2c23" }}
-                  >
+                  <span className="font-semibold" style={{ color: "#3d2c23" }}>
                     {products?.length || 0}
                   </span>{" "}
-                  {products?.length === 1
-                    ? "product"
-                    : "products"}
+                  {products?.length === 1 ? "product" : "products"}
                 </p>
               </div>
 
@@ -266,9 +233,7 @@ const Products = () => {
 
                 <Select
                   value={sortOrder}
-                  onValueChange={(value) =>
-                    setSortOrder(value)
-                  }
+                  onValueChange={(value) => setSortOrder(value)}
                 >
                   <SelectTrigger
                     className="w-full sm:w-[210px] h-11 rounded-full px-5 bg-white/70 focus:ring-0"
@@ -295,8 +260,7 @@ const Products = () => {
                           value={item.value}
                           className="cursor-pointer"
                           style={{
-                            fontFamily:
-                              "DM Sans, sans-serif",
+                            fontFamily: "DM Sans, sans-serif",
                           }}
                         >
                           {item.label}
@@ -313,14 +277,9 @@ const Products = () => {
             -------------------------------------------------- */}
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                {Array.from({ length: 8 }).map(
-                  (_, index) => (
-                    <ProductCard
-                      key={index}
-                      loading={true}
-                    />
-                  )
-                )}
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <ProductCard key={index} loading={true} />
+                ))}
               </div>
             ) : products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
@@ -338,7 +297,6 @@ const Products = () => {
               -------------------------------------------------- */
               <div className="min-h-[420px] flex items-center justify-center">
                 <div className="text-center max-w-md">
-
                   <div
                     className="w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center"
                     style={{
@@ -358,8 +316,7 @@ const Products = () => {
                   <h2
                     className="text-3xl mb-3"
                     style={{
-                      fontFamily:
-                        "Cormorant Garamond, serif",
+                      fontFamily: "Cormorant Garamond, serif",
                       color: "#3d2c23",
                     }}
                   >
@@ -369,14 +326,12 @@ const Products = () => {
                   <p
                     className="text-sm leading-6"
                     style={{
-                      fontFamily:
-                        "DM Sans, sans-serif",
+                      fontFamily: "DM Sans, sans-serif",
                       color: "#78675c",
                     }}
                   >
-                    We couldn't find products matching
-                    your current filters. Try changing your
-                    search or filter options.
+                    We couldn't find products matching your current filters. Try
+                    changing your search or filter options.
                   </p>
                 </div>
               </div>
@@ -425,17 +380,13 @@ const Products = () => {
             <h2
               className="text-4xl sm:text-5xl"
               style={{
-                fontFamily:
-                  "Cormorant Garamond, serif",
+                fontFamily: "Cormorant Garamond, serif",
                 fontWeight: 500,
                 color: "#3d2c23",
               }}
             >
               Find something that feels
-              <span className="italic">
-                {" "}
-                uniquely you.
-              </span>
+              <span className="italic"> uniquely you.</span>
             </h2>
 
             <p
@@ -445,9 +396,8 @@ const Products = () => {
                 color: "#78675c",
               }}
             >
-              From everyday elegance to special
-              occasions, explore styles chosen for
-              comfort, beauty and confidence.
+              From everyday elegance to special occasions, explore styles chosen
+              for comfort, beauty and confidence.
             </p>
           </div>
         </div>

@@ -106,13 +106,35 @@ export const addProduct = async (req, res) => {
       }
 
       const sizes = Array.isArray(variant.sizes)
-        ? variant.sizes.map((size) => String(size).trim()).filter(Boolean)
+        ? [
+            ...new Set(
+              variant.sizes.map((size) => String(size).trim()).filter(Boolean),
+            ),
+          ]
         : [];
+
+      const rawStock = Array.isArray(variant.sizeStock)
+        ? variant.sizeStock
+        : [];
+      const sizeStock = sizes.map((size) => {
+        const stock = rawStock.find(
+          (item) =>
+            String(item?.size || "")
+              .trim()
+              .toLowerCase() === size.toLowerCase(),
+        );
+
+        return {
+          size,
+          quantity: Math.max(0, Number(stock?.quantity ?? 0) || 0),
+        };
+      });
 
       return {
         color: String(variant.color).trim(),
         images,
-        sizes: [...new Set(sizes)],
+        sizes,
+        sizeStock,
       };
     });
 
@@ -148,13 +170,88 @@ export const addProduct = async (req, res) => {
 
 export const getAllProduct = async (_, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
       products,
     });
   } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const getSizeQuantity = (variant, size) => {
+  const stock = (variant?.sizeStock || []).find(
+    (item) =>
+      String(item?.size || "")
+        .trim()
+        .toLowerCase() ===
+      String(size || "")
+        .trim()
+        .toLowerCase(),
+  );
+
+  // Old variant records may not have sizeStock yet. Treat those sizes as 1
+  // available unit so existing products do not suddenly disappear.
+  if (stock) return Math.max(0, Number(stock.quantity) || 0);
+
+  const sizeExists = (variant?.sizes || []).some(
+    (item) =>
+      String(item || "")
+        .trim()
+        .toLowerCase() ===
+      String(size || "")
+        .trim()
+        .toLowerCase(),
+  );
+
+  return sizeExists ? 1 : 0;
+};
+
+const hasAvailableStock = (product) => {
+  if (!product?.variants?.length) return true;
+
+  return product.variants.some((variant) =>
+    (variant.sizes || []).some((size) => getSizeQuantity(variant, size) > 0),
+  );
+};
+
+export const getAvailableProducts = async (_, res) => {
+  try {
+    const allProducts = await Product.find().sort({ createdAt: -1 });
+    const products = allProducts.filter(hasAvailableStock);
+
+    return res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.error("GET AVAILABLE PRODUCTS ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getOutOfStockProducts = async (_, res) => {
+  try {
+    const allProducts = await Product.find().sort({ updatedAt: -1 });
+    const products = allProducts.filter(
+      (product) => !hasAvailableStock(product),
+    );
+
+    return res.status(200).json({
+      success: true,
+      products,
+      count: products.length,
+    });
+  } catch (error) {
+    console.error("GET OUT OF STOCK PRODUCTS ERROR:", error);
     return res.status(500).json({
       success: false,
       message: error.message,

@@ -1,7 +1,7 @@
 import Breadcrums from "@/components/Breadcrums";
 import ProductDesc from "@/components/ProductDesc";
 import ProductImg from "@/components/ProductImg";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
@@ -15,9 +15,47 @@ const SingleProduct = () => {
 
   const variants = product?.variants || [];
 
+  const getVariantStock = (variant, size) => {
+    const stock = variant?.sizeStock?.find(
+      (item) =>
+        String(item?.size || "")
+          .trim()
+          .toLowerCase() ===
+        String(size || "")
+          .trim()
+          .toLowerCase(),
+    );
+
+    if (stock) return Math.max(0, Number(stock.quantity) || 0);
+
+    const exists = (variant?.sizes || []).some(
+      (item) =>
+        String(item).trim().toLowerCase() ===
+        String(size || "")
+          .trim()
+          .toLowerCase(),
+    );
+
+    return exists ? 1 : 0;
+  };
+
+  const firstAvailableVariant =
+    variants.find((variant) =>
+      (variant?.sizes || []).some((size) => getVariantStock(variant, size) > 0),
+    ) || variants[0];
+
   const [selectedVariantId, setSelectedVariantId] = useState(
-    variants?.[0]?._id || "",
+    firstAvailableVariant?._id || "",
   );
+
+  useEffect(() => {
+    if (
+      firstAvailableVariant?._id &&
+      !variants.some((item) => item._id === selectedVariantId)
+    ) {
+      setSelectedVariantId(firstAvailableVariant._id);
+    }
+  }, [firstAvailableVariant?._id, selectedVariantId, variants]);
 
   const selectedVariant = useMemo(() => {
     if (!variants.length) return null;
