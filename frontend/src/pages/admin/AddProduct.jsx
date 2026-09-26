@@ -1,5 +1,3 @@
-import ImageUpload from "@/components/ImageUpload";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,11 +24,35 @@ import {
   Tag,
   Layers3,
   FileText,
+  Plus,
+  X,
 } from "lucide-react";
 
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+
+const SIZE_OPTIONS = [
+  "XS",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "XXL",
+  "28",
+  "30",
+  "32",
+  "34",
+  "36",
+  "Free Size",
+];
+
+const createEmptyVariant = () => ({
+  color: "",
+  images: [],
+  sizes: [],
+  customSize: "",
+});
 
 const AddProduct = () => {
   const [loading, setLoading] = useState(false);
@@ -45,13 +67,13 @@ const AddProduct = () => {
     productName: "",
     productPrice: 0,
     productDesc: "",
-    productImg: [],
     brand: "",
     category: "",
+    variants: [createEmptyVariant()],
   });
 
   // =========================================================
-  // HANDLE INPUT
+  // HANDLE BASIC INPUT
   // =========================================================
 
   const handleChange = (e) => {
@@ -60,6 +82,102 @@ const AddProduct = () => {
     setProductData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  // =========================================================
+  // VARIANT INPUT
+  // =========================================================
+
+  const updateVariant = (index, changes) => {
+    setProductData((prev) => ({
+      ...prev,
+      variants: prev.variants.map((variant, variantIndex) =>
+        variantIndex === index ? { ...variant, ...changes } : variant,
+      ),
+    }));
+  };
+
+  const handleVariantColorChange = (index, value) => {
+    updateVariant(index, { color: value });
+  };
+
+  const handleVariantImages = (index, e) => {
+    const files = Array.from(e.target.files || []);
+
+    if (!files.length) return;
+
+    updateVariant(index, {
+      images: [...(productData.variants[index]?.images || []), ...files],
+    });
+
+    e.target.value = "";
+  };
+
+  const removeVariantImage = (variantIndex, imageIndex) => {
+    const variant = productData.variants[variantIndex];
+
+    updateVariant(variantIndex, {
+      images: variant.images.filter((_, index) => index !== imageIndex),
+    });
+  };
+
+  const toggleSize = (variantIndex, size) => {
+    const variant = productData.variants[variantIndex];
+    const exists = variant.sizes.includes(size);
+
+    updateVariant(variantIndex, {
+      sizes: exists
+        ? variant.sizes.filter((item) => item !== size)
+        : [...variant.sizes, size],
+    });
+  };
+
+  const handleCustomSizeChange = (variantIndex, value) => {
+    updateVariant(variantIndex, {
+      customSize: value,
+    });
+  };
+
+  const addCustomSize = (variantIndex) => {
+    const variant = productData.variants[variantIndex];
+    const customSize = String(variant.customSize || "").trim();
+
+    if (!customSize) return;
+
+    const alreadyExists = variant.sizes.some(
+      (size) => size.toLowerCase() === customSize.toLowerCase(),
+    );
+
+    if (alreadyExists) {
+      toast.error("This size is already selected");
+      return;
+    }
+
+    updateVariant(variantIndex, {
+      sizes: [...variant.sizes, customSize],
+      customSize: "",
+    });
+  };
+
+  const addVariant = () => {
+    setProductData((prev) => ({
+      ...prev,
+      variants: [...prev.variants, createEmptyVariant()],
+    }));
+  };
+
+  const removeVariant = (index) => {
+    if (productData.variants.length === 1) {
+      toast.error("At least one color variant is required");
+      return;
+    }
+
+    setProductData((prev) => ({
+      ...prev,
+      variants: prev.variants.filter(
+        (_, variantIndex) => variantIndex !== index,
+      ),
     }));
   };
 
@@ -81,8 +199,29 @@ const AddProduct = () => {
       return;
     }
 
-    if (productData.productImg.length === 0) {
-      toast.error("Please select at least one image");
+    if (!productData.variants.length) {
+      toast.error("Please add at least one color variant");
+      return;
+    }
+
+    const normalizedColors = productData.variants.map((variant) =>
+      String(variant.color || "")
+        .trim()
+        .toLowerCase(),
+    );
+
+    if (normalizedColors.some((color) => !color)) {
+      toast.error("Please enter a color for every variant");
+      return;
+    }
+
+    if (new Set(normalizedColors).size !== normalizedColors.length) {
+      toast.error("Each color can be added only once");
+      return;
+    }
+
+    if (productData.variants.some((variant) => variant.images.length === 0)) {
+      toast.error("Please upload at least one image for every color");
       return;
     }
 
@@ -94,9 +233,25 @@ const AddProduct = () => {
     formData.append("category", productData.category);
     formData.append("brand", productData.brand);
 
-    productData.productImg.forEach((img) => {
-      formData.append("files", img);
+    let globalImageIndex = 0;
+
+    const variantMeta = productData.variants.map((variant) => {
+      const imageIndexes = [];
+
+      variant.images.forEach((image) => {
+        formData.append("files", image);
+        imageIndexes.push(globalImageIndex);
+        globalImageIndex += 1;
+      });
+
+      return {
+        color: variant.color.trim(),
+        sizes: variant.sizes,
+        imageIndexes,
+      };
     });
+
+    formData.append("variants", JSON.stringify(variantMeta));
 
     try {
       setLoading(true);
@@ -120,9 +275,9 @@ const AddProduct = () => {
           productName: "",
           productPrice: 0,
           productDesc: "",
-          productImg: [],
           brand: "",
           category: "",
+          variants: [createEmptyVariant()],
         });
       }
     } catch (error) {
@@ -181,7 +336,6 @@ const AddProduct = () => {
         ==================================================== */}
 
         <Card className="w-full bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] shadow-sm overflow-hidden">
-          {/* Header */}
           <CardHeader className="bg-[#eee5da] border-b border-[#e2d5c5] px-6 md:px-8 py-7">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[#fffdf9] border border-[#d8c6ad] flex items-center justify-center">
@@ -203,13 +357,9 @@ const AddProduct = () => {
             </div>
           </CardHeader>
 
-          {/* Content */}
           <CardContent className="px-6 md:px-8 py-8">
             <div className="flex flex-col gap-7">
-              {/* =================================================
-                  PRODUCT NAME
-              ================================================== */}
-
+              {/* PRODUCT NAME */}
               <div className="grid gap-2">
                 <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
                   Product Name
@@ -226,10 +376,7 @@ const AddProduct = () => {
                 />
               </div>
 
-              {/* =================================================
-                  PRICE
-              ================================================== */}
-
+              {/* PRICE */}
               <div className="grid gap-2">
                 <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
                   Price
@@ -254,10 +401,7 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              {/* =================================================
-                  BRAND / CATEGORY
-              ================================================== */}
-
+              {/* BRAND / CATEGORY */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="grid gap-2">
                   <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
@@ -306,10 +450,7 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              {/* =================================================
-                  DESCRIPTION
-              ================================================== */}
-
+              {/* DESCRIPTION */}
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
@@ -332,34 +473,218 @@ const AddProduct = () => {
               </div>
 
               {/* =================================================
-                  IMAGE UPLOAD
+                  COLOR VARIANTS
               ================================================== */}
 
-              <div className="grid gap-3">
-                <div className="flex items-center gap-2">
-                  <ImagePlus
-                    className="w-4 h-4 text-[#a78352]"
-                    strokeWidth={1.5}
-                  />
+              <div className="grid gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <ImagePlus
+                      className="w-4 h-4 text-[#a78352]"
+                      strokeWidth={1.5}
+                    />
 
-                  <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
-                    Product Images
-                  </Label>
+                    <div>
+                      <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
+                        Color Variants
+                      </Label>
+
+                      <p className="text-xs text-[#8b7d73] mt-1">
+                        Each color can have different images and sizes.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={addVariant}
+                    variant="outline"
+                    className="rounded-full border-[#cdb690] text-[#80644a] hover:bg-[#eee5da] hover:text-[#4a382c] cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Color
+                  </Button>
                 </div>
 
-                <div className="rounded-2xl border border-dashed border-[#d8c8b5] bg-[#faf7f2] p-5">
-                  <ImageUpload
-                    productData={productData}
-                    setProductData={setProductData}
-                  />
+                <div className="space-y-5">
+                  {productData.variants.map((variant, variantIndex) => (
+                    <div
+                      key={variantIndex}
+                      className="rounded-2xl border border-[#e5d9ca] bg-[#faf7f2] p-5"
+                    >
+                      <div className="flex items-center justify-between gap-3 mb-5">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-[#a78352] font-semibold">
+                            Color Variant {variantIndex + 1}
+                          </p>
+
+                          <p className="text-xs text-[#8b7d73] mt-1">
+                            Upload only the images belonging to this color.
+                          </p>
+                        </div>
+
+                        {productData.variants.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeVariant(variantIndex)}
+                            className="w-9 h-9 rounded-full border border-[#dfcfc0] bg-[#fffdf9] text-[#98736b] hover:bg-[#f2e0dc] flex items-center justify-center cursor-pointer"
+                            title="Remove color"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* COLOR */}
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
+                          Color Name
+                        </Label>
+
+                        <Input
+                          value={variant.color}
+                          onChange={(e) =>
+                            handleVariantColorChange(
+                              variantIndex,
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Example - Red"
+                          className="h-11 rounded-xl border-[#ded1c2] bg-[#fffdf9] text-[#44352c] focus-visible:border-[#b99a6b] focus-visible:ring-[#b99a6b]"
+                        />
+                      </div>
+
+                      {/* IMAGES */}
+                      <div className="grid gap-3 mt-5">
+                        <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
+                          Images for {variant.color || "this color"}
+                        </Label>
+
+                        <div className="flex items-center gap-3">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) =>
+                              handleVariantImages(variantIndex, e)
+                            }
+                            className="h-11 rounded-xl border-[#ded1c2] bg-[#fffdf9] text-sm cursor-pointer"
+                          />
+                        </div>
+
+                        {variant.images.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+                            {variant.images.map((file, imageIndex) => (
+                              <div
+                                key={imageIndex}
+                                className="relative group rounded-xl overflow-hidden border border-[#e3d5c5] bg-[#fffdf9]"
+                              >
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`${variant.color || "Color"} ${imageIndex + 1}`}
+                                  className="w-full h-32 object-cover"
+                                />
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    removeVariantImage(variantIndex, imageIndex)
+                                  }
+                                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* SIZES */}
+                      <div className="grid gap-3 mt-6">
+                        <div>
+                          <Label className="text-[10px] uppercase tracking-wider text-[#6f6259] font-semibold">
+                            Available Sizes for {variant.color || "this color"}
+                          </Label>
+
+                          <p className="text-xs text-[#8b7d73] mt-1">
+                            Select only the sizes available in this color.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          {SIZE_OPTIONS.map((size) => {
+                            const selected = variant.sizes.includes(size);
+
+                            return (
+                              <button
+                                key={size}
+                                type="button"
+                                onClick={() => toggleSize(variantIndex, size)}
+                                className="px-4 py-2 rounded-full text-xs border transition-all cursor-pointer"
+                                style={{
+                                  backgroundColor: selected
+                                    ? "#4a382c"
+                                    : "#fffdf9",
+                                  color: selected ? "#fffdf9" : "#66584f",
+                                  borderColor: selected ? "#4a382c" : "#ded1c2",
+                                }}
+                              >
+                                {size}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Input
+                            value={variant.customSize}
+                            onChange={(e) =>
+                              handleCustomSizeChange(
+                                variantIndex,
+                                e.target.value,
+                              )
+                            }
+                            placeholder="Custom size (example: 38 / 2.5m)"
+                            className="h-10 rounded-xl border-[#ded1c2] bg-[#fffdf9] text-sm text-[#44352c]"
+                          />
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => addCustomSize(variantIndex)}
+                            className="h-10 rounded-xl border-[#cdb690] text-[#80644a] hover:bg-[#eee5da] cursor-pointer"
+                          >
+                            Add Size
+                          </Button>
+                        </div>
+
+                        {variant.sizes.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {variant.sizes.map((size) => (
+                              <span
+                                key={size}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#eee5da] text-[#66584f] text-xs"
+                              >
+                                {size}
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSize(variantIndex, size)}
+                                  className="cursor-pointer"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </CardContent>
-
-          {/* ===================================================
-              FOOTER
-          ==================================================== */}
 
           <CardFooter className="flex-col gap-2 px-6 md:px-8 pb-8 pt-0">
             <div className="w-full border-t border-[#eadfd3] pt-6">
@@ -395,6 +720,5 @@ const AddProduct = () => {
     </div>
   );
 };
-
 
 export default AddProduct;

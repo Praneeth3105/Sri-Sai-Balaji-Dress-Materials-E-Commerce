@@ -397,6 +397,22 @@ const MyOrder = () => {
                               <p className="text-xs text-[#88786d] mt-1">
                                 Quantity: {item.quantity}
                               </p>
+
+                              {(item.color || item.size) && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {item.color && (
+                                    <span className="px-2.5 py-1 rounded-full bg-[#eee5da] text-[10px] text-[#66584f]">
+                                      Color: {item.color}
+                                    </span>
+                                  )}
+
+                                  {item.size && (
+                                    <span className="px-2.5 py-1 rounded-full bg-[#eee5da] text-[10px] text-[#66584f]">
+                                      Size: {item.size}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
 

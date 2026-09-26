@@ -32,7 +32,6 @@ const Cart = () => {
   const tax = subtotal * 0.05;
   const total = subtotal + shipping + tax;
 
-
   const loadCart = async () => {
     if (!accessToken) {
       return;
@@ -57,7 +56,7 @@ const Cart = () => {
   // UPDATE QUANTITY
   // =========================================================
 
-  const handleUpdateQuantity = async (productId, type) => {
+  const handleUpdateQuantity = async (productId, color, size, type) => {
     if (!accessToken) {
       toast.error("Please login first");
       navigate("/login");
@@ -69,6 +68,8 @@ const Cart = () => {
         `${API}/update`,
         {
           productId,
+          color: color || "",
+          size: size || "",
           type,
         },
         {
@@ -92,7 +93,7 @@ const Cart = () => {
   // REMOVE PRODUCT
   // =========================================================
 
-  const handleRemove = async (productId) => {
+  const handleRemove = async (productId, color, size) => {
     if (!accessToken) {
       toast.error("Please login first");
       navigate("/login");
@@ -106,6 +107,8 @@ const Cart = () => {
         },
         data: {
           productId,
+          color: color || "",
+          size: size || "",
         },
       });
 
@@ -263,13 +266,19 @@ const Cart = () => {
                   <div className="flex flex-col sm:flex-row gap-5">
                     {/* Product Image */}
                     <Link
-                      to={`/product/${product?._id}`}
+                      to={`/products/${product?._id}`}
                       className="block flex-shrink-0"
                     >
                       <div className="w-full sm:w-32 h-36 sm:h-36 rounded-xl overflow-hidden bg-[#eee5da]">
                         <img
                           src={
-                            product?.productImage?.[0]?.url || "/Profile.png"
+                            product?.variants?.find(
+                              (variant) =>
+                                String(variant?.color || "").toLowerCase() ===
+                                String(item?.color || "").toLowerCase(),
+                            )?.images?.[0]?.url ||
+                            product?.productImage?.[0]?.url ||
+                            "/Profile.png"
                           }
                           alt={product?.productName || "Product"}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -285,7 +294,7 @@ const Cart = () => {
                         </p>
 
                         <Link
-                          to={`/product/${product?._id}`}
+                          to={`/products/${product?._id}`}
                           className="font-[Cormorant_Garamond] text-2xl text-[#44352c] hover:text-[#9a784e] transition-colors"
                         >
                           {product?.productName || "Product"}
@@ -294,6 +303,22 @@ const Cart = () => {
                         <p className="text-sm text-[#7b6d64] mt-1">
                           ₹{productPrice.toLocaleString("en-IN")}
                         </p>
+
+                        {(item?.color || item?.size) && (
+                          <div className="flex flex-wrap items-center gap-2 mt-3">
+                            {item?.color && (
+                              <span className="px-3 py-1 rounded-full bg-[#eee5da] text-[10px] uppercase tracking-wider text-[#66584f]">
+                                Color: {item.color}
+                              </span>
+                            )}
+
+                            {item?.size && (
+                              <span className="px-3 py-1 rounded-full bg-[#eee5da] text-[10px] uppercase tracking-wider text-[#66584f]">
+                                Size: {item.size}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Quantity + Remove */}
@@ -303,7 +328,12 @@ const Cart = () => {
                           <button
                             type="button"
                             onClick={() =>
-                              handleUpdateQuantity(product?._id, "decrease")
+                              handleUpdateQuantity(
+                                product?._id,
+                                item?.color,
+                                item?.size,
+                                "decrease",
+                              )
                             }
                             disabled={quantity <= 1}
                             className="w-9 h-9 flex items-center justify-center text-[#6f5b4c] hover:bg-[#eee5da] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
@@ -318,7 +348,12 @@ const Cart = () => {
                           <button
                             type="button"
                             onClick={() =>
-                              handleUpdateQuantity(product?._id, "increase")
+                              handleUpdateQuantity(
+                                product?._id,
+                                item?.color,
+                                item?.size,
+                                "increase",
+                              )
                             }
                             className="w-9 h-9 flex items-center justify-center text-[#6f5b4c] hover:bg-[#eee5da] transition-colors cursor-pointer"
                           >
@@ -329,7 +364,9 @@ const Cart = () => {
                         {/* Remove */}
                         <button
                           type="button"
-                          onClick={() => handleRemove(product?._id)}
+                          onClick={() =>
+                            handleRemove(product?._id, item?.color, item?.size)
+                          }
                           className="inline-flex items-center gap-1.5 text-xs text-[#98736b] hover:text-[#7d4037] transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

@@ -1,17 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Minus, Plus, ShoppingBag, ShieldCheck } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setCart } from "@/redux/productSlice";
 
-const ProductDesc = ({ product }) => {
+const ProductDesc = ({
+  product,
+  variants = [],
+  selectedVariant = null,
+  onVariantChange,
+}) => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [selectedSize, setSelectedSize] = useState("");
 
   const dispatch = useDispatch();
 
   const accessToken = localStorage.getItem("accessToken");
+
+  const hasVariants = variants?.length > 0;
+  const availableSizes = selectedVariant?.sizes || [];
+
+  // When the color changes, reset the size because the previous size may
+  // not exist for the newly selected color.
+  useEffect(() => {
+    setSelectedSize(availableSizes?.[0] || "");
+  }, [selectedVariant?._id]);
 
   // ==================================================
   // QUANTITY
@@ -44,6 +59,16 @@ const ProductDesc = ({ product }) => {
       return;
     }
 
+    if (hasVariants && !selectedVariant) {
+      toast.error("Please select a color");
+      return;
+    }
+
+    if (hasVariants && availableSizes.length > 0 && !selectedSize) {
+      toast.error("Please select a size");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -51,6 +76,8 @@ const ProductDesc = ({ product }) => {
         `${import.meta.env.VITE_URL}/api/v1/cart/add`,
         {
           productId: product._id,
+          color: selectedVariant?.color || "",
+          size: selectedSize || "",
           quantity: quantity,
         },
         {
@@ -159,7 +186,7 @@ const ProductDesc = ({ product }) => {
             color: "#a47c43",
           }}
         >
-          ₹{product.productPrice?.toLocaleString("en-IN")}
+          ₹{Number(product.productPrice || 0).toLocaleString("en-IN")}
         </p>
 
         <p
@@ -173,9 +200,113 @@ const ProductDesc = ({ product }) => {
       </div>
 
       {/* ==================================================
+          COLOR SELECTION
+      ================================================== */}
+      {hasVariants && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2
+              className="text-xl"
+              style={{
+                fontFamily: "Cormorant Garamond, serif",
+                fontWeight: 600,
+                color: "#3d2c23",
+              }}
+            >
+              Color
+            </h2>
+
+            <span
+              className="text-[10px] uppercase tracking-[0.16em]"
+              style={{
+                color: "#9b8878",
+              }}
+            >
+              {selectedVariant?.color || "Select color"}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {variants.map((variant) => {
+              const selected = selectedVariant?._id === variant._id;
+
+              return (
+                <button
+                  key={variant._id || variant.color}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => onVariantChange?.(variant)}
+                  className="px-5 py-2.5 rounded-full border text-xs transition-all duration-200 cursor-pointer disabled:opacity-50"
+                  style={{
+                    backgroundColor: selected ? "#3d2c23" : "#fffdf9",
+                    color: selected ? "#fffdf9" : "#66584f",
+                    borderColor: selected ? "#3d2c23" : "#ded1c2",
+                  }}
+                >
+                  {variant.color}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================
+          SIZE SELECTION
+      ================================================== */}
+      {hasVariants && availableSizes.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2
+              className="text-xl"
+              style={{
+                fontFamily: "Cormorant Garamond, serif",
+                fontWeight: 600,
+                color: "#3d2c23",
+              }}
+            >
+              Size
+            </h2>
+
+            <span
+              className="text-[10px] uppercase tracking-[0.16em]"
+              style={{
+                color: "#9b8878",
+              }}
+            >
+              {selectedSize || "Select size"}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {availableSizes.map((size) => {
+              const selected = selectedSize === size;
+
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => setSelectedSize(size)}
+                  className="min-w-[52px] px-4 py-2.5 rounded-full border text-xs transition-all duration-200 cursor-pointer disabled:opacity-50"
+                  style={{
+                    backgroundColor: selected ? "#3d2c23" : "#fffdf9",
+                    color: selected ? "#fffdf9" : "#66584f",
+                    borderColor: selected ? "#3d2c23" : "#ded1c2",
+                  }}
+                >
+                  {size}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================
           DESCRIPTION
       ================================================== */}
-      {product.description && (
+      {product.productDesc && (
         <div>
           <h2
             className="text-xl mb-3"
@@ -194,7 +325,7 @@ const ProductDesc = ({ product }) => {
               color: "#78675c",
             }}
           >
-            {product.description}
+            {product.productDesc}
           </p>
         </div>
       )}
@@ -232,7 +363,6 @@ const ProductDesc = ({ product }) => {
             border: "1px solid #e1d5c7",
           }}
         >
-          {/* Minus */}
           <button
             type="button"
             disabled={quantity <= 1 || loading}
@@ -253,7 +383,6 @@ const ProductDesc = ({ product }) => {
             <Minus size={16} strokeWidth={1.6} />
           </button>
 
-          {/* Quantity */}
           <span
             className="w-12 text-center text-base"
             style={{
@@ -264,7 +393,6 @@ const ProductDesc = ({ product }) => {
             {quantity}
           </span>
 
-          {/* Plus */}
           <button
             type="button"
             disabled={loading}

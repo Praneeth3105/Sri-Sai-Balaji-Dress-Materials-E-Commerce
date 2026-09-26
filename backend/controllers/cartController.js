@@ -1,11 +1,24 @@
 import { Cart } from "../models/cartModel.js";
 import { Product } from "../models/productModel.js";
 
+const normalize = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
+
+const findVariant = (product, color) => {
+  if (!product?.variants?.length) return null;
+
+  return product.variants.find(
+    (variant) => normalize(variant.color) === normalize(color),
+  );
+};
+
 export const getCart = async (req, res) => {
   try {
     const userId = req.id;
 
-    let cart = await Cart.findOne({ userId }).populate("items.productId");
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
 
     if (!cart) {
       return res.status(200).json({
@@ -16,6 +29,7 @@ export const getCart = async (req, res) => {
         },
       });
     }
+
     return res.status(200).json({
       success: true,
       cart,
@@ -34,8 +48,7 @@ export const addToCart = async (req, res) => {
   try {
     const userId = req.id;
 
-    const { productId, quantity } = req.body;
-
+    const { productId, quantity, color, size } = req.body;
 
     if (!productId) {
       return res.status(400).json({
@@ -43,6 +56,7 @@ export const addToCart = async (req, res) => {
         message: "Product ID is required",
       });
     }
+
     const selectedQuantity = Number(quantity) || 1;
 
     if (selectedQuantity < 1) {
@@ -61,41 +75,100 @@ export const addToCart = async (req, res) => {
       });
     }
 
+    let selectedColor = String(color || "").trim();
+    let selectedSize = String(size || "").trim();
+
+    // New variant products must select a valid color.
+    if (product.variants?.length > 0) {
+      if (!selectedColor) {
+        return res.status(400).json({
+          success: false,
+          message: "Please select a color",
+        });
+      }
+
+      const variant = findVariant(product, selectedColor);
+
+      if (!variant) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected color is not available",
+        });
+      }
+
+      selectedColor = variant.color;
+
+      // If the color has sizes, the customer must select one.
+      if (variant.sizes?.length > 0) {
+        if (!selectedSize) {
+          return res.status(400).json({
+            success: false,
+            message: "Please select a size",
+          });
+        }
+
+        const sizeExists = variant.sizes.some(
+          (item) => normalize(item) === normalize(selectedSize),
+        );
+
+        if (!sizeExists) {
+          return res.status(400).json({
+            success: false,
+            message: "Selected size is not available for this color",
+          });
+        }
+
+        selectedSize = variant.sizes.find(
+          (item) => normalize(item) === normalize(selectedSize),
+        );
+      } else {
+        selectedSize = "";
+      }
+    } else {
+      // Old products without variants remain compatible.
+      selectedColor = "";
+      selectedSize = "";
+    }
+
     let cart = await Cart.findOne({ userId });
+
     if (!cart) {
       cart = new Cart({
         userId,
         items: [
           {
-            productId: productId,
+            productId,
+            color: selectedColor,
+            size: selectedSize,
             quantity: selectedQuantity,
             price: product.productPrice,
           },
         ],
-
-        totalPrice: product.productPrice * selectedQuantity,
+        totalPrice: Number(product.productPrice || 0) * selectedQuantity,
       });
-    }
-
-    else {
+    } else {
       const itemIndex = cart.items.findIndex(
-        (item) => item.productId.toString() === productId.toString(),
+        (item) =>
+          item.productId.toString() === productId.toString() &&
+          normalize(item.color) === normalize(selectedColor) &&
+          normalize(item.size) === normalize(selectedSize),
       );
 
       if (itemIndex !== -1) {
         cart.items[itemIndex].quantity += selectedQuantity;
-      }
-
-      else {
+      } else {
         cart.items.push({
-          productId: productId,
+          productId,
+          color: selectedColor,
+          size: selectedSize,
           quantity: selectedQuantity,
           price: product.productPrice,
         });
       }
 
       cart.totalPrice = cart.items.reduce(
-        (total, item) => total + item.price * item.quantity,
+        (total, item) =>
+          total + Number(item.price || 0) * Number(item.quantity || 0),
         0,
       );
     }
@@ -121,12 +194,10 @@ export const addToCart = async (req, res) => {
   }
 };
 
-
 export const updateQuantity = async (req, res) => {
   try {
     const userId = req.id;
-
-    const { productId, type } = req.body;
+    const { productId, color, size, type } = req.body;
 
     const cart = await Cart.findOne({ userId });
 
@@ -138,7 +209,10 @@ export const updateQuantity = async (req, res) => {
     }
 
     const item = cart.items.find(
-      (item) => item.productId.toString() === productId.toString(),
+      (cartItem) =>
+        cartItem.productId.toString() === productId?.toString() &&
+        normalize(cartItem.color) === normalize(color) &&
+        normalize(cartItem.size) === normalize(size),
     );
 
     if (!item) {
@@ -152,14 +226,13 @@ export const updateQuantity = async (req, res) => {
       item.quantity += 1;
     }
 
-    if (type === "decrease") {
-      if (item.quantity > 1) {
-        item.quantity -= 1;
-      }
+    if (type === "decrease" && item.quantity > 1) {
+      item.quantity -= 1;
     }
 
     cart.totalPrice = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, cartItem) =>
+        total + Number(cartItem.price || 0) * Number(cartItem.quantity || 0),
       0,
     );
 
@@ -187,8 +260,7 @@ export const updateQuantity = async (req, res) => {
 export const removeFromCart = async (req, res) => {
   try {
     const userId = req.id;
-
-    const { productId } = req.body;
+    const { productId, color, size } = req.body;
 
     const cart = await Cart.findOne({ userId });
 
@@ -200,11 +272,17 @@ export const removeFromCart = async (req, res) => {
     }
 
     cart.items = cart.items.filter(
-      (item) => item.productId.toString() !== productId.toString(),
+      (item) =>
+        !(
+          item.productId.toString() === productId?.toString() &&
+          normalize(item.color) === normalize(color) &&
+          normalize(item.size) === normalize(size)
+        ),
     );
 
     cart.totalPrice = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) =>
+        total + Number(item.price || 0) * Number(item.quantity || 0),
       0,
     );
 

@@ -183,6 +183,8 @@ const AddressForm = () => {
             .filter((item) => item?.productId?._id)
             .map((item) => ({
               productId: item.productId._id,
+              color: item.color || "",
+              size: item.size || "",
               quantity: item.quantity,
             })),
 

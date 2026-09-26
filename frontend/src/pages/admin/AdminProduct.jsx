@@ -54,6 +54,174 @@ const AdminProduct = () => {
 
   const accessToken = localStorage.getItem("accessToken");
 
+  const normalizeEditVariants = (variants = []) =>
+    variants.map((variant) => {
+      const sizes = Array.isArray(variant?.sizes) ? variant.sizes : [];
+
+      return {
+        ...variant,
+        color: variant?.color || "",
+        sizes,
+        images: Array.isArray(variant?.images) ? variant.images : [],
+        newImages: [],
+        sizeStock: sizes.map((size) => {
+          const existing = (variant?.sizeStock || []).find(
+            (item) =>
+              String(item?.size || "")
+                .trim()
+                .toLowerCase() === String(size).trim().toLowerCase(),
+          );
+
+          return {
+            size,
+            quantity: Math.max(0, Number(existing?.quantity ?? 1) || 0),
+          };
+        }),
+      };
+    });
+
+  const createEmptyVariant = () => ({
+    color: "",
+    sizes: [],
+    sizeStock: [],
+    images: [],
+    newImages: [],
+  });
+
+  const updateVariant = (variantIndex, changes) => {
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: (prev.variants || []).map((variant, index) =>
+        index === variantIndex ? { ...variant, ...changes } : variant,
+      ),
+    }));
+  };
+
+  const handleVariantColorChange = (variantIndex, value) => {
+    updateVariant(variantIndex, { color: value });
+  };
+
+  const handleVariantSizesChange = (variantIndex, value) => {
+    const sizes = [
+      ...new Set(
+        value
+          .split(",")
+          .map((size) => size.trim())
+          .filter(Boolean),
+      ),
+    ];
+
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: (prev.variants || []).map((variant, index) => {
+        if (index !== variantIndex) return variant;
+
+        const oldStock = variant.sizeStock || [];
+
+        return {
+          ...variant,
+          sizes,
+          sizeStock: sizes.map((size) => {
+            const existing = oldStock.find(
+              (item) =>
+                String(item?.size || "")
+                  .trim()
+                  .toLowerCase() === size.toLowerCase(),
+            );
+
+            return {
+              size,
+              quantity: Math.max(0, Number(existing?.quantity ?? 1) || 0),
+            };
+          }),
+        };
+      }),
+    }));
+  };
+
+  const updateEditVariantStock = (variantIndex, size, value) => {
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: (prev.variants || []).map((variant, index) =>
+        index === variantIndex
+          ? {
+              ...variant,
+              sizeStock: (variant.sizeStock || []).map((item) =>
+                item.size === size
+                  ? { ...item, quantity: Math.max(0, Number(value) || 0) }
+                  : item,
+              ),
+            }
+          : variant,
+      ),
+    }));
+  };
+
+  const handleVariantImageChange = (variantIndex, e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: (prev.variants || []).map((variant, index) =>
+        index === variantIndex
+          ? {
+              ...variant,
+              newImages: [...(variant.newImages || []), ...files],
+            }
+          : variant,
+      ),
+    }));
+
+    e.target.value = "";
+  };
+
+  const removeVariantImage = (variantIndex, imageIndex) => {
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: (prev.variants || []).map((variant, index) =>
+        index === variantIndex
+          ? {
+              ...variant,
+              images: (variant.images || []).filter((_, i) => i !== imageIndex),
+            }
+          : variant,
+      ),
+    }));
+  };
+
+  const removeVariantNewImage = (variantIndex, imageIndex) => {
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: (prev.variants || []).map((variant, index) =>
+        index === variantIndex
+          ? {
+              ...variant,
+              newImages: (variant.newImages || []).filter(
+                (_, i) => i !== imageIndex,
+              ),
+            }
+          : variant,
+      ),
+    }));
+  };
+
+  const addVariant = () => {
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: [...(prev.variants || []), createEmptyVariant()],
+    }));
+  };
+
+  const removeVariant = (variantIndex) => {
+    setEditProduct((prev) => ({
+      ...prev,
+      variants: (prev.variants || []).filter(
+        (_, index) => index !== variantIndex,
+      ),
+    }));
+  };
+
   const items = [
     {
       label: "Price: Low To High",
@@ -103,6 +271,7 @@ const AdminProduct = () => {
       brand: product.brand || "",
 
       productImage: product.productImage || [],
+      variants: normalizeEditVariants(product.variants || []),
     });
 
     setOpen(true);
@@ -189,7 +358,38 @@ const AdminProduct = () => {
 
       formData.append("brand", editProduct.brand);
 
-      // Existing Cloudinary images
+      // Build variants and remember which uploaded files belong to each color.
+      let fileIndex = 0;
+      const variantPayload = (editProduct.variants || []).map((variant) => {
+        const imageIndexes = [];
+
+        (variant.newImages || []).forEach((file) => {
+          formData.append("files", file);
+          imageIndexes.push(fileIndex);
+          fileIndex += 1;
+        });
+
+        return {
+          color: String(variant.color || "").trim(),
+          sizes: variant.sizes || [],
+          sizeStock: (variant.sizeStock || []).map((item) => ({
+            size: item.size,
+            quantity: Math.max(0, Number(item.quantity) || 0),
+          })),
+          images: (variant.images || []).filter((img) => img?.public_id),
+          imageIndexes,
+        };
+      });
+
+      if (!variantPayload.length) {
+        toast.error("Please add at least one color variant");
+        setLoading(false);
+        return;
+      }
+
+      formData.append("variants", JSON.stringify(variantPayload));
+
+      // Existing common product images (used only for products without variants).
       const existingImages =
         editProduct.productImage
           ?.filter((img) => !(img instanceof File) && img?.public_id)
@@ -197,12 +397,14 @@ const AdminProduct = () => {
 
       formData.append("existingImages", JSON.stringify(existingImages));
 
-      // New images
-      editProduct.productImage
-        ?.filter((img) => img instanceof File)
-        .forEach((file) => {
-          formData.append("files", file);
-        });
+      // Backward compatibility for products that still use common images.
+      if ((editProduct.variants || []).length === 0) {
+        editProduct.productImage
+          ?.filter((img) => img instanceof File)
+          .forEach((file) => {
+            formData.append("files", file);
+          });
+      }
 
       const res = await axios.put(
         `${import.meta.env.VITE_URL}/api/v1/product/update/${editProduct._id}`,
@@ -1029,159 +1231,226 @@ const AdminProduct = () => {
                   />
                 </div>
 
-                {/* IMAGES */}
+                {/* COLOR / SIZE / STOCK / IMAGES VARIANTS */}
 
-                <div className="grid gap-3">
-                  <label
-                    className="
-                    text-[10px]
-                    uppercase
-                    tracking-[0.16em]
-                    font-semibold
-                    text-[#6d5d52]
-                  "
-                  >
-                    Product Images
-                  </label>
+                <div className="grid gap-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase tracking-[0.16em] font-semibold text-[#6d5d52]">
+                        Color / Images / Sizes / Stock
+                      </label>
 
-                  <input
-                    id={`edit-product-images-${editProduct._id}`}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
+                      <p className="text-xs text-[#93857a] mt-1">
+                        Edit each color separately. Every color can have
+                        different images, sizes and stock.
+                      </p>
+                    </div>
 
-                  <label
-                    htmlFor={`edit-product-images-${editProduct._id}`}
-                    className="
-                      w-full
-                      h-14
-                      flex
-                      items-center
-                      justify-center
-                      gap-2
-                      border
-                      border-dashed
-                      border-[#cbbba9]
-                      rounded-xl
-                      bg-[#f8f4ee]
-                      text-[#6d5d52]
-                      hover:border-[#a78352]
-                      hover:bg-[#eee5da]
-                      transition
-                      cursor-pointer
-                    "
-                  >
-                    <Plus className="w-4 h-4 text-[#a78352]" />
-
-                    <span
-                      className="
-                      text-xs
-                      uppercase
-                      tracking-[0.12em]
-                      font-semibold
-                    "
+                    <Button
+                      type="button"
+                      onClick={addVariant}
+                      className="rounded-xl bg-[#4a382c] hover:bg-[#35271f] text-white shrink-0"
                     >
-                      Add / Change Images
-                    </span>
-                  </label>
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Color
+                    </Button>
+                  </div>
 
-                  {editProduct.productImage?.length > 0 && (
+                  {(editProduct.variants || []).map((variant, variantIndex) => (
                     <div
-                      className="
-                      grid
-                      grid-cols-2
-                      sm:grid-cols-3
-                      gap-3
-                    "
+                      key={variant._id || `variant-${variantIndex}`}
+                      className="rounded-2xl border border-[#e5d9ca] bg-[#f8f4ee] p-4 sm:p-5"
                     >
-                      {editProduct.productImage.map((img, index) => {
-                        const preview =
-                          img instanceof File
-                            ? URL.createObjectURL(img)
-                            : img?.url;
+                      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+                        <div className="grid gap-2 flex-1">
+                          <label className="text-[10px] uppercase tracking-[0.16em] font-semibold text-[#6d5d52]">
+                            Color {variantIndex + 1}
+                          </label>
+                          <Input
+                            value={variant.color || ""}
+                            onChange={(e) =>
+                              handleVariantColorChange(
+                                variantIndex,
+                                e.target.value,
+                              )
+                            }
+                            placeholder="Example: Red"
+                            className="h-11 rounded-xl border-[#e5d9ca] bg-white text-[#4a382c] focus-visible:ring-[#b99a6b] font-[DM_Sans]"
+                          />
+                        </div>
 
-                        return (
-                          <div key={index} className="relative group">
-                            <div
-                              className="
-                                h-32
-                                w-full
-                                rounded-xl
-                                overflow-hidden
-                                border
-                                border-[#e5d9ca]
-                                bg-[#eee5da]
-                              "
-                            >
-                              {preview ? (
-                                <img
-                                  src={preview}
-                                  alt={`Product ${index + 1}`}
-                                  className="
-                                      w-full
-                                      h-full
-                                      object-cover
-                                    "
-                                />
-                              ) : (
-                                <div
-                                  className="
-                                    w-full
-                                    h-full
-                                    flex
-                                    items-center
-                                    justify-center
-                                    text-xs
-                                    text-[#9b8d82]
-                                  "
-                                >
-                                  No Preview
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => removeVariant(variantIndex)}
+                          className="h-11 rounded-xl border-[#e5d9ca] bg-white text-[#8e4e43] hover:bg-[#f3e4df]"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Remove Color
+                        </Button>
+                      </div>
+
+                      {/* COLOR-SPECIFIC IMAGES */}
+                      <div className="grid gap-3 mb-5">
+                        <label className="text-[10px] uppercase tracking-[0.16em] font-semibold text-[#6d5d52]">
+                          {variant.color || "Color"} Images
+                        </label>
+
+                        <input
+                          id={`variant-images-${editProduct._id}-${variantIndex}`}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={(e) =>
+                            handleVariantImageChange(variantIndex, e)
+                          }
+                        />
+
+                        <label
+                          htmlFor={`variant-images-${editProduct._id}-${variantIndex}`}
+                          className="w-full h-12 flex items-center justify-center gap-2 border border-dashed border-[#cbbba9] rounded-xl bg-white text-[#6d5d52] hover:border-[#a78352] hover:bg-[#eee5da] transition cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4 text-[#a78352]" />
+                          <span className="text-xs uppercase tracking-[0.12em] font-semibold">
+                            Add Images for {variant.color || "this color"}
+                          </span>
+                        </label>
+
+                        {(variant.images?.length > 0 ||
+                          variant.newImages?.length > 0) && (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {(variant.images || []).map((img, imageIndex) => (
+                              <div
+                                key={`old-${imageIndex}`}
+                                className="relative group"
+                              >
+                                <div className="h-28 w-full rounded-xl overflow-hidden border border-[#e5d9ca] bg-[#eee5da]">
+                                  <img
+                                    src={img?.url}
+                                    alt={`${variant.color || "Color"} ${imageIndex + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
-                              )}
-                            </div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    removeVariantImage(variantIndex, imageIndex)
+                                  }
+                                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-[#4a382c] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ))}
 
-                            <button
-                              type="button"
-                              onClick={() => removeImage(index)}
-                              className="
-                                  absolute
-                                  top-2
-                                  right-2
-                                  w-7
-                                  h-7
-                                  rounded-full
-                                  bg-[#4a382c]
-                                  text-white
-                                  flex
-                                  items-center
-                                  justify-center
-                                  opacity-0
-                                  group-hover:opacity-100
-                                  transition
-                                  cursor-pointer
-                                "
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
+                            {(variant.newImages || []).map(
+                              (file, imageIndex) => {
+                                const preview = URL.createObjectURL(file);
+
+                                return (
+                                  <div
+                                    key={`new-${imageIndex}`}
+                                    className="relative group"
+                                  >
+                                    <div className="h-28 w-full rounded-xl overflow-hidden border border-[#e5d9ca] bg-[#eee5da]">
+                                      <img
+                                        src={preview}
+                                        alt={`${variant.color || "Color"} new ${imageIndex + 1}`}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        removeVariantNewImage(
+                                          variantIndex,
+                                          imageIndex,
+                                        )
+                                      }
+                                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-[#4a382c] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                );
+                              },
+                            )}
                           </div>
-                        );
-                      })}
+                        )}
+                      </div>
+
+                      {/* COLOR-SPECIFIC SIZES */}
+                      <div className="grid gap-3">
+                        <label className="text-[10px] uppercase tracking-[0.16em] font-semibold text-[#6d5d52]">
+                          Available Sizes for {variant.color || "this color"}
+                        </label>
+
+                        <Input
+                          value={(variant.sizes || []).join(", ")}
+                          onChange={(e) =>
+                            handleVariantSizesChange(
+                              variantIndex,
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Example: S, M, L, XL"
+                          className="h-11 rounded-xl border-[#e5d9ca] bg-white text-[#4a382c] focus-visible:ring-[#b99a6b] font-[DM_Sans]"
+                        />
+
+                        <p className="text-[11px] text-[#93857a]">
+                          Enter sizes separated by commas. Example: S, M, L, XL
+                        </p>
+
+                        {variant.sizes?.length > 0 && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                            {variant.sizes.map((size) => {
+                              const stock =
+                                variant.sizeStock?.find(
+                                  (item) =>
+                                    String(item.size).toLowerCase() ===
+                                    String(size).toLowerCase(),
+                                )?.quantity ?? 1;
+
+                              return (
+                                <div
+                                  key={`${variantIndex}-${size}`}
+                                  className="flex items-center justify-between gap-3 rounded-xl border border-[#ded1c2] bg-white px-3 py-2"
+                                >
+                                  <span className="text-sm font-medium text-[#66584f]">
+                                    Size: {size}
+                                  </span>
+
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    value={stock}
+                                    onChange={(e) =>
+                                      updateEditVariantStock(
+                                        variantIndex,
+                                        size,
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="w-24 h-9 rounded-lg border-[#ded1c2] bg-white text-center text-sm text-[#44352c]"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {(editProduct.variants || []).length === 0 && (
+                    <div className="rounded-xl border border-dashed border-[#d9cabb] bg-[#f8f4ee] py-8 px-5 text-center">
+                      <p className="text-sm text-[#7b6d64]">
+                        No colors added yet. Click <strong>Add Color</strong> to
+                        create a color variant.
+                      </p>
                     </div>
                   )}
-
-                  <p
-                    className="
-                    text-[11px]
-                    text-[#93857a]
-                    leading-5
-                  "
-                  >
-                    Existing images can be removed and new images can be added
-                    before saving.
-                  </p>
                 </div>
 
                 {/* FOOTER */}

@@ -17,6 +17,13 @@ const ProductCard = ({ product, loading }) => {
   // ADD TO CART
   // ==================================================
   const addToCart = async (productId) => {
+    // Products with color/size variants must be selected from the
+    // single-product page so the exact variant is added to the cart.
+    if (product?.variants?.length > 0) {
+      navigate(`/products/${productId}`);
+      return;
+    }
+
     if (!accessToken) {
       toast.error("Please login first");
       return;

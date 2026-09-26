@@ -203,7 +203,7 @@ export const getMyOrder = async (req, res) => {
     })
       .populate({
         path: "products.productId",
-        select: "productName productPrice productImage",
+        select: "productName productPrice productImage variants",
       })
       .populate("user", "firstName lastName email")
       .sort({ createdAt: -1 });
@@ -239,7 +239,7 @@ export const getUserOrders = async (req, res) => {
     })
       .populate({
         path: "products.productId",
-        select: "productName productPrice productImage",
+        select: "productName productPrice productImage variants",
       })
       .populate("user", "firstName lastName email")
       .sort({ createdAt: -1 });
@@ -266,7 +266,7 @@ export const getAllOrdersAdmin = async (req, res) => {
       .populate("user", "firstName lastName email")
       .populate({
         path: "products.productId",
-        select: "productName productPrice productImage",
+        select: "productName productPrice productImage variants",
       });
 
     return res.status(200).json({
@@ -284,7 +284,6 @@ export const getAllOrdersAdmin = async (req, res) => {
     });
   }
 };
-
 
 export const getSalesData = async (req, res) => {
   try {

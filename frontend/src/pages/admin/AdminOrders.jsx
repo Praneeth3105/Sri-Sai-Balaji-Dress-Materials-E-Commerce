@@ -354,27 +354,31 @@ const AdminOrders = () => {
                         {/* Products */}
                         <td className="px-6 py-5">
                           <div className="space-y-1">
-                            {order?.items?.length ? (
-                              order.items.slice(0, 2).map((item, itemIndex) => (
-                                <p
-                                  key={itemIndex}
-                                  className="text-xs text-[#66584f]"
-                                >
-                                  {item?.productId?.productName ||
-                                    item?.productName ||
-                                    "Product"}{" "}
-                                  × {item?.quantity || 1}
-                                </p>
-                              ))
+                            {order?.products?.length ? (
+                              order.products
+                                .slice(0, 2)
+                                .map((item, itemIndex) => (
+                                  <p
+                                    key={itemIndex}
+                                    className="text-xs text-[#66584f]"
+                                  >
+                                    {item?.productId?.productName ||
+                                      item?.productName ||
+                                      "Product"}{" "}
+                                    × {item?.quantity || 1}
+                                    {item?.color ? ` • ${item.color}` : ""}
+                                    {item?.size ? ` • ${item.size}` : ""}
+                                  </p>
+                                ))
                             ) : (
                               <p className="text-xs text-[#88786d]">
                                 No product details
                               </p>
                             )}
 
-                            {order?.items?.length > 2 && (
+                            {order?.products?.length > 2 && (
                               <p className="text-[10px] text-[#a78352]">
-                                +{order.items.length - 2} more
+                                +{order.products.length - 2} more
                               </p>
                             )}
                           </div>
@@ -487,8 +491,8 @@ const AdminOrders = () => {
                       </p>
 
                       <div className="space-y-2">
-                        {order?.items?.length ? (
-                          order.items.map((item, itemIndex) => (
+                        {order?.products?.length ? (
+                          order.products.map((item, itemIndex) => (
                             <div
                               key={itemIndex}
                               className="flex items-center justify-between gap-3"
@@ -501,6 +505,8 @@ const AdminOrders = () => {
 
                               <span className="text-xs text-[#8b7b70]">
                                 × {item?.quantity || 1}
+                                {item?.color ? ` • ${item.color}` : ""}
+                                {item?.size ? ` • ${item.size}` : ""}
                               </span>
                             </div>
                           ))

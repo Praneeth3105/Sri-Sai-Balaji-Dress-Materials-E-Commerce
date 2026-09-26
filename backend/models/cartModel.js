@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const cartSchema = new mongoose.Schema(
   {
     userId: {
@@ -13,6 +14,14 @@ const cartSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
+        },
+        color: {
+          type: String,
+          default: "",
+        },
+        size: {
+          type: String,
+          default: "",
         },
         quantity: {
           type: Number,
@@ -32,4 +41,5 @@ const cartSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-export const Cart = mongoose.model("Cart",cartSchema)
+
+export const Cart = mongoose.model("Cart", cartSchema);
