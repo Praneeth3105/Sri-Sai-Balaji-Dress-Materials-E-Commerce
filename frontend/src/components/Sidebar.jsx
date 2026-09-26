@@ -86,7 +86,6 @@ const Sidebar = () => {
         <div className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
-
             return (
               <NavLink
                 key={item.to}
