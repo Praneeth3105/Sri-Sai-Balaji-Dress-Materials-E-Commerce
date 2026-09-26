@@ -492,7 +492,6 @@ const MyOrder = () => {
 
             <span className="w-12 h-px bg-[#d5c4ad]" />
           </div>
-
           <p className="font-[Cormorant_Garamond] italic text-lg text-[#9a784e] mt-3">
             Style that feels like you.
           </p>
