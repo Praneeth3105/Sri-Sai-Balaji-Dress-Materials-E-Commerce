@@ -484,11 +484,6 @@ const MyOrder = () => {
             );
           })}
         </div>
-
-        {/* =====================================================
-            FOOTER BRAND LINE
-        ====================================================== */}
-
         <div className="text-center mt-12 pb-4">
           <div className="flex items-center justify-center gap-3">
             <span className="w-12 h-px bg-[#d5c4ad]" />
