@@ -82,7 +82,6 @@ const Sidebar = () => {
         <p className="px-4 mb-4 text-[9px] uppercase tracking-[0.3em] font-semibold text-[#9a8a7e]">
           Management
         </p>
-
         <div className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
