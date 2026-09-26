@@ -323,7 +323,6 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
-
 export const changePassword = async (req, res) => {
   try {
     const { newPassword, confirmPassword } = req.body;

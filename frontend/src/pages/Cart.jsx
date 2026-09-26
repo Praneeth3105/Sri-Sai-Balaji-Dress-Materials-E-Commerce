@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ArrowRight,
@@ -28,9 +28,58 @@ const Cart = () => {
   const accessToken = localStorage.getItem("accessToken");
   const API = `${import.meta.env.VITE_URL}/api/v1/cart`;
   const subtotal = Number(cart?.totalPrice || 0);
-  const shipping = subtotal > 299 ? 0 : 10;
-  const tax = subtotal * 0.05;
-  const total = subtotal + shipping + tax;
+  const [couponCode, setCouponCode] = useState(
+    () => localStorage.getItem("sbd_coupon_code") || "",
+  );
+  const [couponDiscount, setCouponDiscount] = useState(() =>
+    Number(localStorage.getItem("sbd_coupon_discount") || 0),
+  );
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
+  const finalShipping = discountedSubtotal > 299 ? 0 : 10;
+  const finalTax = discountedSubtotal * 0.05;
+  const total = discountedSubtotal + finalShipping + finalTax;
+
+  const applyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      toast.error("Enter a coupon code");
+      return;
+    }
+    try {
+      setCouponLoading(true);
+      const res = await axios.post(
+        `${import.meta.env.VITE_URL}/api/v1/orders/apply-coupon`,
+        { code, subtotal },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      if (res.data.success) {
+        setCouponCode(res.data.couponCode);
+        setCouponDiscount(Number(res.data.discount || 0));
+        localStorage.setItem("sbd_coupon_code", res.data.couponCode);
+        localStorage.setItem(
+          "sbd_coupon_discount",
+          String(res.data.discount || 0),
+        );
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      setCouponDiscount(0);
+      localStorage.removeItem("sbd_coupon_code");
+      localStorage.removeItem("sbd_coupon_discount");
+      toast.error(error?.response?.data?.message || "Invalid coupon code");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponCode("");
+    setCouponDiscount(0);
+    localStorage.removeItem("sbd_coupon_code");
+    localStorage.removeItem("sbd_coupon_discount");
+  };
 
   const loadCart = async () => {
     if (!accessToken) {
@@ -438,14 +487,14 @@ const Cart = () => {
 
                     <span
                       className={
-                        shipping === 0
+                        finalShipping === 0
                           ? "text-[#7c8b67] font-medium"
                           : "text-[#44352c]"
                       }
                     >
-                      {shipping === 0
+                      {finalShipping === 0
                         ? "FREE"
-                        : `₹${shipping.toLocaleString("en-IN")}`}
+                        : `₹${finalShipping.toLocaleString("en-IN")}`}
                     </span>
                   </div>
 
@@ -454,11 +503,22 @@ const Cart = () => {
 
                     <span className="text-[#44352c]">
                       ₹
-                      {tax.toLocaleString("en-IN", {
+                      {finalTax.toLocaleString("en-IN", {
                         maximumFractionDigits: 2,
                       })}
                     </span>
                   </div>
+
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-[#75675e]">
+                        Coupon ({couponCode})
+                      </span>
+                      <span className="text-[#536b53] font-medium">
+                        -₹{couponDiscount.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  )}
 
                   <Separator className="bg-[#e5d9ca]" />
 
@@ -492,19 +552,44 @@ const Cart = () => {
                     </span>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter code"
-                      className="h-11 rounded-xl border-[#ded1c2] bg-[#faf7f2] text-sm focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
-                    />
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-11 rounded-xl border-[#cdb690] text-[#80644a] hover:bg-[#eee5da] hover:text-[#4a382c] cursor-pointer"
-                    >
-                      Apply
-                    </Button>
+                  <div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={couponCode}
+                        onChange={(e) =>
+                          setCouponCode(e.target.value.toUpperCase())
+                        }
+                        placeholder="Enter code"
+                        disabled={couponDiscount > 0}
+                        className="h-11 rounded-xl border-[#ded1c2] bg-[#faf7f2] text-sm focus-visible:ring-[#b99a6b] focus-visible:border-[#b99a6b]"
+                      />
+                      {couponDiscount > 0 ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={removeCoupon}
+                          className="h-11 rounded-xl border-[#cdb690] text-[#8e4e43] hover:bg-[#f4e5e1] cursor-pointer"
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={applyCoupon}
+                          disabled={couponLoading}
+                          className="h-11 rounded-xl border-[#cdb690] text-[#80644a] hover:bg-[#eee5da] hover:text-[#4a382c] cursor-pointer"
+                        >
+                          {couponLoading ? "Checking..." : "Apply"}
+                        </Button>
+                      )}
+                    </div>
+                    {couponDiscount > 0 && (
+                      <p className="mt-2 text-xs text-[#536b53]">
+                        {couponCode} saved ₹
+                        {couponDiscount.toLocaleString("en-IN")}
+                      </p>
+                    )}
                   </div>
                 </div>
 

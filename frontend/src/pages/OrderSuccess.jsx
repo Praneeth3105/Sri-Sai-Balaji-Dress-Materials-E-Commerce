@@ -7,19 +7,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 const OrderSuccess = () => {
   const navigate = useNavigate();
 
-  const { user } = useSelector((store) => store.user);
-
   const handleViewOrders = () => {
-    if (user?._id) {
-      navigate(`/profile/${user._id}`);
-    } else {
-      navigate("/login");
-    }
+    navigate("/orders");
   };
 
   return (
@@ -149,7 +142,8 @@ const OrderSuccess = () => {
                 </p>
 
                 <p className="text-xs text-[#7b6d64] mt-1">
-                  Your order is now being prepared for processing.
+                  Your order is confirmed. You can track its progress from My
+                  Orders.
                 </p>
               </div>
             </div>

@@ -23,6 +23,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import SingleProduct from "./pages/SingleProduct";
 import AddressForm from "./pages/AddressForm";
 import OrderSuccess from "./pages/OrderSuccess";
+import MyOrder from "./pages/MyOrder";
+import TrackOrder from "./pages/TrackOrder";
+import StoreInfo from "./pages/StoreInfo";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -77,6 +80,7 @@ const router = createBrowserRouter([
         <ProtectedRoute>
           <Navbar />
           <Profile />
+          <Footer />
         </ProtectedRoute>
       </>
     ),
@@ -88,6 +92,7 @@ const router = createBrowserRouter([
       <>
         <Navbar />
         <Products />
+        <Footer />
       </>
     ),
   },
@@ -97,6 +102,7 @@ const router = createBrowserRouter([
       <>
         <Navbar />
         <SingleProduct />
+        <Footer />
       </>
     ),
   },
@@ -107,6 +113,7 @@ const router = createBrowserRouter([
         <ProtectedRoute>
           <Navbar />
           <Cart />
+          <Footer />
         </ProtectedRoute>
       </>
     ),
@@ -132,6 +139,26 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: "/orders",
+    element: (
+      <ProtectedRoute>
+        <Navbar />
+        <MyOrder />
+        <Footer />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/orders/:orderId",
+    element: (
+      <ProtectedRoute>
+        <Navbar />
+        <TrackOrder />
+        <Footer />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: "/forgot-password",
     element: <ForgotPassword />,
   },
@@ -142,6 +169,76 @@ const router = createBrowserRouter([
   {
     path: "/reset-password/:email",
     element: <ResetPassword />,
+  },
+  {
+    path: "/faq",
+    element: (
+      <>
+        <Navbar />
+        <StoreInfo type="faq" />
+        <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/shipping",
+    element: (
+      <>
+        <Navbar />
+        <StoreInfo type="shipping" />
+        <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/size-guide",
+    element: (
+      <>
+        <Navbar />
+        <StoreInfo type="size" />
+        <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/payment-methods",
+    element: (
+      <>
+        <Navbar />
+        <StoreInfo type="payment" />
+        <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/refund-policy",
+    element: (
+      <>
+        <Navbar />
+        <StoreInfo type="refund" />
+        <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/privacy",
+    element: (
+      <>
+        <Navbar />
+        <StoreInfo type="privacy" />
+        <Footer />
+      </>
+    ),
+  },
+  {
+    path: "/terms",
+    element: (
+      <>
+        <Navbar />
+        <StoreInfo type="terms" />
+        <Footer />
+      </>
+    ),
   },
   {
     path: "/contact",

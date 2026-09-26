@@ -2,15 +2,19 @@ import { Product } from "../models/productModel.js";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/dataUri.js";
 
+const normalize = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
+
 const parseVariants = (value) => {
   if (!value) return [];
-
   if (Array.isArray(value)) return value;
 
   try {
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
+  } catch {
     throw new Error("Invalid product variants data");
   }
 };
@@ -20,7 +24,6 @@ const uploadFiles = async (files = []) => {
 
   for (const file of files) {
     const fileUri = getDataUri(file);
-
     const result = await cloudinary.uploader.upload(fileUri, {
       folder: "mern_products",
     });
@@ -34,6 +37,82 @@ const uploadFiles = async (files = []) => {
   return uploaded;
 };
 
+const normalizeVariant = (variant, uploadedImages = []) => {
+  const color = String(variant?.color || "").trim();
+  const sizes = Array.isArray(variant?.sizes)
+    ? [
+        ...new Set(
+          variant.sizes.map((size) => String(size).trim()).filter(Boolean),
+        ),
+      ]
+    : [];
+
+  const existingImages = Array.isArray(variant?.images)
+    ? variant.images.filter((img) => img?.public_id && img?.url)
+    : [];
+
+  const imageIndexes = Array.isArray(variant?.imageIndexes)
+    ? variant.imageIndexes
+    : [];
+
+  const newImages = imageIndexes
+    .map((index) => uploadedImages[Number(index)])
+    .filter(Boolean);
+
+  const images = [...existingImages, ...newImages];
+
+  const rawStock = Array.isArray(variant?.sizeStock) ? variant.sizeStock : [];
+  const sizeStock = sizes.map((size) => {
+    const item = rawStock.find(
+      (stock) => normalize(stock?.size) === normalize(size),
+    );
+    return {
+      size,
+      quantity: Math.max(0, Number(item?.quantity ?? 0) || 0),
+    };
+  });
+
+  return { color, images, sizes, sizeStock };
+};
+
+const validateVariantMeta = (variantMeta) => {
+  if (!variantMeta.length) {
+    throw new Error("Please add at least one color variant");
+  }
+
+  const colors = variantMeta.map((variant) => normalize(variant.color));
+
+  if (colors.some((color) => !color)) {
+    throw new Error("Every variant must have a color");
+  }
+
+  if (new Set(colors).size !== colors.length) {
+    throw new Error("Each color can be added only once");
+  }
+};
+
+const getSizeQuantity = (variant, size) => {
+  const stock = (variant?.sizeStock || []).find(
+    (item) => normalize(item?.size) === normalize(size),
+  );
+
+  if (stock) return Math.max(0, Number(stock.quantity) || 0);
+
+  const exists = (variant?.sizes || []).some(
+    (item) => normalize(item) === normalize(size),
+  );
+
+  return exists ? 1 : 0;
+};
+
+export const hasAvailableStock = (product) => {
+  if (!product?.variants?.length) return true;
+
+  return product.variants.some((variant) =>
+    (variant.sizes || []).some((size) => getSizeQuantity(variant, size) > 0),
+  );
+};
+
 export const addProduct = async (req, res) => {
   try {
     const {
@@ -44,103 +123,33 @@ export const addProduct = async (req, res) => {
       brand,
       variants: variantsRaw,
     } = req.body;
-
     const userId = req.id;
 
     if (!productName || !productDesc || !productPrice || !category || !brand) {
-      return res.status(400).json({
-        success: false,
-        message: "All Fields Are Required",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "All Fields Are Required" });
     }
 
     const variantMeta = parseVariants(variantsRaw);
-
-    if (variantMeta.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Please add at least one color variant",
-      });
-    }
-
-    const colors = variantMeta.map((variant) =>
-      String(variant.color || "")
-        .trim()
-        .toLowerCase(),
-    );
-
-    if (colors.some((color) => !color)) {
-      return res.status(400).json({
-        success: false,
-        message: "Every variant must have a color",
-      });
-    }
-
-    if (new Set(colors).size !== colors.length) {
-      return res.status(400).json({
-        success: false,
-        message: "Each color can be added only once",
-      });
-    }
+    validateVariantMeta(variantMeta);
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Please select product images",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Please select product images" });
     }
 
     const uploadedImages = await uploadFiles(req.files);
+    const variants = variantMeta.map((variant) =>
+      normalizeVariant(variant, uploadedImages),
+    );
 
-    const variants = variantMeta.map((variant) => {
-      const imageIndexes = Array.isArray(variant.imageIndexes)
-        ? variant.imageIndexes
-        : [];
-
-      const images = imageIndexes
-        .map((index) => uploadedImages[Number(index)])
-        .filter(Boolean);
-
-      if (images.length === 0) {
+    for (const variant of variants) {
+      if (!variant.images.length) {
         throw new Error(`Please add at least one image for ${variant.color}`);
       }
-
-      const sizes = Array.isArray(variant.sizes)
-        ? [
-            ...new Set(
-              variant.sizes.map((size) => String(size).trim()).filter(Boolean),
-            ),
-          ]
-        : [];
-
-      const rawStock = Array.isArray(variant.sizeStock)
-        ? variant.sizeStock
-        : [];
-      const sizeStock = sizes.map((size) => {
-        const stock = rawStock.find(
-          (item) =>
-            String(item?.size || "")
-              .trim()
-              .toLowerCase() === size.toLowerCase(),
-        );
-
-        return {
-          size,
-          quantity: Math.max(0, Number(stock?.quantity ?? 0) || 0),
-        };
-      });
-
-      return {
-        color: String(variant.color).trim(),
-        images,
-        sizes,
-        sizeStock,
-      };
-    });
-
-    // Keep the existing productImage field populated with the first
-    // variant's images so your existing product cards/listing continue working.
-    const productImg = variants[0]?.images || uploadedImages;
+    }
 
     const newProduct = await Product.create({
       userId,
@@ -149,8 +158,9 @@ export const addProduct = async (req, res) => {
       productPrice: Number(productPrice),
       category,
       brand,
-      productImage: productImg,
+      productImage: variants[0]?.images || [],
       variants,
+      salesCount: 0,
     });
 
     return res.status(200).json({
@@ -160,81 +170,27 @@ export const addProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("ADD PRODUCT ERROR:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 export const getAllProduct = async (_, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
-
-    return res.status(200).json({
-      success: true,
-      products,
-    });
+    return res.status(200).json({ success: true, products });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
-};
-
-const getSizeQuantity = (variant, size) => {
-  const stock = (variant?.sizeStock || []).find(
-    (item) =>
-      String(item?.size || "")
-        .trim()
-        .toLowerCase() ===
-      String(size || "")
-        .trim()
-        .toLowerCase(),
-  );
-
-  // Old variant records may not have sizeStock yet. Treat those sizes as 1
-  // available unit so existing products do not suddenly disappear.
-  if (stock) return Math.max(0, Number(stock.quantity) || 0);
-
-  const sizeExists = (variant?.sizes || []).some(
-    (item) =>
-      String(item || "")
-        .trim()
-        .toLowerCase() ===
-      String(size || "")
-        .trim()
-        .toLowerCase(),
-  );
-
-  return sizeExists ? 1 : 0;
-};
-
-const hasAvailableStock = (product) => {
-  if (!product?.variants?.length) return true;
-
-  return product.variants.some((variant) =>
-    (variant.sizes || []).some((size) => getSizeQuantity(variant, size) > 0),
-  );
 };
 
 export const getAvailableProducts = async (_, res) => {
   try {
     const allProducts = await Product.find().sort({ createdAt: -1 });
     const products = allProducts.filter(hasAvailableStock);
-
-    return res.status(200).json({
-      success: true,
-      products,
-    });
+    return res.status(200).json({ success: true, products });
   } catch (error) {
     console.error("GET AVAILABLE PRODUCTS ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -244,45 +200,33 @@ export const getOutOfStockProducts = async (_, res) => {
     const products = allProducts.filter(
       (product) => !hasAvailableStock(product),
     );
-
-    return res.status(200).json({
-      success: true,
-      products,
-      count: products.length,
-    });
+    return res
+      .status(200)
+      .json({ success: true, products, count: products.length });
   } catch (error) {
     console.error("GET OUT OF STOCK PRODUCTS ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 export const deleteProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product Not Found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product Not Found" });
     }
 
-    // Delete old/common images.
+    const deletedIds = new Set();
     for (const img of product.productImage || []) {
-      if (img?.public_id) {
+      if (img?.public_id && !deletedIds.has(img.public_id)) {
         await cloudinary.uploader.destroy(img.public_id);
+        deletedIds.add(img.public_id);
       }
     }
-
-    // Delete variant images without deleting the same Cloudinary image twice.
-    const deletedIds = new Set(
-      (product.productImage || []).map((img) => img?.public_id).filter(Boolean),
-    );
 
     for (const variant of product.variants || []) {
       for (const img of variant.images || []) {
@@ -294,25 +238,18 @@ export const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(productId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Product Deleted Successfully",
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: "Product Deleted Successfully" });
   } catch (error) {
     console.error("DELETE PRODUCT ERROR:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 export const updateProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-
     const {
       productName,
       productDesc,
@@ -321,118 +258,39 @@ export const updateProduct = async (req, res) => {
       brand,
       variants: variantsRaw,
     } = req.body;
-
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product Not Found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product Not Found" });
     }
 
-    product.productName = productName || product.productName;
-    product.productDesc = productDesc || product.productDesc;
-    product.productPrice =
-      productPrice !== undefined && productPrice !== ""
-        ? Number(productPrice)
-        : product.productPrice;
-    product.category = category || product.category;
-    product.brand = brand || product.brand;
+    if (productName !== undefined) product.productName = productName;
+    if (productDesc !== undefined) product.productDesc = productDesc;
+    if (productPrice !== undefined && productPrice !== "")
+      product.productPrice = Number(productPrice);
+    if (category !== undefined) product.category = category;
+    if (brand !== undefined) product.brand = brand;
 
     if (variantsRaw !== undefined) {
       const variantMeta = parseVariants(variantsRaw);
+      validateVariantMeta(variantMeta);
 
-      if (variantMeta.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Please add at least one color variant",
-        });
-      }
-
-      const colors = variantMeta.map((variant) =>
-        String(variant.color || "")
-          .trim()
-          .toLowerCase(),
-      );
-
-      if (colors.some((color) => !color)) {
-        return res.status(400).json({
-          success: false,
-          message: "Every variant must have a color",
-        });
-      }
-
-      if (new Set(colors).size !== colors.length) {
-        return res.status(400).json({
-          success: false,
-          message: "Each color can be added only once",
-        });
-      }
-
-      // Upload only the newly selected color-specific images.
       const uploadedImages = await uploadFiles(req.files || []);
-
       const oldVariantImages = (product.variants || []).flatMap(
         (variant) => variant.images || [],
       );
+      const variants = variantMeta.map((variant) =>
+        normalizeVariant(variant, uploadedImages),
+      );
 
-      const variants = variantMeta.map((variant) => {
-        const existingImages = Array.isArray(variant.images)
-          ? variant.images.filter((img) => img?.public_id && img?.url)
-          : [];
-
-        const imageIndexes = Array.isArray(variant.imageIndexes)
-          ? variant.imageIndexes
-          : [];
-
-        const newImages = imageIndexes
-          .map((index) => uploadedImages[Number(index)])
-          .filter(Boolean);
-
-        const images = [...existingImages, ...newImages];
-
-        if (images.length === 0) {
+      for (const variant of variants) {
+        if (!variant.images.length) {
           throw new Error(`Please add at least one image for ${variant.color}`);
         }
+      }
 
-        const sizes = Array.isArray(variant.sizes)
-          ? [
-              ...new Set(
-                variant.sizes
-                  .map((size) => String(size).trim())
-                  .filter(Boolean),
-              ),
-            ]
-          : [];
-
-        const rawStock = Array.isArray(variant.sizeStock)
-          ? variant.sizeStock
-          : [];
-
-        const sizeStock = sizes.map((size) => {
-          const stock = rawStock.find(
-            (item) =>
-              String(item?.size || "")
-                .trim()
-                .toLowerCase() === size.toLowerCase(),
-          );
-
-          return {
-            size,
-            quantity: Math.max(0, Number(stock?.quantity ?? 1) || 0),
-          };
-        });
-
-        return {
-          color: String(variant.color).trim(),
-          images,
-          sizes,
-          sizeStock,
-        };
-      });
-
-      // Delete old Cloudinary variant images that are no longer kept.
       const keptPublicIds = new Set(
         variants.flatMap((variant) =>
           (variant.images || []).map((img) => img?.public_id).filter(Boolean),
@@ -453,34 +311,25 @@ export const updateProduct = async (req, res) => {
       }
 
       product.variants = variants;
-
-      // Keep the first color's first image in productImage so existing
-      // product cards/listings continue to display an image.
       product.productImage = variants[0]?.images || [];
-    } else if (req.files && req.files.length > 0) {
-      // Backward compatibility for an old product that has only common images.
-      const existingImagesRaw = req.body.existingImages;
-      let existingImageIds = [];
-
-      if (existingImagesRaw) {
+    } else if (req.files?.length) {
+      const existingIds = (() => {
         try {
-          existingImageIds = JSON.parse(existingImagesRaw);
-        } catch (error) {
-          existingImageIds = [];
+          return JSON.parse(req.body.existingImages || "[]");
+        } catch {
+          return [];
         }
-      }
+      })();
 
-      const existingImageMap = new Map(
+      const existingMap = new Map(
         (product.productImage || [])
           .filter((img) => img?.public_id)
           .map((img) => [img.public_id, img]),
       );
-
-      const keptImages = existingImageIds
-        .map((id) => existingImageMap.get(id))
+      const keptImages = existingIds
+        .map((id) => existingMap.get(id))
         .filter(Boolean);
-
-      const keepIds = new Set(existingImageIds);
+      const keepIds = new Set(existingIds);
 
       for (const img of product.productImage || []) {
         if (img?.public_id && !keepIds.has(img.public_id)) {
@@ -488,23 +337,19 @@ export const updateProduct = async (req, res) => {
         }
       }
 
-      const newImages = await uploadFiles(req.files);
-      product.productImage = [...keptImages, ...newImages];
+      product.productImage = [...keptImages, ...(await uploadFiles(req.files))];
     }
 
     const updatedProduct = await product.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Product Updated Successfully",
-      product: updatedProduct,
-    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Product Updated Successfully",
+        product: updatedProduct,
+      });
   } catch (error) {
     console.error("UPDATE PRODUCT ERROR:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

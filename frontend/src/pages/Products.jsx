@@ -13,6 +13,7 @@ import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setProducts } from "@/redux/productSlice";
+import { useSearchParams } from "react-router-dom";
 
 const items = [
   { label: "Price: Low to High", value: "lowToHigh" },
@@ -33,6 +34,8 @@ const Products = () => {
   const [brand, setBrand] = useState("All");
 
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const collection = searchParams.get("collection") || "";
 
   // --------------------------------------------------
   // GET ALL PRODUCTS
@@ -66,6 +69,22 @@ const Products = () => {
 
     let filtered = [...allProducts];
 
+    // Footer / collection shortcuts
+    if (collection === "new") {
+      filtered.sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
+      );
+    } else if (collection === "best" || collection === "trending") {
+      filtered.sort(
+        (a, b) => Number(b.salesCount || 0) - Number(a.salesCount || 0),
+      );
+    } else if (["dress-materials", "sarees", "kurtis"].includes(collection)) {
+      const wanted = collection.replace("-", " ");
+      filtered = filtered.filter((p) =>
+        p.category?.toLowerCase().includes(wanted),
+      );
+    }
+
     // Search
     if (search.trim() !== "") {
       filtered = filtered.filter((p) =>
@@ -96,7 +115,16 @@ const Products = () => {
     }
 
     dispatch(setProducts(filtered));
-  }, [search, category, brand, sortOrder, priceRange, allProducts, dispatch]);
+  }, [
+    search,
+    category,
+    brand,
+    sortOrder,
+    priceRange,
+    allProducts,
+    dispatch,
+    collection,
+  ]);
 
   // --------------------------------------------------
   // INITIAL LOAD
@@ -143,7 +171,13 @@ const Products = () => {
               color: "#3d2c23",
             }}
           >
-            Our Collection
+            {collection === "new"
+              ? "New Arrivals"
+              : collection === "best"
+                ? "Best Sellers"
+                : collection === "trending"
+                  ? "Trending Now"
+                  : "Our Collection"}
           </h1>
 
           {/* Description */}

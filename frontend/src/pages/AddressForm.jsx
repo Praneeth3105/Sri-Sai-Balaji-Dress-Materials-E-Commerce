@@ -57,6 +57,13 @@ const AddressForm = () => {
   );
 
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState(
+    () => localStorage.getItem("sbd_coupon_code") || "",
+  );
+  const [couponDiscount, setCouponDiscount] = useState(() =>
+    Number(localStorage.getItem("sbd_coupon_discount") || 0),
+  );
+  const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
     if (!addresses || addresses.length === 0) {
@@ -143,9 +150,54 @@ const AddressForm = () => {
   };
 
   const subtotal = Number(cart?.totalPrice || 0);
-  const shipping = subtotal > 299 ? 0 : 10;
-  const tax = Number((subtotal * 0.05).toFixed(2));
-  const total = Number((subtotal + shipping + tax).toFixed(2));
+  const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
+  const shipping = discountedSubtotal > 299 ? 0 : 10;
+  const tax = Number((discountedSubtotal * 0.05).toFixed(2));
+  const total = Number((discountedSubtotal + shipping + tax).toFixed(2));
+
+  const applyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      toast.error("Enter a coupon code");
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+      const accessToken = localStorage.getItem("accessToken");
+      const res = await axios.post(
+        `${import.meta.env.VITE_URL}/api/v1/orders/apply-coupon`,
+        { code, subtotal },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      if (res.data.success) {
+        setCouponCode(res.data.couponCode);
+        setCouponDiscount(Number(res.data.discount || 0));
+        localStorage.setItem("sbd_coupon_code", res.data.couponCode);
+        localStorage.setItem(
+          "sbd_coupon_discount",
+          String(res.data.discount || 0),
+        );
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      setCouponDiscount(0);
+      localStorage.removeItem("sbd_coupon_code");
+      localStorage.removeItem("sbd_coupon_discount");
+      toast.error(error?.response?.data?.message || "Invalid coupon code");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponCode("");
+    setCouponDiscount(0);
+    localStorage.removeItem("sbd_coupon_code");
+    localStorage.removeItem("sbd_coupon_discount");
+    toast.success("Coupon removed");
+  };
 
   const handlePayment = async () => {
     const accessToken = localStorage.getItem("accessToken");
@@ -188,11 +240,9 @@ const AddressForm = () => {
               quantity: item.quantity,
             })),
 
-          tax: tax,
-          shipping: shipping,
-          amount: total,
           currency: "INR",
           address: selected,
+          couponCode: couponCode || "",
         },
         {
           headers: {
@@ -258,6 +308,8 @@ const AddressForm = () => {
                   totalPrice: 0,
                 }),
               );
+              localStorage.removeItem("sbd_coupon_code");
+              localStorage.removeItem("sbd_coupon_discount");
 
               navigate("/order-success");
             } else {
@@ -865,6 +917,18 @@ const AddressForm = () => {
                     </span>
                   </div>
 
+                  {/* DISCOUNT */}
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#7b6d64]">
+                        Coupon ({couponCode})
+                      </span>
+                      <span className="text-sm font-semibold text-[#536b53]">
+                        -₹{couponDiscount.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  )}
+
                   {/* SHIPPING */}
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-[#7b6d64]">Shipping</span>
@@ -934,32 +998,42 @@ const AddressForm = () => {
                   </div>
 
                   {/* PROMO */}
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Promo Code"
-                      className="
-                        h-11
-                        rounded-xl
-                        border-[#e5d9ca]
-                        bg-[#fffdf9]
-                        focus-visible:ring-[#b99a6b]
-                      "
-                    />
+                  <div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={couponCode}
+                        onChange={(e) =>
+                          setCouponCode(e.target.value.toUpperCase())
+                        }
+                        placeholder="Promo Code"
+                        disabled={couponDiscount > 0}
+                        className="h-11 rounded-xl border-[#e5d9ca] bg-[#fffdf9] focus-visible:ring-[#b99a6b]"
+                      />
 
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="
-                        h-11
-                        rounded-xl
-                        border-[#cdbb9f]
-                        text-[#4a382c]
-                        hover:bg-[#f4efe7]
-                        cursor-pointer
-                      "
-                    >
-                      Apply
-                    </Button>
+                      {couponDiscount > 0 ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={removeCoupon}
+                          className="h-11 rounded-xl border-[#cdbb9f] text-[#8e4e43] hover:bg-[#f4e5e1] cursor-pointer"
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={applyCoupon}
+                          disabled={couponLoading}
+                          className="h-11 rounded-xl border-[#cdbb9f] text-[#4a382c] hover:bg-[#f4efe7] cursor-pointer"
+                        >
+                          {couponLoading ? "Checking..." : "Apply"}
+                        </Button>
+                      )}
+                    </div>
+                    <p className="mt-2 text-[10px] text-[#8b7c72]">
+                      Try: SBD10, WELCOME10, SAVE100 or FESTIVE15
+                    </p>
                   </div>
 
                   {/* PAYMENT */}

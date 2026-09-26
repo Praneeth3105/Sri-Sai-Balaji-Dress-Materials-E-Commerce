@@ -1091,7 +1091,8 @@ const AdminProduct = () => {
                 font-[DM_Sans]
               "
               >
-                Update product details and manage product images.
+                Update product details, color images, sizes and stock
+                quantities.
               </DialogDescription>
             </DialogHeader>
 

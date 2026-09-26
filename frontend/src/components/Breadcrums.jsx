@@ -7,6 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+
 const Breadcrums = ({ product }) => {
   return (
     <div className="font-serif">
@@ -15,15 +16,19 @@ const Breadcrums = ({ product }) => {
           <BreadcrumbItem>
             <BreadcrumbLink render={<a href="/" />}>Home</BreadcrumbLink>
           </BreadcrumbItem>
+
           <BreadcrumbSeparator />
+
           <BreadcrumbItem>
             <BreadcrumbLink render={<a href="/products" />}>
               Products
             </BreadcrumbLink>
           </BreadcrumbItem>
+
           <BreadcrumbSeparator />
+
           <BreadcrumbItem>
-            <BreadcrumbPage>{product.productName}</BreadcrumbPage>
+            <BreadcrumbPage>{product?.productName || "Product"}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

@@ -216,7 +216,7 @@ const Footer = () => {
       -------------------------------- */}
 
       <div className="relative mx-auto max-w-7xl px-6 py-14 sm:py-16">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.2fr_.8fr_.8fr_1.2fr]">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.15fr_.8fr_.8fr_.8fr_1.1fr]">
           {/* --------------------------------
               Brand
           -------------------------------- */}
@@ -319,6 +319,20 @@ const Footer = () => {
               >
                 Size Guide
               </Link>
+
+              <Link
+                to="/payment-methods"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Payment Methods
+              </Link>
+
+              <Link
+                to="/refund-policy"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Cancellation & Refunds
+              </Link>
             </div>
           </div>
 
@@ -344,17 +358,24 @@ const Footer = () => {
               </Link>
 
               <Link
-                to="/products"
+                to="/products?collection=new"
                 className="footer-link block text-sm text-[#78695e]"
               >
                 New Arrivals
               </Link>
 
               <Link
-                to="/products"
+                to="/products?collection=best"
                 className="footer-link block text-sm text-[#78695e]"
               >
                 Best Sellers
+              </Link>
+
+              <Link
+                to="/products?collection=trending"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Trending Now
               </Link>
 
               <Link
@@ -369,6 +390,59 @@ const Footer = () => {
                 className="footer-link block text-sm text-[#78695e]"
               >
                 Visit Us
+              </Link>
+            </div>
+          </div>
+
+          {/* --------------------------------
+              Shop
+          -------------------------------- */}
+
+          <div {...reveal(3)}>
+            <p className="text-[10px] font-semibold uppercase tracking-[.25em] text-[#a47c43]">
+              Shop
+            </p>
+
+            <h3 className="footer-serif mt-2 text-2xl font-semibold text-[#3c2c23]">
+              Collections
+            </h3>
+
+            <div className="mt-5 space-y-3">
+              <Link
+                to="/products"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                All Products
+              </Link>
+              <Link
+                to="/products?collection=dress-materials"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Dress Materials
+              </Link>
+              <Link
+                to="/products?collection=sarees"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Sarees
+              </Link>
+              <Link
+                to="/products?collection=kurtis"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Kurtis
+              </Link>
+              <Link
+                to="/products?collection=new"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                New Arrivals
+              </Link>
+              <Link
+                to="/products?collection=best"
+                className="footer-link block text-sm text-[#78695e]"
+              >
+                Best Sellers
               </Link>
             </div>
           </div>
@@ -462,7 +536,26 @@ const Footer = () => {
             . All rights reserved.
           </p>
 
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to="/privacy"
+              className="text-[10px] uppercase tracking-[.12em] text-[#8f8278] hover:text-[#5f4c3f]"
+            >
+              Privacy
+            </Link>
+            <Link
+              to="/terms"
+              className="text-[10px] uppercase tracking-[.12em] text-[#8f8278] hover:text-[#5f4c3f]"
+            >
+              Terms
+            </Link>
+            <Link
+              to="/refund-policy"
+              className="text-[10px] uppercase tracking-[.12em] text-[#8f8278] hover:text-[#5f4c3f]"
+            >
+              Refunds
+            </Link>
+            <span className="text-[#d0c1b2]">|</span>
             <span className="text-[10px] uppercase tracking-[.15em] text-[#a0958b]">
               Made with care
             </span>
