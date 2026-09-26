@@ -98,7 +98,6 @@ export const addToCart = async (req, res) => {
 
       selectedColor = variant.color;
 
-      // If the color has sizes, the customer must select one.
       if (variant.sizes?.length > 0) {
         if (!selectedSize) {
           return res.status(400).json({
