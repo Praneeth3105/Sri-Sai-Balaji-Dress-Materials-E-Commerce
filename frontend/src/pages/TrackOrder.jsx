@@ -147,9 +147,6 @@ const TrackOrder = () => {
         </div>
 
         <div className="grid lg:grid-cols-[1.25fr_.75fr] gap-6">
-          {/* =========================
-              TRACKING TIMELINE
-          ========================== */}
           <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] p-6 sm:p-8">
             <div className="flex items-center justify-between mb-7">
               <div>
@@ -237,10 +234,6 @@ const TrackOrder = () => {
               })}
             </div>
           </div>
-
-          {/* =========================
-              RIGHT SIDE
-          ========================== */}
           <div className="space-y-6">
             {/* DELIVERY ADDRESS */}
             <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.5rem] p-6">
