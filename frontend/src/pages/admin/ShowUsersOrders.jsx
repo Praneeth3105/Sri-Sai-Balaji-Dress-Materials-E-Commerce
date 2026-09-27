@@ -158,7 +158,6 @@ const ShowUsersOrders = () => {
               <h2 className="text-2xl font-[Cormorant_Garamond] font-semibold text-[#35271f] mt-6">
                 No Orders Found
               </h2>
-
               <p className="text-sm text-[#7b6d64] mt-2 font-[DM_Sans]">
                 This user has not placed any orders yet.
               </p>
