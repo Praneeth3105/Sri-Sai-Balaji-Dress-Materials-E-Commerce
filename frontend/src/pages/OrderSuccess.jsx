@@ -211,10 +211,6 @@ const OrderSuccess = () => {
             </button>
           </div>
 
-          {/* =================================================
-              BRAND FOOTER
-          ================================================== */}
-
           <div className="mt-9 pt-6 border-t border-[#eadfd3]">
             <div className="flex items-center justify-center gap-3">
               <span className="w-10 h-px bg-[#d5c4ad]" />
