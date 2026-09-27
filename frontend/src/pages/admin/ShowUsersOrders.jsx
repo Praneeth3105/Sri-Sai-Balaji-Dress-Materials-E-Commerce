@@ -148,8 +148,6 @@ const ShowUsersOrders = () => {
             </div>
           </div>
         </div>
-
-        {/* EMPTY */}
         {orders.length === 0 ? (
           <Card className="border-[#e5d9ca] bg-[#fffdf9] rounded-3xl shadow-[0_15px_40px_rgba(74,56,44,0.06)]">
             <CardContent className="py-20 flex flex-col items-center justify-center text-center">
@@ -179,7 +177,6 @@ const ShowUsersOrders = () => {
                   shadow-[0_15px_45px_rgba(74,56,44,0.07)]
                 "
               >
-                {/* ORDER HEADER */}
                 <CardHeader className="bg-[#f4efe7] border-b border-[#e5d9ca] p-6 md:p-7">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
                     <div className="flex items-start gap-4">
