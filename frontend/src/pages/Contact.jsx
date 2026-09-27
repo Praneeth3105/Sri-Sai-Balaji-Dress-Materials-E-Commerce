@@ -92,11 +92,8 @@ const Contact = () => {
           </p>
         </div>
       </section>
-
-      {/* ================= CONTENT ================= */}
       <section className="px-6 pb-24">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[0.9fr_1.1fr] gap-8">
-          {/* ================= STORE DETAILS ================= */}
           <div className="bg-[#fffdf9] border border-[#e5d9ca] rounded-[1.75rem] p-7 md:p-9 shadow-sm">
             <div className="mb-8">
               <p className="text-[10px] uppercase tracking-[0.3em] text-[#a78352] font-semibold mb-2">
