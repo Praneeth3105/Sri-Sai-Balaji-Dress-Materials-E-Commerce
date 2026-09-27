@@ -23,26 +23,20 @@ const values = [
 const About = () => {
   return (
     <div className="min-h-screen bg-[#f8f4ee] text-[#3d3028]">
-      {/* ================= HERO ================= */}
       <section className="relative overflow-hidden px-6 pt-28 pb-24 md:pt-36 md:pb-32">
-        {/* Decorative elements */}
         <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-[#ead8bd]/40 blur-3xl" />
         <div className="absolute top-20 -right-32 w-80 h-80 rounded-full bg-[#e8cfc5]/30 blur-3xl" />
-
         <div className="relative max-w-5xl mx-auto text-center">
           <p className="text-[11px] md:text-xs uppercase tracking-[0.35em] text-[#a78352] font-semibold mb-5">
             Our Story
           </p>
-
           <h1 className="font-[Cormorant_Garamond] text-5xl md:text-7xl lg:text-8xl leading-[0.95] text-[#382b24]">
             Sri Sai Balaji
             <span className="block italic font-normal text-[#a78352]">
               Dress Materials
             </span>
           </h1>
-
           <div className="w-16 h-px bg-[#b99a6b] mx-auto my-7" />
-
           <p className="max-w-2xl mx-auto text-sm md:text-base leading-8 text-[#75665d]">
             A family-run dress material store in the heart of Vijayawada's
             Krishnaveni Cloth Market, bringing carefully selected fabrics and
@@ -51,41 +45,30 @@ const About = () => {
           </p>
         </div>
       </section>
-
-      {/* ================= STORY ================= */}
       <section className="px-6 py-20 md:py-28 bg-[#f2ece4]">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-          {/* Image / Editorial panel */}
           <div className="relative">
             <div className="absolute -top-4 -left-4 w-full h-full border border-[#c9ae83]/50 rounded-[2rem]" />
-
             <div className="relative h-[400px] md:h-[480px] rounded-[2rem] overflow-hidden bg-gradient-to-br from-[#e5d5c0] via-[#f4eee6] to-[#d9c3a7] flex items-center justify-center">
-              {/* Decorative fabric-style shapes */}
               <div className="absolute w-64 h-64 rounded-full border border-[#b99a6b]/30" />
               <div className="absolute w-48 h-48 rounded-full border border-[#b99a6b]/20 rotate-45" />
-
               <div className="relative text-center px-8">
                 <p className="uppercase tracking-[0.3em] text-[10px] text-[#9b794e] mb-4">
                   Since The Beginning
                 </p>
-
                 <h3 className="font-[Cormorant_Garamond] text-5xl md:text-6xl italic text-[#4a382c]">
                   Style
                 </h3>
-
                 <p className="font-[Cormorant_Garamond] text-3xl text-[#8e704c]">
                   with a personal touch
                 </p>
               </div>
             </div>
           </div>
-
-          {/* Story */}
           <div>
             <p className="text-[11px] uppercase tracking-[0.3em] text-[#a78352] font-semibold mb-4">
               From The Market To Your Doorstep
             </p>
-
             <h2 className="font-[Cormorant_Garamond] text-4xl md:text-5xl leading-tight text-[#3c2d25] mb-7">
               A local store,
               <span className="block italic text-[#a78352]">
