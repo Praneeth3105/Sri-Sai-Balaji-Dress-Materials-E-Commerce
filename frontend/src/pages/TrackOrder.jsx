@@ -153,7 +153,6 @@ const TrackOrder = () => {
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#a78352]">
                   Current Status
                 </p>
-
                 <h2 className="font-[Cormorant_Garamond] text-3xl text-[#44352c] mt-1">
                   {status}
                 </h2>
