@@ -127,7 +127,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* ================= VALUES ================= */}
       <section className="px-6 py-20 md:py-28 bg-[#f8f4ee]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
@@ -175,7 +174,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* ================= LOCATION STRIP ================= */}
       <section className="px-6 py-14 bg-[#eee5da]">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div className="flex items-center gap-4">
@@ -204,7 +202,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* ================= CTA ================= */}
       <section className="px-6 py-24 md:py-28 text-center bg-[#f8f4ee]">
         <p className="text-[11px] uppercase tracking-[0.3em] text-[#a78352] font-semibold mb-4">
           Need Help?
