@@ -216,8 +216,6 @@ const ShowUsersOrders = () => {
                             : "N/A"}
                         </span>
                       </div>
-
-                      {/* STATUS */}
                       <span
                         className={`px-4 py-2 rounded-full text-xs font-semibold border ${getStatusStyle(
                           order.status,
