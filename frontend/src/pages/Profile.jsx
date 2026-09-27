@@ -554,10 +554,6 @@ const Profile = () => {
           </div>
         )}
       </div>
-
-      {/* =====================================================
-          BOTTOM BRAND MESSAGE
-      ====================================================== */}
       <section className="px-6 pb-20 text-center">
         <div className="w-12 h-px bg-[#b99a6b] mx-auto mb-5" />
 
