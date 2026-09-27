@@ -337,8 +337,6 @@ const Contact = () => {
           </div>
         </div>
       </section>
-
-      {/* ================= BOTTOM MESSAGE ================= */}
       <section className="px-6 pb-24 text-center">
         <div className="max-w-2xl mx-auto">
           <div className="w-12 h-px bg-[#b99a6b] mx-auto mb-6" />
