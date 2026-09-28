@@ -1033,11 +1033,6 @@ const AdminProduct = () => {
             </div>
           )}
         </div>
-
-        {/* =================================================
-            EDIT PRODUCT DIALOG
-        ================================================= */}
-
         <Dialog
           open={open}
           onOpenChange={(value) => {
