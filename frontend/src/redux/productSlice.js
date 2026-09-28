@@ -51,14 +51,11 @@ const productSlice = createSlice({
 
     clearProductState: (state) => {
       state.products = [];
-
       state.cart = {
         items: [],
         totalPrice: 0,
       };
-
       state.addresses = [];
-
       state.selectedAddress = null;
     },
   },
