@@ -345,9 +345,6 @@ const AdminUsers = () => {
           )}
         </div>
 
-        {/* ===================================================
-            FOOTER
-        ==================================================== */}
         <div className="text-center mt-12 pb-6">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 h-px bg-[#d5c4ad]" />
