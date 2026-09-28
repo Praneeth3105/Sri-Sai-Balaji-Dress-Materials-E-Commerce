@@ -10,7 +10,7 @@ import {
   REGISTER,
 } from "redux-persist";
 import productSlice from "./productSlice";
-// Manual storage engine — bypasses the redux-persist/lib/storage import bug in Vite
+
 const storage = {
   getItem: (key) => {
     return Promise.resolve(window.localStorage.getItem(key));
