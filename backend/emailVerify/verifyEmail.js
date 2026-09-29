@@ -1,30 +1,31 @@
 import "dotenv/config";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendGmail } from "./gmailSender.js";
 
 export const verifyEmail = async (token, email) => {
   try {
-    /* =========================
-       FRONTEND URL
-    ========================= */
+    /*
+    ====================================================
+    FRONTEND URL
+    ====================================================
+    */
 
     const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+    /*
+    ====================================================
+    VERIFICATION LINK
+    ====================================================
+    */
+
     const verificationLink = `${frontendURL}/verify/${token}`;
 
-    /* =========================
-       SEND EMAIL USING RESEND
-    ========================= */
+    /*
+    ====================================================
+    EMAIL HTML
+    ====================================================
+    */
 
-    const { data, error } = await resend.emails.send({
-      from: "Sri Sai Balaji Dress Materials <onboarding@resend.dev>",
-
-      to: [email],
-
-      subject: "✨ Verify Your Email — Sri Sai Balaji Dress Materials",
-
-      html: `
+    const html = `
 <!DOCTYPE html>
 
 <html lang="en">
@@ -259,7 +260,10 @@ export const verifyEmail = async (token, email) => {
 
 <body>
 
-  <table role="presentation" class="wrapper">
+  <table
+    role="presentation"
+    class="wrapper"
+  >
 
     <tr>
 
@@ -409,42 +413,60 @@ export const verifyEmail = async (token, email) => {
 </body>
 
 </html>
-      `,
+    `;
+
+    /*
+    ====================================================
+    SEND EMAIL THROUGH GMAIL API
+    ====================================================
+    */
+
+    const result = await sendGmail({
+      to: email,
+      subject: "✨ Verify Your Email — Sri Sai Balaji Dress Materials",
+      html,
     });
 
-    /* =========================
-       RESEND ERROR
-    ========================= */
+    /*
+    ====================================================
+    SUCCESS
+    ====================================================
+    */
 
-    if (error) {
-      console.error("Resend email error:", error);
-
-      return {
-        success: false,
-        message: "Failed to send verification email",
-        error: error.message,
-      };
-    }
-
-    /* =========================
-       SUCCESS
-    ========================= */
+    console.log("======================================");
 
     console.log("Verification email sent successfully");
-    console.log("Resend Email ID:", data?.id);
+
+    console.log("Recipient:", email);
+
+    console.log("Gmail Message ID:", result.emailId);
+
+    console.log("======================================");
 
     return {
       success: true,
       message: "Verification email sent successfully",
-      emailId: data?.id,
+      emailId: result.emailId,
     };
   } catch (error) {
-    console.error("Email sending failed:", error);
+    /*
+    ====================================================
+    ERROR
+    ====================================================
+    */
+
+    console.error("======================================");
+
+    console.error("Verification email failed");
+
+    console.error(error.response?.data || error.message);
+
+    console.error("======================================");
 
     return {
       success: false,
       message: "Failed to send verification email",
-      error: error.message,
+      error: error.response?.data?.error?.message || error.message,
     };
   }
 };
