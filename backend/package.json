@@ -22,6 +22,7 @@
     "nodemailer": "^9.0.5",
     "nodemon": "^3.1.14",
     "razorpay": "^2.9.8",
+    "resend": "^6.30.0",
     "sonner": "^2.0.8"
   }
 }

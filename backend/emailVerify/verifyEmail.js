@@ -1,20 +1,10 @@
-import nodemailer from "nodemailer";
 import "dotenv/config";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const verifyEmail = async (token, email) => {
   try {
-    /* =========================
-       EMAIL TRANSPORTER
-    ========================= */
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
-      },
-    });
-
     /* =========================
        FRONTEND URL
     ========================= */
@@ -24,19 +14,23 @@ export const verifyEmail = async (token, email) => {
     const verificationLink = `${frontendURL}/verify/${token}`;
 
     /* =========================
-       EMAIL CONFIGURATION
+       SEND EMAIL USING RESEND
     ========================= */
 
-    const mailConfigurations = {
-      from: `"Sri Sai Balaji Dress Materials" <${process.env.MAIL_USER}>`,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: "Sri Sai Balaji Dress Materials <onboarding@resend.dev>",
+
+      to: [email],
+
       subject: "✨ Verify Your Email — Sri Sai Balaji Dress Materials",
 
       html: `
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8" />
 
   <meta
@@ -161,10 +155,6 @@ export const verifyEmail = async (token, email) => {
       font-size: 14px;
       font-weight: bold;
       letter-spacing: 0.5px;
-    }
-
-    .button:hover {
-      background-color: #35271f;
     }
 
     .security-box {
@@ -331,8 +321,6 @@ export const verifyEmail = async (token, email) => {
                 ${email}
               </div>
 
-              <!-- BUTTON -->
-
               <div class="button-wrapper">
 
                 <a
@@ -344,8 +332,6 @@ export const verifyEmail = async (token, email) => {
                 </a>
 
               </div>
-
-              <!-- SECURITY MESSAGE -->
 
               <div class="security-box">
 
@@ -364,8 +350,6 @@ export const verifyEmail = async (token, email) => {
                 </p>
 
               </div>
-
-              <!-- FALLBACK LINK -->
 
               <div class="link-section">
 
@@ -406,10 +390,8 @@ export const verifyEmail = async (token, email) => {
               <br />
 
               <p class="footer-text">
-
                 This is an automated email.
                 Please do not reply directly to this message.
-
               </p>
 
             </td>
@@ -428,20 +410,33 @@ export const verifyEmail = async (token, email) => {
 
 </html>
       `,
-    };
+    });
 
     /* =========================
-       SEND EMAIL
+       RESEND ERROR
     ========================= */
 
-    const info = await transporter.sendMail(mailConfigurations);
+    if (error) {
+      console.error("Resend email error:", error);
 
-    console.log("Email Sent Successfully");
-    console.log(info.response);
+      return {
+        success: false,
+        message: "Failed to send verification email",
+        error: error.message,
+      };
+    }
+
+    /* =========================
+       SUCCESS
+    ========================= */
+
+    console.log("Verification email sent successfully");
+    console.log("Resend Email ID:", data?.id);
 
     return {
       success: true,
       message: "Verification email sent successfully",
+      emailId: data?.id,
     };
   } catch (error) {
     console.error("Email sending failed:", error);

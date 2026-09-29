@@ -136,7 +136,7 @@ export const reVerify = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
       expiresIn: "10m",
     });
-    verifyEmail(token, email);
+    await verifyEmail(token, email);
     user.token = token;
     await user.save();
     return res.status(200).json({
