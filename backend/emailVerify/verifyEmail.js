@@ -11,7 +11,10 @@ export const verifyEmail = (token, email) => {
   });
 
   // Your frontend verification page
-  const verificationLink = `http://localhost:5173/verify/${token}`;
+  // const verificationLink = `http://localhost:5173/verify/${token}`;
+  const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+
+  const verificationLink = `${frontendURL}/verify/${token}`;
 
   const mailConfigurations = {
     from: `"Sri Sai Balaji Dress Materials" <${process.env.MAIL_USER}>`,
