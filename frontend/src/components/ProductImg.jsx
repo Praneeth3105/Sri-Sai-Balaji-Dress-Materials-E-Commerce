@@ -96,7 +96,7 @@ const ProductImg = ({ images = [] }) => {
 
       {/* MAIN IMAGE */}
       <div
-        className="relative flex-1 w-full min-h-[500px] rounded-[2rem] flex items-center justify-center"
+        className="relative flex-1 w-full min-h-[600px] rounded-[2rem] flex items-center justify-center"
         style={{
           background: "linear-gradient(145deg, #f6efe7 0%, #eee3d7 100%)",
           border: "1px solid #e6d9cb",
@@ -119,7 +119,7 @@ const ProductImg = ({ images = [] }) => {
 
         {/* DESKTOP HOVER ZOOM */}
         <div
-          className="hidden lg:flex relative z-10 w-full h-[540px] items-center justify-center p-8 overflow-hidden"
+          className="hidden lg:flex relative z-10 w-full h-[500px] items-center justify-center p-8 overflow-hidden"
           onMouseEnter={() => setIsZoomed(true)}
           onMouseLeave={() => {
             setIsZoomed(false);
@@ -163,7 +163,7 @@ const ProductImg = ({ images = [] }) => {
 
         {/* ZOOM HINT */}
         <div
-          className="absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full backdrop-blur-md pointer-events-none"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full backdrop-blur-md pointer-events-none z-20"
           style={{
             backgroundColor: "rgba(255,253,249,0.78)",
             border: "1px solid rgba(164,124,67,0.18)",
