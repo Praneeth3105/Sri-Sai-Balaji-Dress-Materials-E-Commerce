@@ -12,8 +12,10 @@ const app = express();
 
 const PORT = process.env.PORT || 8000;
 
+// Frontend URL
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+// Allowed frontend origins
 const allowedOrigins = ["http://localhost:5173", FRONTEND_URL].filter(Boolean);
 
 /* =========================
@@ -26,11 +28,12 @@ app.use(
   cors({
     origin: function (origin, callback) {
       // Allow requests without an origin
-      // such as Postman/server-to-server requests
+      // Example: Postman / server-to-server requests
       if (!origin) {
         return callback(null, true);
       }
 
+      // Allow localhost and production frontend
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -60,7 +63,7 @@ app.use("/api/v1/contact", contactRoute);
 ========================= */
 
 app.get("/", (req, res) => {
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     message: "Sri Sai Balaji Dress Materials API",
   });
