@@ -51,18 +51,17 @@ const AdminSales = () => {
       );
 
       console.log("SALES API RESPONSE:", res.data);
+if (res.data.success) {
+  setSalesData(res.data.salesData || []);
 
-      if (res.data.success) {
-        setSalesData(res.data.salesData || []);
-
-        setSummary({
-          totalSales: res.data.summary?.totalSales || 0,
-          totalOrders: res.data.summary?.totalOrders || 0,
-          totalProducts: res.data.summary?.totalProducts || 0,
-        });
-      } else {
-        toast.error(res.data.message || "Failed to fetch sales");
-      }
+  setSummary({
+    totalSales: Number(res.data.totalSales || 0),
+    totalOrders: Number(res.data.totalOrders || 0),
+    totalProducts: Number(res.data.totalProducts || 0),
+  });
+} else {
+  toast.error(res.data.message || "Failed to fetch sales");
+}
     } catch (error) {
       console.error("GET SALES ERROR:", error);
 
