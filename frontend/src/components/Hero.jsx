@@ -315,8 +315,6 @@ const Hero = () => {
               to your wardrobe.
             </p>
 
-            {/* Decorative divider */}
-
             <div
               className="hero-fade mt-7 flex items-center gap-3"
               style={{ animationDelay: ".55s" }}
