@@ -193,15 +193,15 @@ const Navbar = () => {
 
   const logoutHandler = async () => {
     try {
-      const res = await axios.post(
-        "http://localhost:8000/api/v1/user/logout",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+    const res = await axios.post(
+      `${import.meta.env.VITE_URL}/api/v1/user/logout`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
-      );
+      },
+    );
 
       if (res.data.success) {
         dispatch(setUser(null));
