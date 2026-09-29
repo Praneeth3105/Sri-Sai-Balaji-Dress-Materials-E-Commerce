@@ -291,8 +291,6 @@ const Hero = () => {
               </span>
             </div>
 
-            {/* Heading */}
-
             <h1
               className="hero-serif hero-fade text-[54px] font-semibold leading-[.95] tracking-[-0.025em] text-[#33251e] sm:text-[68px] lg:text-[82px]"
               style={{ animationDelay: ".2s" }}
