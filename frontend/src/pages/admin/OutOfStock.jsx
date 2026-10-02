@@ -128,8 +128,6 @@ const OutOfStock = () => {
         setLocalProducts((prev) =>
           prev.filter((item) => item._id !== product._id),
         );
-        // If every size is still 0, keep it here. Otherwise it has returned
-        // to the customer catalogue and disappears from this page.
         const hasStock = (updated.variants || []).some((variant) =>
           (variant.sizes || []).some((size) => getStock(variant, size) > 0),
         );
