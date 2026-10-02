@@ -69,8 +69,6 @@ const ImageUpload = ({ productData, setProductData }) => {
                     />
                   </CardContent>
                 </Card>
-
-                {/* Remove button */}
                 <button
                   type="button"
                   onClick={() => removeImage(idx)}
