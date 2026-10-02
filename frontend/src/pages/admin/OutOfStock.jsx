@@ -54,7 +54,6 @@ const OutOfStock = () => {
       if (res.data.success) {
         const list = res.data.products || [];
         setLocalProducts(list);
-
         const values = {};
         list.forEach((product) => {
           (product.variants || []).forEach((variant, variantIndex) => {
@@ -78,7 +77,6 @@ const OutOfStock = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (accessToken) loadOutOfStock();
   }, [accessToken]);
@@ -120,7 +118,6 @@ const OutOfStock = () => {
           },
         },
       );
-
       if (res.data.success) {
         toast.success("Stock updated successfully");
 
