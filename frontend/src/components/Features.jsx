@@ -262,17 +262,11 @@ const Features = () => {
                     {feature.text}
                   </p>
                 </div>
-
-                {/* bottom accent */}
-
                 <div className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-[#c9a76b] to-transparent opacity-50" />
               </div>
             );
           })}
         </div>
-
-        {/* small bottom statement */}
-
         <div className="mt-12 flex items-center justify-center gap-4 text-center">
           <span className="h-px w-16 bg-[#d6c6b0]" />
 
