@@ -150,9 +150,7 @@ const OutOfStock = () => {
     const confirmed = window.confirm(
       "Remove this product permanently? Its product images will also be removed from Cloudinary.",
     );
-
     if (!confirmed) return;
-
     try {
       setSavingId(productId);
 
