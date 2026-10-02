@@ -134,21 +134,15 @@ const Sidebar = () => {
           })}
         </div>
       </nav>
-
-      {/* BOTTOM CARD */}
-
       <div className="mt-auto px-6 pb-6">
         <div className="rounded-2xl bg-[#4a382c] p-5 text-white">
           <p className="text-[9px] uppercase tracking-[0.25em] text-[#d5b98b]">
             Sri Sai Balaji
           </p>
-
           <p className="font-[Cormorant_Garamond] italic text-xl mt-2 text-white/90">
             Style that feels like you.
           </p>
-
           <div className="w-8 h-px bg-[#b99a6b] mt-4" />
-
           <p className="text-[9px] leading-4 text-white/50 mt-3">
             Manage your boutique collection with elegance.
           </p>
