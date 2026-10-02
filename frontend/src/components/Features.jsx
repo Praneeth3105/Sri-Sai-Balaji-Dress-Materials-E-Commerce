@@ -231,33 +231,23 @@ const Features = () => {
                   transitionDelay: `${index * 150}ms`,
                 }}
               >
-                {/* decorative number */}
 
                 <span className="feature-number features-serif pointer-events-none absolute -right-1 -top-5 text-[110px] font-bold leading-none text-[#8d6b45]/[0.06]">
                   {feature.number}
                 </span>
-
-                {/* icon */}
-
                 <div className="relative mb-7">
                   <div className="feature-circle absolute -inset-2 rounded-full border border-[#d9c29a]/40" />
-
                   <div className="feature-icon relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f3eadb] text-[#9a713b] shadow-sm">
                     <Icon className="h-6 w-6" strokeWidth={1.7} />
                   </div>
                 </div>
-
-                {/* text */}
-
                 <div className="relative">
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-[.25em] text-[#aa8247]">
                     0{index + 1}
                   </p>
-
                   <h3 className="features-serif text-2xl font-semibold text-[#3c2b22]">
                     {feature.title}
                   </h3>
-
                   <p className="mt-3 max-w-xs text-sm leading-7 text-[#7b6d62]">
                     {feature.text}
                   </p>
