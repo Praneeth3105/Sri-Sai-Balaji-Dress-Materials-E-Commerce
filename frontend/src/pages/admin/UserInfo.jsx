@@ -546,7 +546,6 @@ const UserInfo = () => {
 
                     <div>
                       <p className="font-semibold text-[#35271f]">User Role</p>
-
                       <p className="text-xs text-[#8b7d73] mt-0.5">
                         Control the account access level
                       </p>
