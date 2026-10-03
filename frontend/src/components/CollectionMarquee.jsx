@@ -12,15 +12,32 @@ const CollectionMarquee = () => {
       .get(`${import.meta.env.VITE_URL}/api/v1/product/getavailableproducts`)
       .then((res) => {
         if (res.data.success) {
-          setProducts((res.data.products || []).slice(0, 12));
+          const allProducts = res.data.products || [];
+
+          // Randomly select maximum 6 products
+          const randomProducts = [...allProducts]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 6);
+
+          setProducts(randomProducts);
         }
       })
-      .catch(() => {});
+      .catch((error) => {
+        console.error("Failed to load collection products:", error);
+      });
   }, []);
 
   if (!products.length) return null;
 
-  const items = [...products, ...products];
+  /*
+    Only duplicate the selected products when there are
+    enough products for a continuous marquee.
+
+    This is NOT adding duplicate products to the database.
+    It is only for creating the visual looping effect.
+  */
+  const marqueeProducts =
+    products.length >= 4 ? [...products, ...products] : products;
 
   return (
     <section className="overflow-hidden bg-[#f5efe7] py-14 border-y border-[#e5d9ca]">
@@ -30,14 +47,16 @@ const CollectionMarquee = () => {
             from {
               transform: translateX(0);
             }
+
             to {
               transform: translateX(-50%);
             }
           }
 
           .sbd-marquee {
-            animation: sbd-marquee 32s linear infinite;
             width: max-content;
+            animation: sbd-marquee 32s linear infinite;
+            will-change: transform;
           }
 
           .sbd-marquee:hover {
@@ -46,6 +65,7 @@ const CollectionMarquee = () => {
         `}
       </style>
 
+      {/* Heading */}
       <div className="max-w-7xl mx-auto px-6 mb-7 flex items-end justify-between gap-5">
         <div>
           <p className="text-[10px] uppercase tracking-[.3em] text-[#a78352] font-semibold">
@@ -66,14 +86,22 @@ const CollectionMarquee = () => {
         </button>
       </div>
 
+      {/* Moving Products */}
       <div className="overflow-hidden">
-        <div className="sbd-marquee flex gap-5 px-6">
-          {items.map((product, index) => (
+        <div
+          className={
+            products.length >= 4
+              ? "sbd-marquee flex gap-5 px-6"
+              : "flex gap-5 px-6 justify-center"
+          }
+        >
+          {marqueeProducts.map((product, index) => (
             <button
               key={`${product._id}-${index}`}
               onClick={() => navigate(`/products/${product._id}`)}
               className="w-[180px] sm:w-[210px] shrink-0 text-left group cursor-pointer"
             >
+              {/* Product Image */}
               <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-[#eee5da] border border-[#dfd1c0]">
                 <img
                   src={product.productImage?.[0]?.url || "/Shop.png"}
@@ -82,10 +110,12 @@ const CollectionMarquee = () => {
                 />
               </div>
 
+              {/* Brand */}
               <p className="mt-3 text-[9px] uppercase tracking-[.18em] text-[#a78352]">
                 Sri Sai Balaji
               </p>
 
+              {/* Product Name */}
               <p className="font-[Cormorant_Garamond] text-xl text-[#44352c] truncate">
                 {product.productName}
               </p>
