@@ -582,7 +582,6 @@ const UserInfo = () => {
                   </div>
                 </div>
 
-                {/* UPDATE */}
                 <Button
                   type="submit"
                   disabled={loading}
