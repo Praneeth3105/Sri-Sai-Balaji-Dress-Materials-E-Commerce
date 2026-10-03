@@ -9,31 +9,18 @@ import orderRoute from "./routes/orderRoute.js";
 import contactRoute from "./routes/contactRoute.js";
 
 const app = express();
-
 const PORT = process.env.PORT || 8000;
-
-// Frontend URL
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-
-// Allowed frontend origins
 const allowedOrigins = ["http://localhost:5173", FRONTEND_URL].filter(Boolean);
 
-/* =========================
-   MIDDLEWARE
-========================= */
-
 app.use(express.json());
-
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests without an origin
-      // Example: Postman / server-to-server requests
+
       if (!origin) {
         return callback(null, true);
       }
-
-      // Allow localhost and production frontend
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -44,23 +31,12 @@ app.use(
   }),
 );
 
-/* =========================
-   ROUTES
-========================= */
 
 app.use("/api/v1/user", userRoute);
-
 app.use("/api/v1/product", productRoute);
-
 app.use("/api/v1/cart", cartRoute);
-
 app.use("/api/v1/orders", orderRoute);
-
 app.use("/api/v1/contact", contactRoute);
-
-/* =========================
-   ROOT ROUTE
-========================= */
 
 app.get("/", (req, res) => {
   return res.status(200).json({
@@ -68,10 +44,6 @@ app.get("/", (req, res) => {
     message: "Sri Sai Balaji Dress Materials API",
   });
 });
-
-/* =========================
-   SERVER
-========================= */
 
 app.listen(PORT, "0.0.0.0", async () => {
   console.log(`Server is running on port ${PORT}`);
