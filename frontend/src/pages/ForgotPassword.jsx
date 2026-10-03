@@ -77,7 +77,6 @@ const ForgotPassword = () => {
           backdropFilter: "blur(12px)",
         }}
       >
-        {/* Icon */}
         <div
           className="mx-auto mb-6 w-16 h-16 rounded-full flex items-center justify-center"
           style={{
