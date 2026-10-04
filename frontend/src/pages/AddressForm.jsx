@@ -1100,7 +1100,6 @@ const AddressForm = () => {
 
                     <div className="flex items-center gap-3">
                       <LockKeyhole className="w-4 h-4 text-[#a78352]" />
-
                       <span className="text-xs text-[#6f625a]">
                         Protected payment with Razorpay
                       </span>
