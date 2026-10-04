@@ -190,9 +190,6 @@ const SingleProduct = () => {
           </div>
         </div>
 
-        {/* ==================================================
-              BOTTOM INFORMATION
-          ================================================== */}
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Item 1 */}
           <div
