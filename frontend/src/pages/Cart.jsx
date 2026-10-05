@@ -675,8 +675,6 @@ const Cart = () => {
                 </div>
               </div>
             </div>
-
-            {/* Small brand note */}
             <div className="text-center mt-6">
               <p className="font-[Cormorant_Garamond] italic text-lg text-[#9a784e]">
                 Style that feels like you.
