@@ -53,7 +53,6 @@ const AdminSales = () => {
       console.log("SALES API RESPONSE:", res.data);
 if (res.data.success) {
   setSalesData(res.data.salesData || []);
-
   setSummary({
     totalSales: Number(res.data.totalSales || 0),
     totalOrders: Number(res.data.totalOrders || 0),
@@ -64,7 +63,6 @@ if (res.data.success) {
 }
     } catch (error) {
       console.error("GET SALES ERROR:", error);
-
       toast.error(
         error?.response?.data?.message || "Unable to fetch sales data",
       );
