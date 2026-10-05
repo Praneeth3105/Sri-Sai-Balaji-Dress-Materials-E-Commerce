@@ -520,7 +520,6 @@ const UserInfo = () => {
 
                     <div className="grid gap-2">
                       <Label className="text-[#4a382c]">Zip Code</Label>
-
                       <Input
                         name="zipCode"
                         value={updateUser.zipCode}
