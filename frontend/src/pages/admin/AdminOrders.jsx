@@ -30,7 +30,6 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState("");
   const accessToken = localStorage.getItem("accessToken");
-
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -56,7 +55,6 @@ const AdminOrders = () => {
     const index = STEPS.indexOf(normalizedStatus(status));
     return index >= 0 && index < STEPS.length - 1 ? STEPS[index + 1] : "";
   };
-
   const updateStatus = async (orderId, status) => {
     if (!status) return;
     try {
