@@ -5,6 +5,7 @@ import {
   Users,
   ClipboardList,
   AlertTriangle,
+  BadgePercent,
   Sparkles,
   Menu,
   X,
@@ -46,6 +47,11 @@ const Sidebar = () => {
       to: "/dashboard/out-of-stock",
       label: "Out of Stock",
       icon: AlertTriangle,
+    },
+    {
+      to: "/dashboard/coupons",
+      label: "Offers & Coupons",
+      icon: BadgePercent,
     },
   ];
 

@@ -7,6 +7,7 @@ import productRoute from "./routes/productRoute.js";
 import cartRoute from "./routes/cartRoute.js";
 import orderRoute from "./routes/orderRoute.js";
 import contactRoute from "./routes/contactRoute.js";
+import couponRoute from "./routes/couponRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -17,7 +18,6 @@ app.use(express.json());
 app.use(
   cors({
     origin: function (origin, callback) {
-
       if (!origin) {
         return callback(null, true);
       }
@@ -31,12 +31,12 @@ app.use(
   }),
 );
 
-
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/orders", orderRoute);
 app.use("/api/v1/contact", contactRoute);
+app.use("/api/v1/coupons", couponRoute);
 
 app.get("/", (req, res) => {
   return res.status(200).json({

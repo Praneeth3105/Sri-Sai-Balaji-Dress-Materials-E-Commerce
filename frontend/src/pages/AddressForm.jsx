@@ -57,13 +57,11 @@ const AddressForm = () => {
   );
 
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const [couponCode, setCouponCode] = useState(
-    () => localStorage.getItem("sbd_coupon_code") || "",
-  );
-  const [couponDiscount, setCouponDiscount] = useState(() =>
-    Number(localStorage.getItem("sbd_coupon_discount") || 0),
-  );
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [couponListLoading, setCouponListLoading] = useState(true);
 
   useEffect(() => {
     if (!addresses || addresses.length === 0) {
@@ -72,6 +70,26 @@ const AddressForm = () => {
       setShowForm(false);
     }
   }, [addresses]);
+
+  useEffect(() => {
+    const loadCoupons = async () => {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const res = await axios.get(
+          `${import.meta.env.VITE_URL}/api/v1/coupons/available`,
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        );
+        if (res.data.success) setAvailableCoupons(res.data.coupons || []);
+      } catch (error) {
+        console.error("AVAILABLE COUPONS ERROR:", error);
+        setAvailableCoupons([]);
+      } finally {
+        setCouponListLoading(false);
+      }
+    };
+
+    loadCoupons();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -155,8 +173,10 @@ const AddressForm = () => {
   const tax = Number((discountedSubtotal * 0.05).toFixed(2));
   const total = Number((discountedSubtotal + shipping + tax).toFixed(2));
 
-  const applyCoupon = async () => {
-    const code = couponCode.trim().toUpperCase();
+  const applyCoupon = async (selectedCode = couponCode) => {
+    const code = String(selectedCode || "")
+      .trim()
+      .toUpperCase();
     if (!code) {
       toast.error("Enter a coupon code");
       return;
@@ -174,17 +194,10 @@ const AddressForm = () => {
       if (res.data.success) {
         setCouponCode(res.data.couponCode);
         setCouponDiscount(Number(res.data.discount || 0));
-        localStorage.setItem("sbd_coupon_code", res.data.couponCode);
-        localStorage.setItem(
-          "sbd_coupon_discount",
-          String(res.data.discount || 0),
-        );
         toast.success(res.data.message);
       }
     } catch (error) {
       setCouponDiscount(0);
-      localStorage.removeItem("sbd_coupon_code");
-      localStorage.removeItem("sbd_coupon_discount");
       toast.error(error?.response?.data?.message || "Invalid coupon code");
     } finally {
       setCouponLoading(false);
@@ -194,8 +207,6 @@ const AddressForm = () => {
   const removeCoupon = () => {
     setCouponCode("");
     setCouponDiscount(0);
-    localStorage.removeItem("sbd_coupon_code");
-    localStorage.removeItem("sbd_coupon_discount");
     toast.success("Coupon removed");
   };
 
@@ -308,8 +319,6 @@ const AddressForm = () => {
                   totalPrice: 0,
                 }),
               );
-              localStorage.removeItem("sbd_coupon_code");
-              localStorage.removeItem("sbd_coupon_discount");
 
               navigate("/order-success");
             } else {
@@ -997,43 +1006,126 @@ const AddressForm = () => {
                     )}
                   </div>
 
-                  {/* PROMO */}
-                  <div>
-                    <div className="flex gap-2">
-                      <Input
-                        value={couponCode}
-                        onChange={(e) =>
-                          setCouponCode(e.target.value.toUpperCase())
-                        }
-                        placeholder="Promo Code"
-                        disabled={couponDiscount > 0}
-                        className="h-11 rounded-xl border-[#e5d9ca] bg-[#fffdf9] focus-visible:ring-[#b99a6b]"
-                      />
+                  {/* OFFERS + PROMO */}
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-[#a78352]">
+                            Offers for you
+                          </p>
+                          <p className="text-xs text-[#8b7c72] mt-1">
+                            Approved offers available for your account
+                          </p>
+                        </div>
+                        {availableCoupons.length > 0 && (
+                          <span className="text-[10px] px-2.5 py-1 rounded-full bg-[#eee5da] text-[#6f6259]">
+                            {availableCoupons.length} available
+                          </span>
+                        )}
+                      </div>
 
-                      {couponDiscount > 0 ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={removeCoupon}
-                          className="h-11 rounded-xl border-[#cdbb9f] text-[#8e4e43] hover:bg-[#f4e5e1] cursor-pointer"
-                        >
-                          Remove
-                        </Button>
+                      {couponListLoading ? (
+                        <div className="rounded-2xl border border-[#e5d9ca] bg-[#faf7f2] p-4 text-xs text-[#8b7c72]">
+                          Checking available offers...
+                        </div>
+                      ) : availableCoupons.length ? (
+                        <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1">
+                          {availableCoupons.map((coupon) => (
+                            <div
+                              key={coupon._id}
+                              className="rounded-2xl border border-[#e5d9ca] bg-[#faf7f2] p-4"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-sm font-semibold text-[#4a382c]">
+                                    {coupon.title}
+                                  </p>
+                                  <p className="text-[11px] text-[#7b6d64] mt-1">
+                                    {coupon.description ||
+                                      `${coupon.discountType === "percent" ? `${coupon.discountValue}% off` : `₹${coupon.discountValue} off`} on orders above ₹${Number(coupon.minimumOrderValue || 0).toLocaleString("en-IN")}`}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    <span className="px-2.5 py-1 rounded-full bg-[#fffdf9] border border-[#e5d9ca] text-[10px] font-semibold tracking-wider text-[#a78352]">
+                                      {coupon.code}
+                                    </span>
+                                    {coupon.maximumDiscount ? (
+                                      <span className="text-[10px] text-[#8b7c72] self-center">
+                                        Max ₹
+                                        {Number(
+                                          coupon.maximumDiscount,
+                                        ).toLocaleString("en-IN")}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  onClick={() => {
+                                    setCouponCode(coupon.code);
+                                    applyCoupon(coupon.code);
+                                  }}
+                                  disabled={couponLoading || couponDiscount > 0}
+                                  className="shrink-0 h-9 rounded-full bg-[#4a382c] hover:bg-[#35271f] text-white text-[10px] px-4 cursor-pointer"
+                                >
+                                  Apply
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={applyCoupon}
-                          disabled={couponLoading}
-                          className="h-11 rounded-xl border-[#cdbb9f] text-[#4a382c] hover:bg-[#f4efe7] cursor-pointer"
-                        >
-                          {couponLoading ? "Checking..." : "Apply"}
-                        </Button>
+                        <div className="rounded-2xl border border-dashed border-[#d9cabb] bg-[#faf7f2] p-4 text-xs text-[#8b7c72]">
+                          No new offers are available for your account right
+                          now.
+                        </div>
                       )}
                     </div>
-                    <p className="mt-2 text-[10px] text-[#8b7c72]">
-                      Try: SBD10, WELCOME10, SAVE100 or FESTIVE15
-                    </p>
+
+                    <div>
+                      <div className="flex gap-2">
+                        <Input
+                          value={couponCode}
+                          onChange={(e) =>
+                            setCouponCode(e.target.value.toUpperCase())
+                          }
+                          placeholder="Enter promo code"
+                          disabled={couponDiscount > 0}
+                          className="h-11 rounded-xl border-[#e5d9ca] bg-[#fffdf9] focus-visible:ring-[#b99a6b]"
+                        />
+
+                        {couponDiscount > 0 ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={removeCoupon}
+                            className="h-11 rounded-xl border-[#cdbb9f] text-[#8e4e43] hover:bg-[#f4e5e1] cursor-pointer"
+                          >
+                            Remove
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => applyCoupon()}
+                            disabled={couponLoading}
+                            className="h-11 rounded-xl border-[#cdbb9f] text-[#4a382c] hover:bg-[#f4efe7] cursor-pointer"
+                          >
+                            {couponLoading ? "Checking..." : "Apply"}
+                          </Button>
+                        )}
+                      </div>
+                      {couponDiscount > 0 ? (
+                        <p className="mt-2 text-[10px] text-[#536b53]">
+                          ✓ {couponCode} applied. You can use this coupon only
+                          once on this account.
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-[10px] text-[#8b7c72]">
+                          Offers work only during their approved offer period.
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* PAYMENT */}

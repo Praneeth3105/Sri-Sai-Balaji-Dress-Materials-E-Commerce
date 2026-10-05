@@ -3,7 +3,9 @@ import { Order } from "../models/orderModel.js";
 import crypto from "crypto";
 import { Cart } from "../models/cartModel.js";
 import { Product } from "../models/productModel.js";
-import { calculateCouponDiscount } from "../utils/coupons.js";
+import { validateCouponForUser } from "../utils/coupons.js";
+import { Coupon } from "../models/couponModel.js";
+import { CouponUsage } from "../models/couponUsageModel.js";
 
 const normalize = (value) =>
   String(value || "")
@@ -62,7 +64,7 @@ const validateOrderStock = async (products) => {
   }
 };
 
-const calculateOrderPricing = async (products, couponCode = "") => {
+const calculateOrderPricing = async (products, couponCode = "", userId) => {
   let subtotal = 0;
 
   for (const item of products) {
@@ -80,10 +82,15 @@ const calculateOrderPricing = async (products, couponCode = "") => {
   let appliedCoupon = "";
 
   if (couponCode) {
-    const coupon = calculateCouponDiscount(couponCode, subtotal);
-    if (!coupon.valid) throw new Error(coupon.message);
-    discount = coupon.discount;
-    appliedCoupon = coupon.code;
+    const couponResult = await validateCouponForUser({
+      code: couponCode,
+      subtotal,
+      userId,
+    });
+    // User-aware validation is performed before this function from createOrder.
+    if (!couponResult.valid) throw new Error(couponResult.message);
+    discount = couponResult.discount;
+    appliedCoupon = couponResult.code;
   }
 
   const discountedSubtotal = Math.max(0, subtotal - discount);
@@ -121,7 +128,12 @@ const ensureTracking = (order) => {
 export const applyCoupon = async (req, res) => {
   try {
     const { code, subtotal } = req.body;
-    const result = calculateCouponDiscount(code, subtotal);
+    const result = await validateCouponForUser({
+      code,
+      subtotal,
+      userId: req.id,
+      reserve: false,
+    });
 
     if (!result.valid) {
       return res.status(400).json({ success: false, message: result.message });
@@ -150,15 +162,20 @@ export const createOrder = async (req, res) => {
     }
 
     await validateOrderStock(products);
-    const pricing = await calculateOrderPricing(products, couponCode);
+    const pricing = await calculateOrderPricing(products, couponCode, userId);
 
-    const options = {
-      amount: Math.round(pricing.amount * 100),
-      currency: currency || "INR",
-      receipt: `receipt_${Date.now()}`,
-    };
+    let coupon = null;
 
-    const razorpayOrder = await razorpayInstance.orders.create(options);
+    if (couponCode) {
+      const couponResult = await validateCouponForUser({
+        code: couponCode,
+        subtotal: pricing.subtotal,
+        userId,
+        reserve: true,
+      });
+      if (!couponResult.valid) throw new Error(couponResult.message);
+      coupon = couponResult.coupon;
+    }
 
     const newOrder = new Order({
       user: userId,
@@ -172,18 +189,59 @@ export const createOrder = async (req, res) => {
       currency: currency || "INR",
       deliveryAddress: address || null,
       status: "Pending",
-      razorpayOrderId: razorpayOrder.id,
     });
 
     await newOrder.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Order Created Successfully",
-      order: razorpayOrder,
-      dbOrder: newOrder,
-      pricing,
-    });
+    if (coupon) {
+      try {
+        await CouponUsage.create({
+          coupon: coupon._id,
+          user: userId,
+          order: newOrder._id,
+          discountAmount: pricing.discount,
+          status: "Reserved",
+        });
+      } catch (usageError) {
+        await newOrder.deleteOne();
+        if (usageError?.code === 11000) {
+          return res.status(409).json({
+            success: false,
+            message: "You have already used or reserved this coupon",
+          });
+        }
+        throw usageError;
+      }
+    }
+
+    try {
+      const options = {
+        amount: Math.round(pricing.amount * 100),
+        currency: currency || "INR",
+        receipt: `receipt_${Date.now()}`,
+      };
+
+      const razorpayOrder = await razorpayInstance.orders.create(options);
+      newOrder.razorpayOrderId = razorpayOrder.id;
+      await newOrder.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Order Created Successfully",
+        order: razorpayOrder,
+        dbOrder: newOrder,
+        pricing,
+      });
+    } catch (razorpayError) {
+      if (coupon)
+        await CouponUsage.deleteOne({
+          coupon: coupon._id,
+          user: userId,
+          order: newOrder._id,
+        });
+      await newOrder.deleteOne();
+      throw razorpayError;
+    }
   } catch (error) {
     console.error("CREATE ORDER ERROR:", error);
     return res.status(500).json({
@@ -210,18 +268,23 @@ export const verifyPayment = async (req, res) => {
         { status: "Failed" },
         { new: true },
       );
+      if (order?.couponCode) {
+        await CouponUsage.deleteOne({
+          order: order._id,
+          user: userId,
+          status: "Reserved",
+        });
+      }
       return res
         .status(400)
         .json({ success: false, message: "Payment Failed", order });
     }
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Payment verification data is missing",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Payment verification data is missing",
+      });
     }
 
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
@@ -231,11 +294,18 @@ export const verifyPayment = async (req, res) => {
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      await Order.findOneAndUpdate(
+      const failedOrder = await Order.findOneAndUpdate(
         { razorpayOrderId: razorpay_order_id, user: userId },
         { status: "Failed" },
         { new: true },
       );
+      if (failedOrder?.couponCode) {
+        await CouponUsage.deleteOne({
+          order: failedOrder._id,
+          user: userId,
+          status: "Reserved",
+        });
+      }
       return res
         .status(400)
         .json({ success: false, message: "Invalid Signature" });
@@ -262,13 +332,11 @@ export const verifyPayment = async (req, res) => {
         "Delivered",
       ].includes(existingOrder.status)
     ) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Payment Already Verified",
-          order: existingOrder,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Payment Already Verified",
+        order: existingOrder,
+      });
     }
 
     const productsToSave = new Map();
@@ -352,6 +420,20 @@ export const verifyPayment = async (req, res) => {
         .status(409)
         .json({ success: false, message: "Order was already processed" });
 
+    if (order.couponCode) {
+      const usage = await CouponUsage.findOneAndUpdate(
+        { order: order._id, user: userId, status: "Reserved" },
+        { status: "Used", usedAt: new Date() },
+        { new: true },
+      );
+
+      if (usage) {
+        await Coupon.findByIdAndUpdate(usage.coupon, {
+          $inc: { usedCount: 1 },
+        });
+      }
+    }
+
     await Cart.findOneAndUpdate(
       { userId },
       { $set: { items: [], totalPrice: 0 } },
@@ -427,13 +509,11 @@ export const getAllOrdersAdmin = async (req, res) => {
       .json({ success: true, count: orders.length, orders });
   } catch (error) {
     console.error("GET ALL ORDERS ERROR:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to Fetch All Orders",
-        error: error.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to Fetch All Orders",
+      error: error.message,
+    });
   }
 };
 
@@ -457,24 +537,20 @@ export const updateOrderStatus = async (req, res) => {
     const current = order.status === "Paid" ? "Order Placed" : order.status;
 
     if (current === "Delivered") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Delivered orders cannot be moved backwards",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Delivered orders cannot be moved backwards",
+      });
     }
 
     if (status !== "Cancelled") {
       const currentIndex = STATUS_FLOW.indexOf(current);
       const nextIndex = STATUS_FLOW.indexOf(status);
       if (currentIndex === -1 || nextIndex !== currentIndex + 1) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: `Next status should be ${STATUS_FLOW[Math.max(0, currentIndex + 1)] || "Delivered"}`,
-          });
+        return res.status(400).json({
+          success: false,
+          message: `Next status should be ${STATUS_FLOW[Math.max(0, currentIndex + 1)] || "Delivered"}`,
+        });
       }
     }
 
@@ -482,12 +558,10 @@ export const updateOrderStatus = async (req, res) => {
       status === "Cancelled" &&
       ["Delivered", "Out for Delivery"].includes(current)
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "This order cannot be cancelled at the current stage",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "This order cannot be cancelled at the current stage",
+      });
     }
 
     // A paid order that is cancelled before the delivery stage returns its
@@ -544,6 +618,14 @@ export const updateOrderStatus = async (req, res) => {
 
     await order.save();
 
+    if (status === "Cancelled" && order.couponCode) {
+      await CouponUsage.findOneAndDelete({
+        order: order._id,
+        user: order.user,
+        status: "Reserved",
+      });
+    }
+
     const populated = await Order.findById(order._id)
       .populate({
         path: "products.productId",
@@ -551,13 +633,11 @@ export const updateOrderStatus = async (req, res) => {
       })
       .populate("user", "firstName lastName email phoneNo");
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: `Order moved to ${status}`,
-        order: populated,
-      });
+    return res.status(200).json({
+      success: true,
+      message: `Order moved to ${status}`,
+      order: populated,
+    });
   } catch (error) {
     console.error("UPDATE ORDER STATUS ERROR:", error);
     return res.status(500).json({ success: false, message: error.message });
